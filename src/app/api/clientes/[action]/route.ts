@@ -82,6 +82,6 @@ export async function POST(
       return NextResponse.json({ error: 'Error en el switch' }, { status: 500 });
     }
   }
-
+//
   return NextResponse.json({ error: 'Acción POST no válida' }, { status: 404 });
 }
