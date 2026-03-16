@@ -2,32 +2,52 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // 1. Intentamos obtener el token de las cookies
-  const token = request.cookies.get('token')?.value;
+  // 1. Obtenemos el token y validamos estrictamente su contenido
+  const cookieToken = request.cookies.get('token')?.value;
+
+  // Validamos que exista y que no sea basura como "undefined" o "null" en string
+  const hasToken = cookieToken &&
+    cookieToken !== 'undefined' &&
+    cookieToken !== 'null' &&
+    cookieToken.trim() !== '';
+
   const { pathname } = request.nextUrl;
 
-  // 2. PROTECCIÓN: Si intenta ir a /admin sin token
+  // BASE URL DINÁMICA: Vital para que ngrok y localhost no choquen
+  const host = request.headers.get('host') || request.nextUrl.host;
+  const protocol = request.headers.get('x-forwarded-proto') || 'http';
+  const baseUrl = `${protocol}://${host}`;
+
+  // 2. CASO: Acceso a /admin sin token válido
   if (pathname.startsWith('/admin')) {
-    if (!token) {
-      console.warn(`🚫 Acceso denegado a ${pathname}. Redirigiendo a login.`);
-      // Redirigimos al login y guardamos la página a la que quería ir en un parámetro 'callback'
-      const url = new URL('/login', request.url);
-      return NextResponse.redirect(url);
+    if (!hasToken) {
+      console.warn(`🚫 Acceso denegado a ${pathname}. Limpiando y redirigiendo.`);
+
+      const loginUrl = new URL('/login', baseUrl);
+      loginUrl.searchParams.set('callback', pathname);
+
+      const response = NextResponse.redirect(loginUrl);
+
+      // CAMBIO CLAVE: Si el token no es válido, lo borramos del navegador 
+      // para evitar que el middleware se confunda en la siguiente petición.
+      response.cookies.delete('token');
+      return response;
     }
   }
 
-  // 3. LOGUEADO: Si el usuario ya tiene token e intenta entrar al /login, mandarlo al dashboard
-  if (pathname === '/login' && token) {
-    return NextResponse.redirect(new URL('/admin', request.url));
+  // 3. CASO: Usuario logueado intentando entrar al /login
+  if (pathname === '/login' && hasToken) {
+    console.log(`✅ Usuario con sesión activa detectado. Mandando a /admin.`);
+    return NextResponse.redirect(new URL('/admin', baseUrl));
   }
 
   return NextResponse.next();
 }
 
-// Configura qué rutas debe vigilar el middleware
+// Configuración de rutas
 export const config = {
   matcher: [
-    '/admin/:path*', // Protege todo lo que empiece por /admin
-    '/login'         // Monitorea el login para evitar re-logueos
+    '/admin/:path*',
+    '/login'
   ],
 };

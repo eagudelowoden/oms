@@ -4,10 +4,28 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import styles from "./login.module.css";
+// 1. IMPORTAR EL COMPONENTE
+import ModalElegirCliente from "../../app/_modulos/auth/components/ModalElegirCliente/ModalElegirCliente";
 
+// --- INTERFACES PARA TYPESCRIPT ---
 interface LoginFormInputs {
   username: string;
   password: string;
+}
+
+// Estructura del usuario según tu Backend
+interface Usuario {
+  id: number;
+  nombre: string;
+  username: string;
+  // Añade otros campos si tu API los devuelve (rol, cargo, etc.)
+}
+
+// Resultado del switch de cliente
+interface ClientSwitchResponse {
+  clientToken: string;
+  clientDb: string;
+  clientDbName: string;
 }
 
 export default function LoginPage() {
@@ -15,6 +33,10 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // 2. ESTADOS TIPADOS CORRECTAMENTE (Sin 'any')
+  const [showModal, setShowModal] = useState(false);
+  const [tempUserData, setTempUserData] = useState<Usuario | null>(null);
 
   const router = useRouter();
   const { register, handleSubmit } = useForm<LoginFormInputs>();
@@ -45,10 +67,12 @@ export default function LoginPage() {
         body: JSON.stringify(data),
       });
       const result = await response.json();
+
       if (response.ok) {
-        localStorage.setItem("token", result.token);
-        localStorage.setItem("usuario", JSON.stringify(result.usuario));
-        router.push("/admin");
+        // 3. CAMBIO CLAVE: Guardamos usuario tipado y abrimos modal
+        localStorage.setItem("token", result.token); 
+        setTempUserData(result.usuario as Usuario); 
+        setShowModal(true); 
       } else {
         setError(result.message || "Credenciales inválidas");
       }
@@ -59,54 +83,50 @@ export default function LoginPage() {
     }
   };
 
+  // 4. FUNCIÓN AL SELECCIONAR CLIENTE CON ÉXITO
+  const handleClientSuccess = (clientData: ClientSwitchResponse) => {
+    // Reemplazamos por el token del cliente (BD específica)
+    localStorage.setItem("token", clientData.clientToken);
+    localStorage.setItem("clientDb", clientData.clientDb);
+    
+    if (tempUserData) {
+      localStorage.setItem("usuario", JSON.stringify(tempUserData));
+    }
+    
+    router.push("/admin");
+  };
+
   return (
     <div className={styles.mainWrapper}>
-      {/* Botón Switch de Tema */}
       <button
         type="button"
         onClick={toggleDarkMode}
         className={styles.themeButton}
       >
-        <span
-          className="material-symbols-rounded"
-          style={{
-            color: isDarkMode ? "#60a5fa" : "#f59e0b",
-            fontSize: "20px",
-            display: "block",
-          }}
-        >
+        <span className={`material-symbols-rounded ${isDarkMode ? styles.sunIcon : styles.moonIcon}`}>
           {isDarkMode ? "light_mode" : "dark_mode"}
         </span>
       </button>
 
-      {/* Contenedor Central para Logo + Tarjeta */}
       <div className={styles.centerContainer}>
-        {/* Logo */}
         <div className={styles.logoSection}>
           <div className={styles.logoIconBox}>
-            <span className="material-symbols-rounded" style={{ color: "white", fontSize: "24px" }}>
-              warehouse
-            </span>
+            <span className="material-symbols-rounded">warehouse</span>
           </div>
           <h2 className={styles.logoText}>OMS</h2>
         </div>
 
-        {/* Tarjeta de Login */}
         <div className={styles.card}>
-          <div style={{ marginBottom: "1.5rem", textAlign: "left" }}>
-            <h1 style={{ fontSize: "1.3rem", fontWeight: "800", color: "var(--text-main)", margin: 0 }}>
-              Bienvenido
-            </h1>
-            <p style={{ fontSize: "11px", color: "#64748b", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginTop: "4px" }}>
-              Acceso al sistema
-            </p>
+          <div className={styles.cardHeader}>
+            <h1>Bienvenido</h1>
+            <p>Acceso al sistema</p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
+          <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
             {error && (
               <div className={styles.errorAlert}>
-                <span className="material-symbols-rounded" style={{ fontSize: "16px" }}>error</span>
-                <span style={{ fontWeight: "bold" }}>{error}</span>
+                <span className="material-symbols-rounded">error</span>
+                <span>{error}</span>
               </div>
             )}
 
@@ -137,48 +157,36 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className={styles.eyeButton}
                 >
-                  <span className="material-symbols-rounded" style={{ fontSize: "18px" }}>
+                  <span className="material-symbols-rounded">
                     {showPassword ? "visibility_off" : "visibility"}
                   </span>
                 </button>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={styles.submitBtn}
-            >
+            <button type="submit" disabled={isLoading} className={styles.submitBtn}>
               {isLoading ? (
-                <div className="spinner" />
+                <div className={styles.spinner} />
               ) : (
                 <>
                   <span>INGRESAR</span>
-                  <span className="material-symbols-rounded" style={{ fontSize: "18px" }}>arrow_forward</span>
+                  <span className="material-symbols-rounded">arrow_forward</span>
                 </>
               )}
             </button>
           </form>
         </div>
-
-        <p className={styles.footerText}>
-          WODEN DEV &bull; v1.0
-        </p>
+        <p className={styles.footerText}>WODEN DEV &bull; v1.0</p>
       </div>
 
-      <style jsx>{`
-        .spinner {
-          width: 18px;
-          height: 18px;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-top-color: white;
-          border-radius: 50%;
-          animation: spin 0.6s linear infinite;
-        }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      {/* 5. RENDERIZAR EL MODAL */}
+      {showModal && tempUserData && (
+        <ModalElegirCliente 
+          usuarioId={tempUserData.id}
+          onCancel={() => setShowModal(false)}
+          onSuccess={handleClientSuccess}
+        />
+      )}
     </div>
   );
 }

@@ -10,11 +10,15 @@ interface Usuario {
   rol: string;
 }
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [cargando, setCargando] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Estado para móviles
-  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const router = useRouter();
   const pathname = usePathname();
 
@@ -34,52 +38,93 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [router]);
 
-  // Cerrar sidebar al cambiar de ruta (en móviles)
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [pathname]);
 
-  const linkClass = (path: string) => 
+  // FUNCIÓN DE LOGOUT SINCRONIZADA
+  const handleLogout = async () => {
+    try {
+      // 1. Llamada al API para borrar la cookie
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Error al invalidar cookie");
+    } finally {
+      // 2. Limpiar localstorage y redirigir pase lo que pase
+      localStorage.clear();
+      router.push("/login");
+      router.refresh(); // Limpia caché de rutas
+    }
+  };
+
+  const linkClass = (path: string) =>
     `${styles.navItem} ${pathname === path ? styles.active : ""}`;
 
-  if (cargando) return <div className={styles.loadingContainer}><div className={styles.spinner}></div></div>;
+  if (cargando)
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinner}></div>
+      </div>
+    );
   if (!usuario) return null;
 
   return (
     <div className={styles.adminWrapper}>
-      {/* Overlay para móviles: cierra el menú al tocar fuera */}
       {isSidebarOpen && (
-        <div className={styles.mobileOverlay} onClick={() => setIsSidebarOpen(false)} />
+        <div
+          className={styles.mobileOverlay}
+          onClick={() => setIsSidebarOpen(false)}
+        />
       )}
 
-      {/* SIDEBAR */}
-      <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ""}`}>
+      <aside
+        className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ""}`}
+      >
         <div className={styles.sidebarHeader}>
           <div className={styles.logoBadge}>
             <span className="material-symbols-rounded">warehouse</span>
           </div>
-          <span className={styles.logoText}>OMS Admin</span>
-          <button className={styles.closeMenuMobile} onClick={() => setIsSidebarOpen(false)}>
+          <span className={styles.logoText}>OMS</span>
+          <button
+            className={styles.closeMenuMobile}
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <span className="material-symbols-rounded">close</span>
           </button>
         </div>
 
         <nav className={styles.navMenu}>
           <p className={styles.navSectionTitle}>Módulos</p>
-          
+
+          {/* Link al Home del Admin */}
           <Link href="/admin" className={linkClass("/admin")}>
             <span className="material-symbols-rounded">dashboard</span>
+            <span>Dashboard</span>
+          </Link>
+
+          {/* EL NUEVO MÓDULO AQUÍ */}
+          <Link
+            href="/admin/preAlertaAgente"
+            className={linkClass("/admin/preAlertaAgente")}
+          >
+            <span className="material-symbols-rounded">pending_actions</span>
             <span>Pre - Alerta Agente</span>
           </Link>
 
           {usuario.rol === "ADMIN" && (
-            <Link href="/admin/usuarios" className={linkClass("/admin/usuarios")}>
+            <Link
+              href="/admin/usuarios"
+              className={linkClass("/admin/usuarios")}
+            >
               <span className="material-symbols-rounded">group</span>
               <span>Usuarios</span>
             </Link>
           )}
 
-          <Link href="/admin/inventario" className={linkClass("/admin/inventario")}>
+          <Link
+            href="/admin/inventario"
+            className={linkClass("/admin/inventario")}
+          >
             <span className="material-symbols-rounded">inventory_2</span>
             <span>Pre - Alerta Acopio</span>
           </Link>
@@ -90,29 +135,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <p className={styles.userName}>{usuario.nombre}</p>
             <p className={styles.userRole}>{usuario.rol}</p>
           </div>
-          <button 
-            onClick={() => { localStorage.clear(); router.push("/login"); }} 
+          <button
+            onClick={handleLogout}
             className={styles.logoutBtn}
+            title="Cerrar sesión"
           >
             <span className="material-symbols-rounded">logout</span>
           </button>
         </div>
       </aside>
 
-      {/* CONTENIDO PRINCIPAL */}
       <main className={styles.mainContent}>
         <header className={styles.topHeader}>
-          <button className={styles.hamburger} onClick={() => setIsSidebarOpen(true)}>
+          <button
+            className={styles.hamburger}
+            onClick={() => setIsSidebarOpen(true)}
+          >
             <span className="material-symbols-rounded">menu</span>
           </button>
           <div className={styles.headerTitle}>
-             {/* Aquí podrías poner el nombre de la sección actual */}
+            {/* Opcional: Nombre de ruta dinámica */}
           </div>
         </header>
-        
-        <div className={styles.pageContainer}>
-          {children}
-        </div>
+
+        <div className={styles.pageContainer}>{children}</div>
       </main>
     </div>
   );
