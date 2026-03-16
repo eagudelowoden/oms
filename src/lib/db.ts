@@ -19,7 +19,7 @@ let pool: sql.ConnectionPool | null = null;
 
 export const getDBConnection = async () => {
   if (pool) return pool; // Si ya existe la conexión, la reutiliza
-  
+
   try {
     console.log(`📡 Conectando a AWS RDS: ${sqlConfig.server}...`);
     pool = await sql.connect(sqlConfig);

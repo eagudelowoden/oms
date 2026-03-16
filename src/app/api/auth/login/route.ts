@@ -1,54 +1,51 @@
 import { NextResponse } from 'next/server';
 import { AuthBackendService } from '../../../_modulos/auth/services/auth.service';
 import jwt from 'jsonwebtoken';
+import { cookies } from 'next/headers'; // <--- Importante para las cookies
 
 export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
 
-    // 1. Validar contra SQL Server usando el SP
     const usuario = await AuthBackendService.getUsuarioModel(username, password);
 
     if (!usuario) {
       return NextResponse.json(
-        { message: 'Credenciales incorrectas o usuario inactivo' },
+        { message: 'Credenciales incorrectas o usuario inactivo' }, 
         { status: 401 }
       );
     }
 
-    /**
-     * 2. Generar el JWT
-     * En tu Spring Boot original, el token incluía: clientName, clientDb y clientId.
-     * Los agregamos aquí para mantener la compatibilidad con tu JwtUtil de Java.
-     */
+    // Generar el JWT
     const token = jwt.sign(
-      {
-        sub: usuario.nombreUsuario, // 'sub' es estándar para el username
-        id: usuario.id,
-        clientName: "WmsWdGeneral",
-        clientDb: "WmsWdGeneral",
-        clientId: 0
+      { 
+        id: usuario.id, 
+        username: usuario.nombreUsuario,
+        clientName: "WmsWdGeneral" 
       },
       process.env.JWT_SECRET || 'oms_default_secret_2026',
       { expiresIn: '8h' }
     );
 
-    /**
-     * 3. Respuesta idéntica a la original
-     * Tu Angular usa response.usuarioId (como string) y espera el objeto 'usuario'.
-     */
+    // 🍪 SETEAR COOKIE EN EL SERVIDOR
+    const cookieStore = await cookies();
+    cookieStore.set('token', token, {
+      httpOnly: true,    // Protege contra ataques XSS
+      secure: process.env.NODE_ENV === 'production', 
+      maxAge: 60 * 60 * 8, // 8 horas (igual que el JWT)
+      path: '/',         // Disponible en toda la app
+      sameSite: 'lax',
+    });
+
     return NextResponse.json({
-      message: 'Inicio de sesión exitoso',
-      usuarioId: usuario.id.toString(), // Importante: Spring Boot lo mandaba como String
-      token: token,
-      usuario: usuario
+      token,
+      usuarioId: usuario.id.toString(),
+      usuario: usuario,
+      message: 'Inicio de sesión exitoso'
     });
 
   } catch (error) {
-    console.error('❌ Error en el proceso de Login:', error);
-    return NextResponse.json(
-      { message: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    console.error('Error en login:', error);
+    return NextResponse.json({ message: 'Error interno' }, { status: 500 });
   }
 }
