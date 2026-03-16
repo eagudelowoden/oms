@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-app: #f8fafc;    /* Fondo slate muy suave */
+    --bg-card: rgba(255, 255, 255, 0.9); /* Blanco con transparencia */
+    --text-main: #0f172a;
+    --border-color: #e2e8f0;
+  }
+
+  .dark {
+    --bg-app: #020617;    /* Negro azulado */
+    --bg-card: rgba(15, 23, 42, 0.8); /* Azul oscuro con transparencia */
+    --text-main: #f8fafc;
+    --border-color: #1e293b;
+  }
+}
+
+body {
+  background-color: var(--bg-app) !important;
+  color: var(--text-main) !important;
+  /* Textura de puntos profesional */
+  background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+  background-size: 30px 30px;
+  transition: all 0.4s ease;
+}
+
+.dark body {
+  background-image: radial-gradient(#1e293b 0.5px, transparent 0.5px);
+}
