@@ -117,7 +117,7 @@ export default function LoginPage() {
                 <input
                   {...register("username", { required: true })}
                   className={styles.inputField}
-                  placeholder="e.agudelo"
+                  placeholder="Usuario"
                 />
               </div>
             </div>
