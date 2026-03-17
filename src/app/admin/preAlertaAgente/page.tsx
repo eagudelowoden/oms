@@ -21,14 +21,15 @@ export default function PreAlertaAgentePage() {
       try {
         const response = await fetch("/api/prealerta/list");
         if (!response.ok) throw new Error("Error al obtener datos");
-        
+
         const data = await response.json();
-        
+
         // Mapeamos los datos: si el SP solo devuelve un string, creamos el objeto
-        const dataFormateada: PrealertaItem[] = data.map((item: string | PrealertaItem) => 
-          typeof item === 'string' ? { nombre: item } : item
+        const dataFormateada: PrealertaItem[] = data.map(
+          (item: string | PrealertaItem) =>
+            typeof item === "string" ? { nombre: item } : item,
         );
-        
+
         setPrealertas(dataFormateada);
       } catch (error) {
         console.error("Fallo al cargar historial:", error);
@@ -53,9 +54,9 @@ export default function PreAlertaAgentePage() {
           tipoOrigenId: 1,
           origenId: 100,
           guia: `GUIA-${Math.floor(Math.random() * 1000)}`,
-          usuarioId: 5321, 
+          usuarioId: 5321,
           idResponsable: 5321,
-          estado: "PENDIENTE"
+          estado: "PENDIENTE",
         }),
       });
 
@@ -70,11 +71,14 @@ export default function PreAlertaAgentePage() {
 
   return (
     <div className={styles.wrapper}>
-      
       {/* ENCABEZADO CON BOTÓN CONECTADO */}
       <div className={styles.headerContainer}>
         <h2 className={styles.cardTitle}>Historial Pre-Alerta Agentes</h2>
-        <button type="button" className={styles.btnCreate} onClick={handleCrearPrealerta}>
+        <button
+          type="button"
+          className={styles.btnCreate}
+          onClick={handleCrearPrealerta}
+        >
           <span className="material-symbols-rounded">add_circle</span>
           CREAR PREALERTA
         </button>
@@ -94,9 +98,17 @@ export default function PreAlertaAgentePage() {
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={4} style={{textAlign: 'center'}}>Cargando historial...</td></tr>
+                <tr>
+                  <td colSpan={4} style={{ textAlign: "center" }}>
+                    Cargando historial...
+                  </td>
+                </tr>
               ) : prealertas.length === 0 ? (
-                <tr><td colSpan={4} style={{textAlign: 'center'}}>No hay prealertas activas</td></tr>
+                <tr>
+                  <td colSpan={4} style={{ textAlign: "center" }}>
+                    No hay prealertas activas
+                  </td>
+                </tr>
               ) : (
                 prealertas.map((item, index) => (
                   <tr key={index}>
@@ -156,11 +168,15 @@ export default function PreAlertaAgentePage() {
             <tbody>
               <tr>
                 <td>Equipos</td>
-                <td><input type="text" placeholder="Ej: J-12" /></td>
+                <td>
+                  <input type="text" placeholder="Ej: J-12" />
+                </td>
               </tr>
               <tr>
                 <td>Accesorios</td>
-                <td><input type="text" placeholder="Ej: J-13" /></td>
+                <td>
+                  <input type="text" placeholder="Ej: J-13" />
+                </td>
               </tr>
             </tbody>
           </table>
@@ -168,8 +184,12 @@ export default function PreAlertaAgentePage() {
       </div>
 
       <footer className={styles.footerActions}>
-        <button type="button" className={styles.btnEmpacar}>Empacar</button>
-        <button type="button" className={styles.btnDesempacar}>Desempacar</button>
+        <button type="button" className={styles.btnEmpacar}>
+          Empacar
+        </button>
+        <button type="button" className={styles.btnDesempacar}>
+          Desempacar
+        </button>
       </footer>
     </div>
   );

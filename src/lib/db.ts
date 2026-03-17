@@ -10,8 +10,7 @@ interface JWTPayload {
 const pools = new Map<string, sql.ConnectionPool>();
 
 export const getDBConnection = async (forceGeneral: boolean = false): Promise<sql.ConnectionPool> => {
-  // Si forceGeneral es true, ignoramos TODO y vamos a la Maestra
-  let dbName = forceGeneral ? "WmsWdGeneral" : "WmsWdGeneral";
+  let dbName = "WmsWdGeneral";
 
   if (!forceGeneral) {
     try {
@@ -21,37 +20,53 @@ export const getDBConnection = async (forceGeneral: boolean = false): Promise<sq
         const decoded = jwt.decode(token) as JWTPayload;
         if (decoded?.dbName) dbName = decoded.dbName;
       }
-    } catch (e) {
-      console.warn("⚠️ Usando DB General por defecto.");
+    } catch {
+      // En TS moderno, si no usas el error, puedes dejar el catch vacío
+      console.warn("⚠️ No se pudo leer el token, usando DB General.");
     }
   }
 
-  // REVISIÓN DE POOL: Verificamos si el pool en el mapa coincide con la dbName que queremos
   if (pools.has(dbName)) {
     const p = pools.get(dbName)!;
     if (p.connected) return p;
     pools.delete(dbName);
   }
 
-  const config = {
+  const config: sql.config = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     server: process.env.DB_SERVER || '',
-    database: dbName, // "WmsWdGeneral" o "WmsWdLegacyCostaRica"
-    port: 14331,
-    options: { 
-      encrypt: true, 
+    database: dbName,
+    port: Number(process.env.DB_PORT) || 1433,
+    options: {
+      encrypt: true,
       trustServerCertificate: true,
-      enableArithAbort: true 
+      enableArithAbort: true,
+      connectTimeout: 15000 
+    },
+    pool: {
+      max: 10,
+      min: 0,
+      idleTimeoutMillis: 30000
     }
   };
 
   try {
     const pool = await new sql.ConnectionPool(config).connect();
     pools.set(dbName, pool);
+    console.log(`✅ Conexión exitosa a: ${dbName}`);
     return pool;
-  } catch (err) {
-    console.error(`❌ Error conectando a ${dbName}:`, err);
+  } catch (err: unknown) {
+    // Tipado seguro para el error
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    
+    console.error(`❌ Error de Login en ${dbName}:`, errorMessage);
+
+    if (dbName !== "WmsWdGeneral") {
+      console.warn(`🔄 Reintentando conectar a WmsWdGeneral como respaldo...`);
+      return getDBConnection(true); 
+    }
+    
     throw err;
   }
 };

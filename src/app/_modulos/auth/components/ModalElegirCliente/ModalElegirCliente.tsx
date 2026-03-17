@@ -3,6 +3,13 @@
 import { useState, useEffect } from "react";
 import styles from "./modalElegirCliente.module.css";
 
+// 1. La interfaz ahora usa 'dbase' para ser fiel a la base de datos
+interface Cliente {
+  id: number;
+  nombre: string;
+  dbase: string; // Nombre técnico (ej: WmsWdGlobalLiberty)
+}
+
 interface ClientSwitchResponse {
   clientToken: string;
   clientDb: string;
@@ -16,17 +23,18 @@ interface ModalProps {
 }
 
 export default function ModalElegirCliente({ usuarioId, onSuccess, onCancel }: ModalProps) {
-  const [clientes, setClientes] = useState<string[]>([]);
-  const [seleccionado, setSeleccionado] = useState("");
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [seleccionado, setSeleccionado] = useState<Cliente | null>(null);
   const [isChanging, setIsChanging] = useState(false);
 
-  // 1. Cargar lista usando la API Unificada
+  // Cargar lista de clientes
   useEffect(() => {
     const fetchClientes = async () => {
       try {
         const response = await fetch(`/api/clientes/list?usuarioId=${usuarioId}`);
         if (!response.ok) throw new Error("Error en la respuesta");
-        const data: string[] = await response.json();
+        
+        const data: Cliente[] = await response.json();
         setClientes(data);
       } catch (err) {
         console.error("Error cargando clientes:", err);
@@ -40,15 +48,15 @@ export default function ModalElegirCliente({ usuarioId, onSuccess, onCancel }: M
     setIsChanging(true);
 
     try {
-      // 2. Obtener ID usando la API Unificada
-      const resId = await fetch(`/api/clientes/getId?nombre=${encodeURIComponent(seleccionado)}`);
-      const clientId: number = await resId.json();
-
-      // 3. Hacer el SWITCH (Esta es la parte de POST que unifica el token)
+      // 2. Enviamos 'dbase' como 'dbNameReal' para que la API lo reconozca
       const resSwitch = await fetch(`/api/clientes/switch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientId, clienteNombre: seleccionado }),
+        body: JSON.stringify({ 
+          clientId: seleccionado.id, 
+          clienteNombre: seleccionado.nombre,
+          dbNameReal: seleccionado.dbase // Pasamos el valor técnico sin modificar
+        }),
       });
       
       const result: ClientSwitchResponse = await resSwitch.json();
@@ -56,9 +64,10 @@ export default function ModalElegirCliente({ usuarioId, onSuccess, onCancel }: M
       if (resSwitch.ok) {
         onSuccess(result); 
       } else {
-        alert("No se pudo conectar con la base de datos del cliente");
+        alert(`Error: No se pudo conectar a la base de datos técnica del cliente.`);
       }
     } catch (err) {
+      console.error("Error en switch:", err);
       alert("Error de conexión al cambiar de cliente");
     } finally {
       setIsChanging(false);
@@ -77,18 +86,29 @@ export default function ModalElegirCliente({ usuarioId, onSuccess, onCancel }: M
 
         <select 
           className={styles.select}
-          value={seleccionado}
-          onChange={(e) => setSeleccionado(e.target.value)}
+          // Usamos 'dbase' como valor de control para asegurar la coincidencia visual
+          value={seleccionado?.dbase || ""}
+          onChange={(e) => {
+            const clienteEncontrado = clientes.find(c => c.dbase === e.target.value);
+            setSeleccionado(clienteEncontrado || null);
+          }}
           disabled={isChanging}
         >
-          <option value="">-- Seleccione un cliente --</option>
-          {clientes.map((c) => (
-            <option key={c} value={c}>{c}</option>
+          <option value="" disabled>-- Seleccione un cliente --</option>
+          {clientes.map((c, index) => (
+            <option key={`${c.dbase}-${index}`} value={c.dbase}>
+              {c.nombre}
+            </option>
           ))}
         </select>
 
         <div className={styles.footerButtons}>
-          <button type="button" onClick={onCancel} className={styles.btnCancel}>
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className={styles.btnCancel} 
+            disabled={isChanging}
+          >
             Cancelar
           </button>
           <button 
