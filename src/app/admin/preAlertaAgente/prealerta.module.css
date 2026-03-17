@@ -1,3 +1,4 @@
+/* 1. CONFIGURACIÓN Y ANIMACIONES */
 .wrapper {
   display: flex;
   flex-direction: column;
@@ -11,7 +12,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Tarjetas */
+/* 2. COMPONENTES REUTILIZABLES (Tarjetas y Títulos) */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -20,25 +21,35 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-.cardTitle {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 1.2rem;
-  letter-spacing: -0.5px;
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-/* Tabla Principal Superior */
+.cardTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+/* 3. TABLAS Y CONTENEDORES */
 .tableContainer {
+  width: 100%;
   overflow-x: auto;
   border-radius: 0.75rem;
   border: 1px solid var(--border-color);
+  -webkit-overflow-scrolling: touch;
 }
 
 .mainTable {
   width: 100%;
   border-collapse: collapse;
-  background: transparent;
+  min-width: 600px; /* Evita que las columnas se aplasten */
 }
 
 .mainTable th {
@@ -49,7 +60,6 @@
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .mainTable td {
@@ -59,53 +69,7 @@
   font-size: 0.9rem;
 }
 
-.btnAction {
-  background: none;
-  border: none;
-  color: #ef4444;
-  cursor: pointer;
-  display: flex;
-  padding: 6px;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-
-.btnAction:hover {
-  background: rgba(239, 68, 68, 0.1);
-}
-
-/* Fila de Carga (Botón Azul y Fecha) */
-.uploadRow {
-  display: flex;
-  align-items: flex-end;
-  gap: 1.5rem;
-  width: 100%;
-}
-
-.btnUpload {
-  flex: 2;
-  height: 54px;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 0.8rem;
-  font-weight: 800;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-}
-
-.btnUpload:hover {
-  background-color: #1d4ed8;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
-}
-
+/* 4. FORMULARIOS E INPUTS */
 .inputGroup {
   flex: 1;
   display: flex;
@@ -120,7 +84,7 @@
   text-transform: uppercase;
 }
 
-.datePicker {
+.datePicker, .miniTable input {
   height: 50px;
   padding: 0 1rem;
   border-radius: 0.8rem;
@@ -130,372 +94,109 @@
   font-family: inherit;
   font-weight: 600;
   outline: none;
+  transition: border-color 0.2s;
 }
 
-/* Grid de Trabajo Inferior */
-.workGrid {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr; /* Más ancho el checklist */
-  gap: 1.5rem;
-}
-
-.checkList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 280px;
-  overflow-y: auto;
-  padding-right: 5px;
-}
-
-/* Scrollbar personalizado para el checklist */
-.checkList::-webkit-scrollbar { width: 5px; }
-.checkList::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-
-.checkItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 0.75rem;
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.checkItem:hover {
-  background: rgba(37, 99, 235, 0.05);
-  border-color: rgba(37, 99, 235, 0.2);
-}
-
-.checkItem input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: #2563eb;
-  cursor: pointer;
-}
-
-/* Tabla de Materiales (Derecha) */
-.miniTable {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 10px;
-}
-
-.miniTable th {
-  text-align: left;
-  font-size: 11px;
-  color: #94a3b8;
-  text-transform: uppercase;
-  padding: 0 10px;
-}
-
-.miniTable td {
-  padding: 5px 0;
-}
-
-.miniTable input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 0.6rem;
-  border: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-main);
-  font-weight: 600;
-  outline: none;
-}
-
-.miniTable input:focus {
+.datePicker:focus, .miniTable input:focus {
   border-color: #2563eb;
 }
 
-/* Botones Finales de Acción */
-.footerActions {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-.btnEmpacar {
-  background-color: #10b981;
-  color: white;
-  padding: 1rem 3.5rem;
+/* 5. BOTONES */
+.btnBase { /* Clase base para reducir repetición */
   border: none;
   border-radius: 0.8rem;
   font-weight: 800;
-  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-}
-
-.btnDesempacar {
-  background-color: #f59e0b;
-  color: white;
-  padding: 1rem 3.5rem;
-  border: none;
-  border-radius: 0.8rem;
-  font-weight: 800;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
-}
-
-.btnEmpacar:hover, .btnDesempacar:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
-}
-
-/* Estados */
-.badgePendiente {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-/* --- RESPONSIVE LOGIC --- */
-
-/* 1. Ajuste del Grid de Trabajo (Checklist y Cajas) */
-.workGrid {
-  display: grid;
-  grid-template-columns: 1fr; /* Por defecto 1 columna (Celular) */
-  gap: 1.5rem;
-}
-
-@media (min-width: 1024px) {
-  .workGrid {
-    grid-template-columns: 1.6fr 1fr; /* 2 columnas en PC */
-  }
-}
-
-/* 2. Ajuste de la fila de Cargar y Fecha */
-.uploadRow {
-  display: flex;
-  flex-direction: column; /* Apilado en celular */
-  gap: 1rem;
-  width: 100%;
-}
-
-@media (min-width: 768px) {
-  .uploadRow {
-    flex-direction: row; /* En línea en PC */
-    align-items: flex-end;
-  }
-}
-
-.btnUpload {
-  width: 100%; /* Botón grande en celular */
-}
-
-@media (min-width: 768px) {
-  .btnUpload {
-    flex: 2;
-  }
-}
-
-/* 3. Botones Finales (Empacar/Desempacar) */
-.footerActions {
-  display: flex;
-  flex-direction: column; /* Uno arriba del otro en celular */
-  gap: 1rem;
-  padding: 1rem;
-}
-
-@media (min-width: 640px) {
-  .footerActions {
-    flex-direction: row; /* Uno al lado del otro en tablets/PC */
-    justify-content: center;
-  }
-}
-
-.btnEmpacar, .btnDesempacar {
-  width: 100%; /* Botones anchos para no fallar el click en móvil */
-}
-
-@media (min-width: 640px) {
-  .btnEmpacar, .btnDesempacar {
-    width: auto;
-    min-width: 200px;
-  }
-}
-
-/* 4. Scroll de la tabla en móviles */
-.tableContainer {
-  width: 100%;
-  overflow-x: auto; /* Permite deslizar la tabla si es muy ancha */
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid var(--border-color);
-}
-
-/* 5. Inputs más altos en móvil para mejor tacto */
-.datePicker, .miniTable input {
-  min-height: 48px; /* Tamaño recomendado para touch */
-}
-
-/* Ajuste de padding general para no perder espacio en móvil */
-@media (max-width: 480px) {
-  .card {
-    padding: 1rem;
-  }
-  .wrapper {
-    gap: 1rem;
-  }
-}
-.wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 0.5rem;
-}
-
-/* Header con Botón Crear */
-.headerContainer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.btnCreate {
-  background-color: #10b981; /* Verde éxito */
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.75rem;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s;
-}
-
-.btnCreate:hover {
-  background-color: #059669;
-  transform: translateY(-2px);
-}
-
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 1.25rem;
-  padding: 1.25rem;
-}
-
-.cardTitle {
-  font-size: 1.2rem;
-  font-weight: 800;
-  margin: 0;
-  color: var(--text-main);
-}
-
-/* --- TABLA RESPONSIVE --- */
-.tableContainer {
-  overflow-x: auto; /* Scroll horizontal en móvil */
-  -webkit-overflow-scrolling: touch;
-}
-
-.mainTable {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 500px; /* Evita que se encoja demasiado en móvil */
-}
-
-/* --- SECCIÓN CARGA (RESPONSIVE) --- */
-.uploadRow {
-  display: flex;
-  flex-direction: column; /* Apilado en móvil */
-  gap: 1rem;
-}
-
-@media (min-width: 768px) {
-  .uploadRow {
-    flex-direction: row; /* En línea en PC */
-    align-items: flex-end;
-  }
-}
-
-.btnUpload {
-  flex: 2;
-  height: 50px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 0.8rem;
-  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btnCreate {
+  composes: btnBase; /* Concepto de lógica, aplica los estilos de btnBase */
+  background-color: #10b981;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+}
+
+.btnUpload {
+  composes: btnBase;
+  background: #2563eb;
+  color: white;
+  height: 54px;
+  width: 100%;
+}
+
+.btnAction {
+  background: none;
+  border: none;
+  color: #ef4444;
+  padding: 6px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
-/* --- GRID DE TRABAJO (RESPONSIVE) --- */
-.workGrid {
-  display: grid;
-  grid-template-columns: 1fr; /* 1 columna en móvil */
+.btnEmpacar { background: #10b981; color: white; padding: 1rem 2.5rem; }
+.btnDesempacar { background: #f59e0b; color: white; padding: 1rem 2.5rem; }
+
+.btnBase:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+/* 6. LAYOUT GRIDS (MOBILE FIRST) */
+.uploadRow, .workGrid, .footerActions {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
 }
 
+/* 7. MEDIA QUERIES (BREAKPOINTS) */
+
+/* Tablets en adelante (768px) */
+@media (min-width: 768px) {
+  .uploadRow {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+  .btnUpload { flex: 2; width: auto; }
+  .footerActions { flex-direction: row; justify-content: center; }
+  .btnEmpacar, .btnDesempacar { width: auto; min-width: 200px; }
+}
+
+/* Escritorio (1024px) */
 @media (min-width: 1024px) {
   .workGrid {
-    grid-template-columns: 1.6fr 1fr; /* 2 columnas en PC */
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 1.5rem;
   }
 }
-
-/* --- BOTONES FINALES (RESPONSIVE) --- */
-.footerActions {
-  display: flex;
-  flex-direction: column; /* Botones grandes uno sobre otro en móvil */
-  gap: 1rem;
+/* Este es el contenedor que debe controlar el scroll */
+.tableContainer {
+  width: 100%;
+  max-height: 450px;     /* Ajusta este valor según qué tan alta quieras la tabla */
+  overflow-y: auto;      /* Scroll vertical interno */
+  overflow-x: auto;      /* Scroll horizontal para móviles */
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  
+  /* Para que el scroll se vea más limpio (opcional) */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
-@media (min-width: 640px) {
-  .footerActions {
-    flex-direction: row; /* Uno al lado del otro en PC */
-    justify-content: center;
-  }
+/* Para que el encabezado (thead) se quede pegado arriba mientras haces scroll */
+.mainTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f8fafc; /* Un color sólido para que no se trasluzca el contenido al bajar */
+  box-shadow: inset 0 -1px 0 var(--border-color); /* Simula el borde inferior */
 }
 
-.btnEmpacar, .btnDesempacar {
-  padding: 1rem 2.5rem;
-  border-radius: 0.8rem;
-  border: none;
-  font-weight: 800;
-  cursor: pointer;
-  width: 100%; /* Ancho completo en móvil */
+/* Asegúrate de que la tabla ocupe todo el ancho */
+.mainTable {
+  width: 100%;
+  border-collapse: collapse;
 }
-
-@media (min-width: 640px) {
-  .btnEmpacar, .btnDesempacar {
-    width: auto;
-  }
-}
-
-.btnEmpacar { background: #10b981; color: white; }
-.btnDesempacar { background: #f59e0b; color: white; }
-
-/* Otros estilos necesarios */
-.badgePendiente {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.inputGroup { display: flex; flex-direction: column; gap: 5px; flex: 1; }
-.datePicker { height: 45px; border-radius: 0.5rem; border: 1px solid var(--border-color); padding: 0 10px; background: var(--bg-card); color: var(--text-main); }
-.checkList { display: flex; flex-direction: column; gap: 8px; }
-.checkItem { display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0,0,0,0.02); border-radius: 8px; cursor: pointer; }
-.miniTable { width: 100%; }
-.miniTable input { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); }

@@ -60,7 +60,7 @@ export default function PreAlertaAgentePage() {
       
       {/* ENCABEZADO CON BOTÓN DE CREAR CONECTADO */}
       <div className={styles.headerContainer}>
-        <h2 className={styles.cardTitle}>Historial Pre-Alerta Agente</h2>
+        <h2 className={styles.cardTitle}>Historial Pre-Alerta Agentes</h2>
         <button 
           type="button" 
           className={styles.btnCreate} 
