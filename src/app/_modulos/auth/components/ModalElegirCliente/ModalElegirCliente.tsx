@@ -54,29 +54,30 @@ export default function ModalElegirCliente({
     setIsChanging(true);
 
     try {
-      // 2. Enviamos 'dbase' como 'dbNameReal' para que la API lo reconozca
       const resSwitch = await fetch(`/api/clientes/switch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientId: seleccionado.id,
-          clienteNombre: seleccionado.nombre,
-          dbNameReal: seleccionado.dbase, // Pasamos el valor técnico sin modificar
+          clienteNombre: seleccionado.nombre, // Este es el comercial (HUGHES CO BOG)
+          dbNameReal: seleccionado.dbase,
         }),
       });
 
       const result: ClientSwitchResponse = await resSwitch.json();
 
       if (resSwitch.ok) {
-        onSuccess(result);
+        // ⚠️ IMPORTANTE: Pasa también el nombre comercial al onSuccess
+        // para que el Layout sepa qué nombre mandarle al SP.
+        onSuccess({
+          ...result,
+          clientDbName: seleccionado.nombre, // Aseguramos que pasamos el nombre comercial
+        });
       } else {
-        alert(
-          `Error: No se pudo conectar a la base de datos técnica del cliente.`,
-        );
+        alert(`Error: No se pudo conectar a la base de datos técnica.`);
       }
     } catch (err) {
       console.error("Error en switch:", err);
-      alert("Error de conexión al cambiar de cliente");
     } finally {
       setIsChanging(false);
     }
