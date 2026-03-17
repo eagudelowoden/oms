@@ -46,9 +46,9 @@ export async function POST(
 
   if (action === 'switch') {
     try {
-      const body = await request.json() as { 
-        clientId: number, 
-        clienteNombre: string, 
+      const body = await request.json() as {
+        clientId: number,
+        clienteNombre: string,
         dbNameReal: string // Ahora es requerido para no inventar nombres
       };
 
@@ -69,7 +69,7 @@ export async function POST(
       const token = jwt.sign(
         {
           clientId,
-          dbName, 
+          dbName,
           clienteNombre,
           role: 'admin'
         },

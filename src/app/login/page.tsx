@@ -70,9 +70,9 @@ export default function LoginPage() {
 
       if (response.ok) {
         // 3. CAMBIO CLAVE: Guardamos usuario tipado y abrimos modal
-        localStorage.setItem("token", result.token); 
-        setTempUserData(result.usuario as Usuario); 
-        setShowModal(true); 
+        localStorage.setItem("token", result.token);
+        setTempUserData(result.usuario as Usuario);
+        setShowModal(true);
       } else {
         setError(result.message || "Credenciales inválidas");
       }
@@ -88,11 +88,11 @@ export default function LoginPage() {
     // Reemplazamos por el token del cliente (BD específica)
     localStorage.setItem("token", clientData.clientToken);
     localStorage.setItem("clientDb", clientData.clientDb);
-    
+
     if (tempUserData) {
       localStorage.setItem("usuario", JSON.stringify(tempUserData));
     }
-    
+
     router.push("/admin");
   };
 
@@ -103,7 +103,9 @@ export default function LoginPage() {
         onClick={toggleDarkMode}
         className={styles.themeButton}
       >
-        <span className={`material-symbols-rounded ${isDarkMode ? styles.sunIcon : styles.moonIcon}`}>
+        <span
+          className={`material-symbols-rounded ${isDarkMode ? styles.sunIcon : styles.moonIcon}`}
+        >
           {isDarkMode ? "light_mode" : "dark_mode"}
         </span>
       </button>
@@ -133,7 +135,11 @@ export default function LoginPage() {
             <div className={styles.inputGroup}>
               <label className={styles.label}>Usuario</label>
               <div className={styles.relative}>
-                <span className={`material-symbols-rounded ${styles.inputIcon}`}>person</span>
+                <span
+                  className={`material-symbols-rounded ${styles.inputIcon}`}
+                >
+                  person
+                </span>
                 <input
                   {...register("username", { required: true })}
                   className={styles.inputField}
@@ -145,7 +151,11 @@ export default function LoginPage() {
             <div className={styles.inputGroup}>
               <label className={styles.label}>Contraseña</label>
               <div className={styles.relative}>
-                <span className={`material-symbols-rounded ${styles.inputIcon}`}>lock</span>
+                <span
+                  className={`material-symbols-rounded ${styles.inputIcon}`}
+                >
+                  lock
+                </span>
                 <input
                   type={showPassword ? "text" : "password"}
                   {...register("password", { required: true })}
@@ -164,13 +174,19 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <button type="submit" disabled={isLoading} className={styles.submitBtn}>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={styles.submitBtn}
+            >
               {isLoading ? (
                 <div className={styles.spinner} />
               ) : (
                 <>
                   <span>INGRESAR</span>
-                  <span className="material-symbols-rounded">arrow_forward</span>
+                  <span className="material-symbols-rounded">
+                    arrow_forward
+                  </span>
                 </>
               )}
             </button>
@@ -181,7 +197,7 @@ export default function LoginPage() {
 
       {/* 5. RENDERIZAR EL MODAL */}
       {showModal && tempUserData && (
-        <ModalElegirCliente 
+        <ModalElegirCliente
           usuarioId={tempUserData.id}
           onCancel={() => setShowModal(false)}
           onSuccess={handleClientSuccess}

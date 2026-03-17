@@ -22,7 +22,11 @@ interface ModalProps {
   onCancel: () => void;
 }
 
-export default function ModalElegirCliente({ usuarioId, onSuccess, onCancel }: ModalProps) {
+export default function ModalElegirCliente({
+  usuarioId,
+  onSuccess,
+  onCancel,
+}: ModalProps) {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [seleccionado, setSeleccionado] = useState<Cliente | null>(null);
   const [isChanging, setIsChanging] = useState(false);
@@ -31,9 +35,11 @@ export default function ModalElegirCliente({ usuarioId, onSuccess, onCancel }: M
   useEffect(() => {
     const fetchClientes = async () => {
       try {
-        const response = await fetch(`/api/clientes/list?usuarioId=${usuarioId}`);
+        const response = await fetch(
+          `/api/clientes/list?usuarioId=${usuarioId}`,
+        );
         if (!response.ok) throw new Error("Error en la respuesta");
-        
+
         const data: Cliente[] = await response.json();
         setClientes(data);
       } catch (err) {
@@ -52,19 +58,21 @@ export default function ModalElegirCliente({ usuarioId, onSuccess, onCancel }: M
       const resSwitch = await fetch(`/api/clientes/switch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          clientId: seleccionado.id, 
+        body: JSON.stringify({
+          clientId: seleccionado.id,
           clienteNombre: seleccionado.nombre,
-          dbNameReal: seleccionado.dbase // Pasamos el valor técnico sin modificar
+          dbNameReal: seleccionado.dbase, // Pasamos el valor técnico sin modificar
         }),
       });
-      
+
       const result: ClientSwitchResponse = await resSwitch.json();
-      
+
       if (resSwitch.ok) {
-        onSuccess(result); 
+        onSuccess(result);
       } else {
-        alert(`Error: No se pudo conectar a la base de datos técnica del cliente.`);
+        alert(
+          `Error: No se pudo conectar a la base de datos técnica del cliente.`,
+        );
       }
     } catch (err) {
       console.error("Error en switch:", err);
@@ -81,20 +89,24 @@ export default function ModalElegirCliente({ usuarioId, onSuccess, onCancel }: M
           <span className="material-symbols-rounded">business_center</span>
           <h3>Seleccionar Cliente</h3>
         </div>
-        
+
         <p>Selecciona la operación con la que deseas trabajar:</p>
 
-        <select 
+        <select
           className={styles.select}
           // Usamos 'dbase' como valor de control para asegurar la coincidencia visual
           value={seleccionado?.dbase || ""}
           onChange={(e) => {
-            const clienteEncontrado = clientes.find(c => c.dbase === e.target.value);
+            const clienteEncontrado = clientes.find(
+              (c) => c.dbase === e.target.value,
+            );
             setSeleccionado(clienteEncontrado || null);
           }}
           disabled={isChanging}
         >
-          <option value="" disabled>-- Seleccione un cliente --</option>
+          <option value="" disabled>
+            -- Seleccione un cliente --
+          </option>
           {clientes.map((c, index) => (
             <option key={`${c.dbase}-${index}`} value={c.dbase}>
               {c.nombre}
@@ -103,17 +115,17 @@ export default function ModalElegirCliente({ usuarioId, onSuccess, onCancel }: M
         </select>
 
         <div className={styles.footerButtons}>
-          <button 
-            type="button" 
-            onClick={onCancel} 
-            className={styles.btnCancel} 
+          <button
+            type="button"
+            onClick={onCancel}
+            className={styles.btnCancel}
             disabled={isChanging}
           >
             Cancelar
           </button>
-          <button 
+          <button
             type="button"
-            onClick={handleConfirmar} 
+            onClick={handleConfirmar}
             className={styles.btnConfirm}
             disabled={!seleccionado || isChanging}
           >

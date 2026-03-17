@@ -22,7 +22,7 @@ export const ClienteBackendService = {
    */
   async getListClient(usuarioId: number): Promise<ClienteData[]> {
     try {
-      const pool = await getDBConnection(true); 
+      const pool = await getDBConnection(true);
 
       // 1. Ejecutar SP pa_GetListClient con el parámetro EXACTO @UsuarioId
       const resultSP = await pool.request()

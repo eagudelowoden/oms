@@ -41,7 +41,7 @@ export default function PreAlertaAgentePage() {
           guia: "GUIA-" + Math.floor(Math.random() * 1000),
           usuarioId: 5321, // Esto debería venir de tu contexto de usuario/session
           idResponsable: 5321,
-          estado: "PENDIENTE"
+          estado: "PENDIENTE",
         }),
       });
 
@@ -57,13 +57,12 @@ export default function PreAlertaAgentePage() {
 
   return (
     <div className={styles.wrapper}>
-      
       {/* ENCABEZADO CON BOTÓN DE CREAR CONECTADO */}
       <div className={styles.headerContainer}>
         <h2 className={styles.cardTitle}>Historial Pre-Alerta Agentes</h2>
-        <button 
-          type="button" 
-          className={styles.btnCreate} 
+        <button
+          type="button"
+          className={styles.btnCreate}
           onClick={handleCrearPrealerta}
         >
           <span className="material-symbols-rounded">add_circle</span>
@@ -85,15 +84,22 @@ export default function PreAlertaAgentePage() {
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={4}>Cargando datos de SQL...</td></tr>
+                <tr>
+                  <td colSpan={4}>Cargando datos de SQL...</td>
+                </tr>
               ) : prealertas.length === 0 ? (
-                <tr><td colSpan={4}>No hay prealertas activas</td></tr>
+                <tr>
+                  <td colSpan={4}>No hay prealertas activas</td>
+                </tr>
               ) : (
                 prealertas.map((nombre, index) => (
                   <tr key={index}>
                     <td>{nombre}</td>
-                    <td>{new Date().toLocaleDateString()}</td> {/* Ajustar si el SP devuelve fecha */}
-                    <td><span className={styles.badgePendiente}>Pendiente</span></td>
+                    <td>{new Date().toLocaleDateString()}</td>{" "}
+                    {/* Ajustar si el SP devuelve fecha */}
+                    <td>
+                      <span className={styles.badgePendiente}>Pendiente</span>
+                    </td>
                     <td>
                       <button type="button" className={styles.btnAction}>
                         <span className="material-symbols-rounded">delete</span>
@@ -109,7 +115,7 @@ export default function PreAlertaAgentePage() {
 
       {/* ... El resto de tu código de secciones inferiores ... */}
       <div className={styles.uploadRow}>
-         {/* Aquí podrías conectar la carga de archivos */}
+        {/* Aquí podrías conectar la carga de archivos */}
       </div>
     </div>
   );

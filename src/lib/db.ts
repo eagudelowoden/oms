@@ -42,7 +42,7 @@ export const getDBConnection = async (forceGeneral: boolean = false): Promise<sq
       encrypt: true,
       trustServerCertificate: true,
       enableArithAbort: true,
-      connectTimeout: 15000 
+      connectTimeout: 15000
     },
     pool: {
       max: 10,
@@ -59,14 +59,14 @@ export const getDBConnection = async (forceGeneral: boolean = false): Promise<sq
   } catch (err: unknown) {
     // Tipado seguro para el error
     const errorMessage = err instanceof Error ? err.message : String(err);
-    
+
     console.error(`❌ Error de Login en ${dbName}:`, errorMessage);
 
     if (dbName !== "WmsWdGeneral") {
       console.warn(`🔄 Reintentando conectar a WmsWdGeneral como respaldo...`);
-      return getDBConnection(true); 
+      return getDBConnection(true);
     }
-    
+
     throw err;
   }
 };
