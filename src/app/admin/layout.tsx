@@ -72,6 +72,7 @@ export default function AdminLayout({
           const response = await fetch(url);
           if (response.ok) {
             const data = await response.json();
+            console.log('📦 data recibida del perfil:', data); // 👈 agrega esto
 
             // Actualizamos estado con perfilNombre Y perfilId
             setUsuario((prev) =>
