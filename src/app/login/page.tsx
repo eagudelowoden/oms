@@ -85,12 +85,17 @@ export default function LoginPage() {
 
   // 4. FUNCIÓN AL SELECCIONAR CLIENTE CON ÉXITO
   const handleClientSuccess = (clientData: ClientSwitchResponse) => {
-    // Reemplazamos por el token del cliente (BD específica)
     localStorage.setItem("token", clientData.clientToken);
     localStorage.setItem("clientDb", clientData.clientDb);
 
     if (tempUserData) {
-      localStorage.setItem("usuario", JSON.stringify(tempUserData));
+      localStorage.setItem(
+        "usuario",
+        JSON.stringify({
+          ...tempUserData,
+          clienteNombre: clientData.clientDbName, // 👈 línea nueva
+        }),
+      );
     }
 
     router.push("/admin");

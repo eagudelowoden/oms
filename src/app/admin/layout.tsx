@@ -45,6 +45,9 @@ export default function AdminLayout({
       return;
     }
     const localData = JSON.parse(userStr) as Usuario;
+    console.log("👤 Usuario desde localStorage:", localData);
+    console.log("🏢 clienteNombre:", localData.clienteNombre);
+    console.log("🆔 id:", localData.id);
     setUsuario(localData);
     setCargando(false);
   }, [router]);
@@ -103,6 +106,7 @@ export default function AdminLayout({
   };
 
   const handleClientSwitchSuccess = (result: ClientSwitchResult) => {
+    console.log("🔄 result completo:", result); // 👈 agrega esto
     if (usuario) {
       const updatedUser = {
         ...usuario,
