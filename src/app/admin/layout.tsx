@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import styles from "./admin.module.css";
 import ModalElegirCliente from "../../../src/app/_modulos/auth/components/ModalElegirCliente/ModalElegirCliente";
+import { useMenu } from "../_modulos/auth/components/menu/useMenu";
 
 // --- INTERFACES ACTUALIZADAS ---
 interface Usuario {
@@ -34,6 +35,10 @@ export default function AdminLayout({
   const [showChangeClient, setShowChangeClient] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
+  const { menu, loadingMenu } = useMenu(usuario?.perfilId);
+  console.log("🎯 perfilId para menú:", usuario?.perfilId);
+  console.log("📋 menu cargado:", menu);
+
   const router = useRouter();
   const pathname = usePathname();
 
@@ -55,8 +60,6 @@ export default function AdminLayout({
   // EFECTO 2: Reacciona al cambio de cliente y pide el perfil (El "SwitchMap" de Angular)
   useEffect(() => {
     const fetchPerfilData = async () => {
-      // Solo disparamos si tenemos el ID y el Nombre del Cliente
-      // pero NO tenemos todavía el perfilNombre cargado
       if (usuario?.id && usuario?.clienteNombre && !usuario.perfilNombre) {
         try {
           const url = `/api/perfil/${usuario.id}?clienteNombre=${encodeURIComponent(usuario.clienteNombre)}`;
@@ -70,15 +73,30 @@ export default function AdminLayout({
           if (response.ok) {
             const data = await response.json();
 
-            // Actualizamos el estado con el perfil que trajo el SP
+            // Actualizamos estado con perfilNombre Y perfilId
             setUsuario((prev) =>
               prev
                 ? {
                     ...prev,
                     perfilNombre: data.perfilNombre,
+                    perfilId: data.perfilId, // 👈
                   }
                 : null,
             );
+
+            // Guardamos en localStorage también
+            const userStr = localStorage.getItem("usuario");
+            if (userStr) {
+              const user = JSON.parse(userStr);
+              localStorage.setItem(
+                "usuario",
+                JSON.stringify({
+                  ...user,
+                  perfilNombre: data.perfilNombre,
+                  perfilId: data.perfilId, // 👈
+                }),
+              );
+            }
           }
         } catch (error) {
           console.error("❌ Error en fetch perfil:", error);
@@ -87,7 +105,6 @@ export default function AdminLayout({
     };
 
     fetchPerfilData();
-    // Esta es la clave: el efecto "vigila" estas variables
   }, [usuario?.id, usuario?.clienteNombre, usuario?.perfilNombre]);
 
   useEffect(() => {
