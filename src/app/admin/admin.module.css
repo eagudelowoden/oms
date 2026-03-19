@@ -485,7 +485,7 @@
 .sessionInfoGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Espacio sutil entre cliente y usuario */
+  gap: 8px; 
 }
 
 .infoRow {
@@ -495,7 +495,7 @@
 }
 
 .infoRow span {
-  font-size: 13px; /* Iconos pequeños y discretos */
+  font-size: 12px; /* Iconos pequeños y discretos */
   color: #94a3b8;
 }
 
@@ -508,6 +508,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 
 .userName {
   margin: 0;
@@ -535,3 +536,4 @@
   background: #f1f5f9;
   margin: 2px 0;
 }
+
