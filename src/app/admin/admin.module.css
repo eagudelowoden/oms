@@ -9,7 +9,7 @@
 
 /* --- SIDEBAR --- */
 .sidebar {
-  width: 280px;
+  width: 255px;
   height: 100vh;
   background-color: #ffffff;
   border-right: 1px solid #e2e8f0;
@@ -21,8 +21,8 @@
 }
 
 .sidebarHeader {
-  height: 64px;
-  padding: 0 1.25rem;
+  height: 45px;
+  padding: 0 1.20rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -34,13 +34,13 @@
 .logoGroup {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
 }
 
 .logoBadge {
   background: #2563eb;
   color: white;
-  padding: 6px;
+  padding: 5px;
   border-radius: 8px;
   display: flex;
 }
@@ -54,7 +54,7 @@
 /* --- INDICADOR DE CLIENTE --- */
 .currentClientBadge {
   margin: 1rem;
-  padding: 0.75rem;
+  padding: 0.70rem;
   background: rgba(37, 99, 235, 0.05);
   border-radius: 10px;
   display: flex;
@@ -81,7 +81,7 @@
 /* --- NAVEGACIÓN --- */
 .navMenu {
   flex: 1;
-  padding: 0.75rem;
+  padding: 0.50rem;
   overflow-y: auto;
 }
 
@@ -97,8 +97,8 @@
 .navItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
+  gap: 10px;
+  padding: 10px 10px;
   color: #64748b;
   text-decoration: none;
   border-radius: 10px;
@@ -151,8 +151,8 @@
 }
 
 .userAvatar {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   background: #2563eb;
   color: white;
   border-radius: 8px;
@@ -181,7 +181,7 @@
 }
 
 .userRole {
-  font-size: 10px;
+  font-size: 0.70rem;
   color: #94a3b8;
   text-transform: uppercase;
   margin: 0;
@@ -192,7 +192,7 @@
   position: absolute;
   bottom: calc(100% + 12px);
   left: 0;
-  width: 100%;
+  width: 80%;
   min-width: 200px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -254,7 +254,7 @@
 }
 
 .topHeader {
-  height: 64px;
+  height: 70px;
   display: flex;
   align-items: center;
   padding: 0 1.5rem;
@@ -475,8 +475,8 @@
   z-index: 9999;
 }
 .currentClientBadge {
-  margin: 1rem;
-  padding: 0.85rem;
+  margin: 0.5rem;
+  padding: 0.70rem;
   background: #f8fafc; /* Fondo muy suave */
   border-radius: 12px;
   border: 1px solid #e2e8f0;

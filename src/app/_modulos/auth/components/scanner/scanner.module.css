@@ -1,0 +1,528 @@
+/* ============================================================
+   SCANNER MODAL — Escaneo de seriales por cámara / manual
+   ============================================================ */
+
+/* ── OVERLAY ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── MODAL ── */
+.modal {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 0.5px solid #e2e8f0;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.18s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── HEADER ── */
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid #f1f5f9;
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.headerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.modalSub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 2px 0 0;
+}
+
+.btnClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 0.5px solid #e2e8f0;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.btnClose:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+/* ── CAMERA SECTION ── */
+.cameraSection {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #0f172a;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: box-shadow 0.15s;
+}
+
+.flashGreen {
+  box-shadow: inset 0 0 0 3px #22c55e;
+}
+
+.cameraPlaceholder,
+.camError {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #94a3b8;
+  font-size: 12px;
+  text-align: center;
+  padding: 20px;
+}
+
+.camError {
+  color: #f87171;
+}
+
+.camError p {
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+.btnStartCam {
+  margin-top: 4px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnStartCam:hover {
+  background: #1d4ed8;
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+.videoVisible {
+  display: block;
+}
+
+/* Scan overlay + linea animada */
+.scanOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Corner brackets */
+.scanOverlay::before,
+.scanOverlay::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-color: #22c55e;
+  border-style: solid;
+}
+
+.scanOverlay::before {
+  top: 16px;
+  left: 16px;
+  border-width: 2px 0 0 2px;
+  border-radius: 4px 0 0 0;
+}
+
+.scanOverlay::after {
+  bottom: 16px;
+  right: 16px;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 4px 0;
+}
+
+.scanLine {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #22c55e, transparent);
+  animation: scanMove 2s ease-in-out infinite;
+  top: 16px;
+}
+
+@keyframes scanMove {
+  0%   { top: 16px; opacity: 1; }
+  50%  { opacity: 1; }
+  100% { top: calc(100% - 18px); opacity: 0.6; }
+}
+
+.btnStopCam {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(15, 23, 42, 0.7);
+  color: #fff;
+  border: 0.5px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s;
+}
+
+.btnStopCam:hover {
+  background: rgba(239, 68, 68, 0.7);
+}
+
+/* ── INPUT MANUAL ── */
+.manualSection {
+  padding: 8px 12px;
+  border-bottom: 0.5px solid #f1f5f9;
+  flex-shrink: 0;
+}
+
+.manualBar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #f8fafc;
+  border: 0.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  transition: border-color 0.15s;
+}
+
+.manualBar:focus-within {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+
+.manualBar svg {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.manualInput {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: #1e293b;
+  font-family: 'Courier New', monospace;
+  outline: none;
+  flex: 1;
+  letter-spacing: 0.04em;
+}
+
+.manualInput::placeholder {
+  color: #cbd5e1;
+  font-family: inherit;
+  letter-spacing: 0;
+}
+
+.btnAddManual {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.btnAddManual:hover {
+  background: #1d4ed8;
+}
+
+/* ── LISTA SERIALES ── */
+.serialList {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 80px;
+  max-height: 220px;
+}
+
+.emptyList {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.serialItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 0.5px solid #f1f5f9;
+  transition: background 0.12s;
+  animation: itemIn 0.15s ease;
+}
+
+@keyframes itemIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.serialItem:last-child {
+  border-bottom: none;
+}
+
+.serialItem:hover {
+  background: #f8fafc;
+}
+
+.serialValido .serialDot {
+  background: #22c55e;
+  box-shadow: 0 0 5px rgba(34, 197, 94, 0.4);
+}
+
+.serialDuplicado {
+  background: #fffbeb;
+}
+
+.serialDuplicado:hover {
+  background: #fef9c3;
+}
+
+.serialDuplicado .serialDot {
+  background: #f59e0b;
+}
+
+.serialLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.serialDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.serialCode {
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dupTag {
+  display: inline-block;
+  margin-left: 7px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #d97706;
+  background: #fef3c7;
+  border: 0.5px solid #fcd34d;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.serialRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.serialTime {
+  font-size: 10px;
+  color: #cbd5e1;
+  font-family: 'Courier New', monospace;
+}
+
+.btnRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnRemove:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* ── SCROLLBAR lista ── */
+.serialList::-webkit-scrollbar { width: 3px; }
+.serialList::-webkit-scrollbar-track { background: transparent; }
+.serialList::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
+
+/* ── FOOTER MODAL ── */
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 0.5px solid #f1f5f9;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnCancelar {
+  background: transparent;
+  color: #64748b;
+  border: 0.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnCancelar:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.btnLimpiar {
+  background: transparent;
+  color: #94a3b8;
+  border: 0.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnLimpiar:hover {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.btnConfirmar {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.btnConfirmar:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btnConfirmar:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 520px) {
+  .overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: 100%;
+    border-radius: 14px 14px 0 0;
+    max-height: 92vh;
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.2);
+  }
+}
