@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import styles from "./prealerta.module.css";
 
-// Definimos el tipo para evitar el error 'any' de ESLint
 interface PrealertaItem {
   nombre: string;
   fecha?: string;
@@ -11,25 +10,22 @@ interface PrealertaItem {
 }
 
 export default function PreAlertaAgentePage() {
-  // 1. Estados con tipos definidos
   const [prealertas, setPrealertas] = useState<PrealertaItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [query, setQuery] = useState<string>("");
+  const [sortCol, setSortCol] = useState<"nombre" | "fecha" | null>(null);
+  const [sortAsc, setSortAsc] = useState<boolean>(true);
 
-  // 2. Carga de datos desde la API (pa_GetListPrealert)
   useEffect(() => {
     const cargarHistorial = async () => {
       try {
         const response = await fetch("/api/prealerta/list");
         if (!response.ok) throw new Error("Error al obtener datos");
-
         const data = await response.json();
-
-        // Mapeamos los datos: si el SP solo devuelve un string, creamos el objeto
         const dataFormateada: PrealertaItem[] = data.map(
           (item: string | PrealertaItem) =>
             typeof item === "string" ? { nombre: item } : item,
         );
-
         setPrealertas(dataFormateada);
       } catch (error) {
         console.error("Fallo al cargar historial:", error);
@@ -40,88 +36,133 @@ export default function PreAlertaAgentePage() {
     cargarHistorial();
   }, []);
 
-  // 3. Función para Crear (pa_InsertPrealert)
+  const filteredAndSorted = useMemo(() => {
+    let list = prealertas.filter((r) =>
+      r.nombre.toLowerCase().includes(query.toLowerCase()),
+    );
+    if (sortCol) {
+      list = [...list].sort((a, b) => {
+        const av = (a[sortCol] ?? "").toLowerCase();
+        const bv = (b[sortCol] ?? "").toLowerCase();
+        return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+      });
+    }
+    return list;
+  }, [prealertas, query, sortCol, sortAsc]);
+
+  const handleSort = (col: "nombre" | "fecha") => {
+    if (sortCol === col) setSortAsc((p) => !p);
+    else { setSortCol(col); setSortAsc(true); }
+  };
+
   const handleCrearPrealerta = async () => {
     const nombreNuevo = prompt("Ingrese el nombre de la prealerta:");
-    if (!nombreNuevo) return;
-
+    if (!nombreNuevo?.trim()) return;
     try {
       const res = await fetch("/api/prealerta/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nombre: nombreNuevo,
+          nombre: nombreNuevo.trim(),
           tipoOrigenId: 1,
           origenId: 100,
           guia: `GUIA-${Math.floor(Math.random() * 1000)}`,
           usuarioId: 5321,
           idResponsable: 5321,
-          estado: "PENDIENTE",
+          estado: "Pendiente",
         }),
       });
-
       if (res.ok) {
-        setPrealertas((prev) => [{ nombre: nombreNuevo }, ...prev]);
-        alert("Prealerta creada exitosamente");
+        setPrealertas((prev) => [
+          {
+            nombre: nombreNuevo.trim(),
+            fecha: new Date().toLocaleDateString("es-CO"),
+            estado: "Pendiente",
+          },
+          ...prev,
+        ]);
       }
     } catch (error) {
-      alert("Error al insertar en la base de datos");
+      console.error("Error al insertar:", error);
     }
+  };
+
+  const handleEliminar = (nombre: string) => {
+    setPrealertas((prev) => prev.filter((r) => r.nombre !== nombre));
+  };
+
+  const sortIcon = (col: "nombre" | "fecha") => {
+    if (sortCol !== col) return <span className={styles.sortIcon}>↕</span>;
+    return <span className={`${styles.sortIcon} ${styles.sortActive}`}>{sortAsc ? "↑" : "↓"}</span>;
   };
 
   return (
     <div className={styles.wrapper}>
-      {/* ENCABEZADO CON BOTÓN CONECTADO */}
-      <div className={styles.headerContainer}>
-        <h2 className={styles.cardTitle}>Historial Pre-Alerta Agente</h2>
-        <button
-          type="button"
-          className={styles.btnCreate}
-          onClick={handleCrearPrealerta}
-        >
-          <span className="material-symbols-rounded">add_circle</span>
-          <span className={styles.btnLabel}>Crear prealerta</span>
+
+      {/* ── HEADER ── */}
+      <div className={styles.header}>
+        <h2 className={styles.headerTitle}>Historial Pre-Alerta Agente</h2>
+        <button type="button" className={styles.btnNew} onClick={handleCrearPrealerta}>
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <circle cx="7" cy="7" r="5.5"/><line x1="7" y1="4.2" x2="7" y2="9.8"/><line x1="4.2" y1="7" x2="9.8" y2="7"/>
+          </svg>
+          Crear prealerta
         </button>
       </div>
 
-      {/* SECCIÓN SUPERIOR: Historial Dinámico */}
-      <section className={styles.card}>
-        <div className={styles.tableContainer}>
-          <table className={styles.mainTable}>
+      {/* ── TABLA ── */}
+      <div className={styles.card}>
+        <div className={styles.searchBar}>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
+            <circle cx="5" cy="5" r="3.2"/><line x1="7.6" y1="7.6" x2="10.5" y2="10.5"/>
+          </svg>
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Buscar por nombre..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query && (
+            <button type="button" className={styles.clearBtn} onClick={() => setQuery("")}>✕</button>
+          )}
+        </div>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th>Nombre</th>
-                <th>Fecha</th>
-                <th>Estado</th>
-                <th>Acciones</th>
+                <th onClick={() => handleSort("nombre")} className={styles.thSortable}>
+                  NOMBRE {sortIcon("nombre")}
+                </th>
+                <th onClick={() => handleSort("fecha")} className={styles.thSortable}>
+                  FECHA {sortIcon("fecha")}
+                </th>
+                <th>ESTADO</th>
+                <th>ACCIONES</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr>
-                  <td colSpan={4} style={{ textAlign: "center" }}>
-                    Cargando historial...
-                  </td>
-                </tr>
-              ) : prealertas.length === 0 ? (
-                <tr>
-                  <td colSpan={4} style={{ textAlign: "center" }}>
-                    No hay prealertas activas
-                  </td>
-                </tr>
+                <tr><td colSpan={4} className={styles.emptyCell}>Cargando...</td></tr>
+              ) : filteredAndSorted.length === 0 ? (
+                <tr><td colSpan={4} className={styles.emptyCell}>Sin resultados</td></tr>
               ) : (
-                prealertas.map((item, index) => (
-                  <tr key={index}>
+                filteredAndSorted.map((item, i) => (
+                  <tr key={i}>
                     <td>{item.nombre}</td>
-                    <td>{item.fecha || new Date().toLocaleDateString()}</td>
+                    <td className={styles.tdMuted}>{item.fecha ?? new Date().toLocaleDateString("es-CO")}</td>
+                    <td className={styles.tdMuted}>{item.estado ?? "Pendiente"}</td>
                     <td>
-                      <span className={styles.badgePendiente}>
-                        {item.estado || "Pendiente"}
-                      </span>
-                    </td>
-                    <td>
-                      <button type="button" className={styles.btnAction}>
-                        <span className="material-symbols-rounded">delete</span>
+                      <button
+                        type="button"
+                        className={styles.btnDel}
+                        onClick={() => handleEliminar(item.nombre)}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
+                          <polyline points="2.5,4 11.5,4"/>
+                          <path d="M5 4V3h4v1"/>
+                          <path d="M4 4l.6 7.5h4.8L10 4"/>
+                        </svg>
                       </button>
                     </td>
                   </tr>
@@ -130,22 +171,26 @@ export default function PreAlertaAgentePage() {
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
 
-      {/* SECCIÓN MEDIA: Carga y Fecha */}
-      <div className={styles.uploadRow}>
+      {/* ── CARGA + FECHA ── */}
+      <div className={styles.midRow}>
         <button type="button" className={styles.btnUpload}>
-          <span className="material-symbols-rounded">upload_file</span>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M8 10V4M5 7l3-3 3 3"/><path d="M2 12.5h12"/>
+          </svg>
           Cargar Recuperaciones Día
         </button>
-        <div className={styles.inputGroup}>
-          <label htmlFor="fechaProceso">Fecha Proceso</label>
-          <input id="fechaProceso" type="date" className={styles.datePicker} />
+        <div className={styles.fechaCard}>
+          <label htmlFor="fechaProceso" className={styles.fechaLabel}>Fecha Proceso</label>
+          <input id="fechaProceso" type="date" className={styles.fechaInput} />
         </div>
       </div>
 
-      {/* SECCIÓN INFERIOR: Grid de Trabajo */}
-      <div className={styles.workGrid}>
+      {/* ── BOTTOM GRID ── */}
+      <div className={styles.bottomGrid}>
+
+        {/* Equipos recuperados */}
         <div className={styles.card}>
           <div className={styles.checkList}>
             {[1, 2, 3, 4].map((i) => (
@@ -157,6 +202,7 @@ export default function PreAlertaAgentePage() {
           </div>
         </div>
 
+        {/* Tipo material */}
         <div className={styles.card}>
           <table className={styles.miniTable}>
             <thead>
@@ -168,29 +214,24 @@ export default function PreAlertaAgentePage() {
             <tbody>
               <tr>
                 <td>Equipos</td>
-                <td>
-                  <input type="text" placeholder="Ej: J-12" />
-                </td>
+                <td><input type="text" placeholder="Ej: J-12" className={styles.miniInput} /></td>
               </tr>
               <tr>
                 <td>Accesorios</td>
-                <td>
-                  <input type="text" placeholder="Ej: J-13" />
-                </td>
+                <td><input type="text" placeholder="Ej: J-13" className={styles.miniInput} /></td>
               </tr>
             </tbody>
           </table>
         </div>
+
       </div>
 
-      <footer className={styles.footerActions}>
-        <button type="button" className={styles.btnEmpacar}>
-          Empacar
-        </button>
-        <button type="button" className={styles.btnDesempacar}>
-          Desempacar
-        </button>
-      </footer>
+      {/* ── FOOTER ── */}
+      <div className={styles.footer}>
+        <button type="button" className={styles.btnEmpacar}>Empacar</button>
+        <button type="button" className={styles.btnDesempacar}>Desempacar</button>
+      </div>
+
     </div>
   );
 }
