@@ -33,6 +33,8 @@ export function usePrealerta() {
     msg: string;
     type: "ok" | "error";
   } | null>(null);
+  const [empacando, setEmpacando] = useState(false);
+  const [progreso, setProgreso] = useState(0);
 
   /* ── TOAST ── */
   const showToast = (msg: string, type: "ok" | "error" = "ok") => {
@@ -226,10 +228,15 @@ export function usePrealerta() {
       return;
     }
 
+    setEmpacando(true);
+    setProgreso(0);
+
     let exitosos = 0;
     let fallidos = 0;
+    const total = serialesEscaneados.length;
 
-    for (const serial of serialesEscaneados) {
+    for (let i = 0; i < total; i++) {
+      const serial = serialesEscaneados[i];
       try {
         const res = await fetch("/api/prealerta/insertSerial", {
           method: "POST",
@@ -255,7 +262,13 @@ export function usePrealerta() {
       } catch {
         fallidos++;
       }
+
+      // Actualizar progreso después de cada serial
+      setProgreso(Math.round(((i + 1) / total) * 100));
     }
+
+    setEmpacando(false);
+    setProgreso(0);
 
     if (exitosos > 0) {
       showToast(
@@ -298,5 +311,7 @@ export function usePrealerta() {
     handleRemoveSerial,
     handleEmpacar,
     showToast,
+    empacando,
+    progreso,
   };
 }

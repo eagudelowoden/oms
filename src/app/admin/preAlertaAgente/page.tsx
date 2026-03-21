@@ -38,6 +38,8 @@ export default function PreAlertaAgentePage() {
     handleSerialConfirm,
     handleEmpacar,
     showToast,
+    empacando,
+    progreso,
   } = usePrealerta();
 
   return (
@@ -81,10 +83,21 @@ export default function PreAlertaAgentePage() {
       <div className={styles.footer}>
         <button
           type="button"
-          className={styles.btnEmpacar}
+          className={`${styles.btnEmpacar} ${empacando ? styles.btnEmpacarLoading : ""}`}
           onClick={handleEmpacar}
+          disabled={empacando}
         >
-          Empacar
+          {empacando ? (
+            <div className={styles.empacarProgress}>
+              <div
+                className={styles.empacarProgressBar}
+                style={{ width: `${progreso}%` }}
+              />
+              <span className={styles.empacarProgressText}>{progreso}%</span>
+            </div>
+          ) : (
+            "Empacar"
+          )}
         </button>
         <button type="button" className={styles.btnDesempacar}>
           Desempacar
