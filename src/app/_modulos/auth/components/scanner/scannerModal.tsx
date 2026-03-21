@@ -13,7 +13,11 @@ interface SerialItem {
   id: string;
   serial: string;
   timestamp: string;
-  duplicado: boolean;
+}
+
+interface CamaraDisponible {
+  deviceId: string;
+  label: string;
 }
 
 export default function ScannerModal({
@@ -22,154 +26,231 @@ export default function ScannerModal({
   onConfirm,
 }: ScannerModalProps) {
   const [seriales, setSeriales] = useState<SerialItem[]>([]);
-  const [manualInput, setManualInput] = useState<string>("");
-  const [scanning, setScanning] = useState<boolean>(false);
+  const [manualInput, setManualInput] = useState("");
+  const [scanning, setScanning] = useState(false);
+  const [dupSerial, setDupSerial] = useState<string | null>(null);
   const [camError, setCamError] = useState<string | null>(null);
   const [flashScan, setFlashScan] = useState<"none" | "ok" | "dup">("none");
-  const [torchOn, setTorchOn] = useState<boolean>(false);
-  const [torchAvailable, setTorchAvailable] = useState<boolean>(false);
+  const [torchOn, setTorchOn] = useState(false);
+  const [torchAvailable, setTorchAvailable] = useState(false);
+  const [camaras, setCamaras] = useState<CamaraDisponible[]>([]);
+  const [camaraActual, setCamaraActual] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const scannerRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // FIX DUPLICADOS: ref espejo del estado — siempre actualizado dentro de closures
+  const audioCtxRef = useRef<AudioContext | null>(null);
   const serialesRef = useRef<SerialItem[]>([]);
   const lastScanRef = useRef<{ serial: string; time: number }>({
     serial: "",
     time: 0,
   });
 
-  // Mantener ref sincronizado con estado
   useEffect(() => {
     serialesRef.current = seriales;
   }, [seriales]);
 
-  /* ── Agregar serial — usa ref para leer estado actualizado ── */
-  const agregarSerial = useCallback((raw: string) => {
-    const serial = raw.trim().toUpperCase();
-    if (!serial) return;
+  /* ── SONIDO ── */
+  const playBeep = useCallback((type: "ok" | "dup") => {
+    try {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (
+          window.AudioContext || (window as any).webkitAudioContext
+        )();
+      }
+      const ctx = audioCtxRef.current;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
 
-    // Throttle: bloquea el mismo serial por 2.5s para evitar doble lectura de cámara
-    const now = Date.now();
-    if (
-      serial === lastScanRef.current.serial &&
-      now - lastScanRef.current.time < 2500
-    )
-      return;
-    lastScanRef.current = { serial, time: now };
-
-    // Lee el estado actual desde el ref — no el closure desactualizado
-    const yaExiste = serialesRef.current.some((s) => s.serial === serial);
-
-    if (yaExiste) {
-      // Ya está en la lista — solo flash rojo, NO agregar
-      setFlashScan("dup");
-      setTimeout(() => setFlashScan("none"), 700);
-      return;
+      if (type === "ok") {
+        // Beep corto y agudo — confirmación
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.2);
+      } else {
+        // Beep grave — duplicado
+        osc.frequency.setValueAtTime(220, ctx.currentTime);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.3);
+      }
+    } catch (e) {
+      console.warn("Audio no disponible:", e);
     }
-
-    // Serial nuevo — agregar
-    setSeriales((prev) => [
-      {
-        id: `${Date.now()}-${Math.random()}`,
-        serial,
-        timestamp: new Date().toLocaleTimeString("es-CO", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }),
-        duplicado: false,
-      },
-      ...prev,
-    ]);
-
-    setFlashScan("ok");
-    setTimeout(() => setFlashScan("none"), 700);
   }, []);
 
-  /* ── Iniciar cámara ── */
-  const iniciarCamara = useCallback(async () => {
-    setCamError(null);
-    setScanning(true);
-    setTorchOn(false);
-    setTorchAvailable(false);
-
+  /* ── DETECTAR CÁMARAS TRASERAS ── */
+  const detectarCamaras = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
+      // Pedir permiso primero para obtener labels
+      await navigator.mediaDevices.getUserMedia({ video: true });
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter((d) => d.kind === "videoinput");
+
+      // Filtrar cámaras traseras por label
+      const traseras = videoDevices.filter((d) => {
+        const label = d.label.toLowerCase();
+        return (
+          label.includes("back") ||
+          label.includes("rear") ||
+          label.includes("trasera") ||
+          label.includes("environment") ||
+          label.includes("wide") ||
+          label.includes("ultra") ||
+          label.includes("tele") ||
+          label.includes("0,") // Android: "camera2 0, facing back"
+        );
       });
 
-      streamRef.current = stream;
+      // Si no detectó traseras, usar todas
+      const lista = traseras.length > 0 ? traseras : videoDevices;
 
-      // Detectar linterna — algunos navegadores necesitan un pequeño delay
-      const track = stream.getVideoTracks()[0];
-      setTimeout(() => {
-        try {
-          const capabilities = track.getCapabilities() as any;
-          // Mostrar siempre el botón si hay cámara trasera; intentar torch al pulsar
-          setTorchAvailable(true);
-          if (!capabilities?.torch) {
-            // Marcar internamente que quizás no funcione pero mostramos el botón
-            console.info("Torch capability not reported — will try on demand");
-          }
-        } catch (_) {
-          setTorchAvailable(true); // intentar de todas formas
-        }
-      }, 500);
+      const camarasFormateadas: CamaraDisponible[] = lista.map((d, i) => ({
+        deviceId: d.deviceId,
+        label: d.label || `Cámara ${i + 1}`,
+      }));
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+      setCamaras(camarasFormateadas);
+      // Usar la primera trasera detectada
+      if (camarasFormateadas.length > 0 && !camaraActual) {
+        setCamaraActual(camarasFormateadas[0].deviceId);
       }
-
-      if (!videoRef.current) {
-        setCamError("No se pudo inicializar el video.");
-        setScanning(false);
-        return;
-      }
-
-      const { BrowserMultiFormatReader } = await import("@zxing/browser");
-      const { DecodeHintType, BarcodeFormat } = await import("@zxing/library");
-
-      const hints = new Map();
-      hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-        BarcodeFormat.CODE_128,
-        BarcodeFormat.CODE_39,
-        BarcodeFormat.EAN_13,
-        BarcodeFormat.EAN_8,
-        BarcodeFormat.QR_CODE,
-        BarcodeFormat.DATA_MATRIX,
-        BarcodeFormat.UPC_A,
-        BarcodeFormat.UPC_E,
-      ]);
-      hints.set(DecodeHintType.TRY_HARDER, true);
-
-      const codeReader = new BrowserMultiFormatReader(hints);
-      scannerRef.current = codeReader;
-
-      const videoEl = videoRef.current;
-      codeReader.decodeFromVideoElement(videoEl, (result: any) => {
-        if (result) agregarSerial(result.getText());
-      });
-    } catch (err: any) {
-      const msg =
-        err?.name === "NotAllowedError"
-          ? "Permiso de cámara denegado. Actívalo en la configuración del navegador."
-          : err?.name === "NotFoundError"
-            ? "No se encontró cámara en este dispositivo."
-            : "No se pudo acceder a la cámara.";
-      setCamError(msg);
-      setScanning(false);
+      return camarasFormateadas;
+    } catch (e) {
+      console.error("Error detectando cámaras:", e);
+      return [];
     }
-  }, [agregarSerial]);
+  }, [camaraActual]);
 
-  /* ── Toggle linterna ── */
+  /* ── INICIAR CÁMARA ── */
+  const iniciarCamara = useCallback(
+    async (deviceId?: string) => {
+      setCamError(null);
+      setScanning(true);
+      setTorchOn(false);
+      setTorchAvailable(false);
+
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+      if (scannerRef.current) {
+        try {
+          scannerRef.current.reset?.();
+        } catch (_) {}
+        scannerRef.current = null;
+      }
+
+      try {
+        let listaActual = camaras;
+        if (camaras.length === 0) {
+          listaActual = await detectarCamaras();
+        }
+
+        const idAUsar = deviceId ?? camaraActual ?? undefined;
+        const constraints: MediaStreamConstraints = {
+          video: idAUsar
+            ? {
+                deviceId: { exact: idAUsar },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
+              }
+            : {
+                facingMode: { ideal: "environment" },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
+              },
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        streamRef.current = stream;
+
+        const track = stream.getVideoTracks()[0];
+        setTimeout(async () => {
+          try {
+            const capabilities = track.getCapabilities() as any;
+            setTorchAvailable(
+              "torch" in capabilities ? capabilities.torch : true,
+            );
+          } catch (_) {
+            setTorchAvailable(true);
+          }
+        }, 600);
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+
+        if (!videoRef.current) {
+          setCamError("No se pudo inicializar el video.");
+          setScanning(false);
+          return;
+        }
+
+        const { BrowserMultiFormatReader } = await import("@zxing/browser");
+        const { DecodeHintType, BarcodeFormat } =
+          await import("@zxing/library");
+
+        const hints = new Map();
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+          BarcodeFormat.CODE_128,
+          BarcodeFormat.CODE_39,
+          BarcodeFormat.EAN_13,
+          BarcodeFormat.EAN_8,
+          BarcodeFormat.QR_CODE,
+          BarcodeFormat.DATA_MATRIX,
+          BarcodeFormat.UPC_A,
+          BarcodeFormat.UPC_E,
+        ]);
+        hints.set(DecodeHintType.TRY_HARDER, true);
+
+        const codeReader = new BrowserMultiFormatReader(hints);
+        scannerRef.current = codeReader;
+
+        const videoEl = videoRef.current;
+        codeReader.decodeFromVideoElement(videoEl, (result: any) => {
+          if (result) agregarSerial(result.getText());
+        });
+      } catch (err: any) {
+        // ← MUESTRA EL ERROR COMPLETO EN PANTALLA
+        const debugMsg = `${err?.name}: ${err?.message}${err?.constraint ? ` | constraint: ${err?.constraint}` : ""}`;
+
+        const msg =
+          err?.name === "NotAllowedError"
+            ? `Permiso denegado — ${debugMsg}`
+            : err?.name === "NotFoundError"
+              ? `Cámara no encontrada — ${debugMsg}`
+              : err?.name === "OverconstrainedError"
+                ? `Configuración no soportada — ${debugMsg}`
+                : err?.name === "NotReadableError"
+                  ? `Cámara ocupada por otra app — ${debugMsg}`
+                  : `Error desconocido — ${debugMsg}`;
+
+        setCamError(msg);
+        setScanning(false);
+      }
+    },
+    [camaras, camaraActual, detectarCamaras],
+  );
+
+  /* ── CAMBIAR CÁMARA ── */
+  const cambiarCamara = useCallback(
+    async (deviceId: string) => {
+      setCamaraActual(deviceId);
+      if (scanning) await iniciarCamara(deviceId);
+    },
+    [scanning, iniciarCamara],
+  );
+
+  /* ── TOGGLE LINTERNA ── */
   const toggleTorch = useCallback(async () => {
     const track = streamRef.current?.getVideoTracks()[0];
     if (!track) return;
@@ -178,12 +259,64 @@ export default function ScannerModal({
       await track.applyConstraints({ advanced: [{ torch: next } as any] });
       setTorchOn(next);
     } catch (e) {
-      console.warn("Torch not supported on this device", e);
-      // Mostrar igual el estado aunque falle silenciosamente
+      console.warn("Torch no soportado:", e);
+      setTorchAvailable(false);
     }
   }, [torchOn]);
 
-  /* ── Detener cámara ── */
+  /* ── AGREGAR SERIAL ── */
+  const agregarSerial = useCallback(
+    (raw: string) => {
+      const serial = raw.trim().toUpperCase();
+      if (!serial) return;
+
+      const now = Date.now();
+
+      // Throttle más largo — 4 segundos para el mismo serial
+      if (
+        serial === lastScanRef.current.serial &&
+        now - lastScanRef.current.time < 4000
+      )
+        return; // ← silencioso, cámara sigue leyendo el mismo código
+
+      lastScanRef.current = { serial, time: now };
+
+      // Verificar duplicado en la lista completa
+      const yaExiste = serialesRef.current.some((s) => s.serial === serial);
+
+      if (yaExiste) {
+        setFlashScan("dup");
+        playBeep("dup");
+        setDupSerial(serial); // ← mostrar qué serial es duplicado
+        setTimeout(() => {
+          setFlashScan("none");
+          setDupSerial(null);
+        }, 2000);
+        return;
+      }
+
+      // Serial nuevo
+      setSeriales((prev) => [
+        {
+          id: `${Date.now()}-${Math.random()}`,
+          serial,
+          timestamp: new Date().toLocaleTimeString("es-CO", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          }),
+        },
+        ...prev,
+      ]);
+
+      setFlashScan("ok");
+      playBeep("ok");
+      setTimeout(() => setFlashScan("none"), 700);
+    },
+    [playBeep],
+  );
+
+  /* ── DETENER CÁMARA ── */
   const detenerCamara = useCallback(() => {
     if (scannerRef.current) {
       try {
@@ -200,7 +333,7 @@ export default function ScannerModal({
     setTorchAvailable(false);
   }, []);
 
-  /* ── Limpiar al cerrar ── */
+  /* ── LIMPIAR AL CERRAR ── */
   useEffect(() => {
     if (!isOpen) {
       detenerCamara();
@@ -213,9 +346,7 @@ export default function ScannerModal({
   }, [isOpen, detenerCamara]);
 
   useEffect(() => {
-    if (isOpen && !scanning) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
+    if (isOpen && !scanning) setTimeout(() => inputRef.current?.focus(), 100);
   }, [isOpen, scanning]);
 
   const handleManualKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -225,9 +356,8 @@ export default function ScannerModal({
     }
   };
 
-  const eliminarSerial = (id: string) => {
+  const eliminarSerial = (id: string) =>
     setSeriales((prev) => prev.filter((s) => s.id !== id));
-  };
 
   const handleConfirmar = () => {
     onConfirm(seriales.map((s) => s.serial));
@@ -313,7 +443,7 @@ export default function ScannerModal({
               <button
                 type="button"
                 className={styles.btnStartCam}
-                onClick={iniciarCamara}
+                onClick={() => iniciarCamara()}
               >
                 Activar cámara
               </button>
@@ -339,7 +469,7 @@ export default function ScannerModal({
               <button
                 type="button"
                 className={styles.btnStartCam}
-                onClick={iniciarCamara}
+                onClick={() => iniciarCamara()}
               >
                 Reintentar
               </button>
@@ -355,7 +485,6 @@ export default function ScannerModal({
 
           {scanning && (
             <>
-              {/* Overlay con recuadro de escaneo */}
               <div className={styles.scanOverlay}>
                 <div className={styles.cornerTL} />
                 <div className={styles.cornerTR} />
@@ -367,15 +496,42 @@ export default function ScannerModal({
                 </p>
               </div>
 
-              {/* Controles */}
               <div className={styles.camControls}>
+                {/* Selector de cámara — solo si hay más de una */}
+                {camaras.length > 1 && (
+                  <div className={styles.camSelectorWrap}>
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    >
+                      <path d="M1 6l4-4 4 4M15 10l-4 4-4-4" />
+                    </svg>
+                    <select
+                      className={styles.camSelector}
+                      value={camaraActual ?? ""}
+                      onChange={(e) => cambiarCamara(e.target.value)}
+                    >
+                      {camaras.map((c, i) => (
+                        <option key={c.deviceId} value={c.deviceId}>
+                          {c.label.length > 22 ? `Cámara ${i + 1}` : c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Linterna */}
                 {torchAvailable && (
                   <button
                     type="button"
                     className={`${styles.btnTorch} ${torchOn ? styles.btnTorchOn : ""}`}
                     onClick={toggleTorch}
                   >
-                    {/* Icono linterna */}
                     <svg
                       width="13"
                       height="13"
@@ -393,6 +549,7 @@ export default function ScannerModal({
                     {torchOn ? "Linterna ON" : "Linterna"}
                   </button>
                 )}
+
                 <button
                   type="button"
                   className={styles.btnStopCam}
