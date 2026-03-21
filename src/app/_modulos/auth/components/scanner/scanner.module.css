@@ -1,12 +1,12 @@
 /* ============================================================
-   SCANNER MODAL — Escaneo de seriales por cámara / manual
+   SCANNER MODAL — scanner.module.css
+   Ruta: src/app/_modulos/auth/components/scanner/scanner.module.css
    ============================================================ */
 
-/* ── OVERLAY ── */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.55);
+  background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(2px);
   z-index: 200;
   display: flex;
@@ -17,16 +17,19 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* ── MODAL ── */
 .modal {
   background: #ffffff;
   border-radius: 14px;
   border: 0.5px solid #e2e8f0;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
@@ -37,8 +40,14 @@
 }
 
 @keyframes slideUp {
-  from { transform: translateY(12px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* ── HEADER ── */
@@ -103,19 +112,51 @@
   color: #1e293b;
 }
 
-/* ── CAMERA SECTION ── */
+/* ── CÁMARA ── */
 .cameraSection {
   position: relative;
   width: 100%;
-  aspect-ratio: 16/9;
+  aspect-ratio: 4 / 3;
   background: #0f172a;
   overflow: hidden;
   flex-shrink: 0;
-  transition: box-shadow 0.15s;
+  transition: box-shadow 0.1s ease;
 }
 
+/* Flash verde = nuevo serial OK */
 .flashGreen {
-  box-shadow: inset 0 0 0 3px #22c55e;
+  box-shadow: inset 0 0 0 4px #22c55e;
+  animation: flashPulseGreen 0.5s ease;
+}
+
+@keyframes flashPulseGreen {
+  0% {
+    box-shadow: inset 0 0 0 4px #22c55e;
+  }
+  50% {
+    box-shadow: inset 0 0 0 8px #16a34a;
+  }
+  100% {
+    box-shadow: inset 0 0 0 4px #22c55e;
+  }
+}
+
+/* Flash rojo = duplicado */
+.flashRed {
+  box-shadow: inset 0 0 0 4px #ef4444;
+  animation: flashPulseRed 0.5s ease;
+}
+
+@keyframes flashPulseRed {
+  0% {
+    box-shadow: inset 0 0 0 4px #ef4444;
+  }
+  50% {
+    box-shadow: inset 0 0 0 8px #dc2626;
+  }
+  100% {
+    box-shadow: inset 0 0 0 4px #ef4444;
+  }
 }
 
 .cameraPlaceholder,
@@ -136,7 +177,6 @@
 .camError {
   color: #f87171;
 }
-
 .camError p {
   max-width: 280px;
   line-height: 1.5;
@@ -148,7 +188,7 @@
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 7px 20px;
+  padding: 8px 22px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -172,64 +212,155 @@
   display: block;
 }
 
-/* Scan overlay + linea animada */
+/* ── SCAN OVERLAY: zona oscura + recuadro central ── */
 .scanOverlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  /* Sombra oscura alrededor del recuadro */
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, transparent 25%) top,
+    linear-gradient(to top, rgba(0, 0, 0, 0.45) 0%, transparent 25%) bottom,
+    linear-gradient(to right, rgba(0, 0, 0, 0.45) 0%, transparent 20%) left,
+    linear-gradient(to left, rgba(0, 0, 0, 0.45) 0%, transparent 20%) right;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
-/* Corner brackets */
-.scanOverlay::before,
-.scanOverlay::after {
-  content: '';
+/* Esquinas del recuadro de escaneo */
+.cornerTL,
+.cornerTR,
+.cornerBL,
+.cornerBR {
   position: absolute;
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   border-color: #22c55e;
   border-style: solid;
+  border-radius: 3px;
 }
 
-.scanOverlay::before {
-  top: 16px;
-  left: 16px;
-  border-width: 2px 0 0 2px;
+/* Posición centrada del recuadro — 20% desde cada borde */
+.cornerTL {
+  top: 22%;
+  left: 15%;
+  border-width: 2.5px 0 0 2.5px;
   border-radius: 4px 0 0 0;
 }
 
-.scanOverlay::after {
-  bottom: 16px;
-  right: 16px;
-  border-width: 0 2px 2px 0;
+.cornerTR {
+  top: 22%;
+  right: 15%;
+  border-width: 2.5px 2.5px 0 0;
+  border-radius: 0 4px 0 0;
+}
+
+.cornerBL {
+  bottom: 22%;
+  left: 15%;
+  border-width: 0 0 2.5px 2.5px;
+  border-radius: 0 0 0 4px;
+}
+
+.cornerBR {
+  bottom: 22%;
+  right: 15%;
+  border-width: 0 2.5px 2.5px 0;
   border-radius: 0 0 4px 0;
 }
 
+/* Línea de escaneo animada dentro del recuadro */
 .scanLine {
   position: absolute;
-  left: 16px;
-  right: 16px;
+  left: 15%;
+  right: 15%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #22c55e, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #22c55e 30%,
+    #4ade80 50%,
+    #22c55e 70%,
+    transparent 100%
+  );
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
   animation: scanMove 2s ease-in-out infinite;
-  top: 16px;
+  top: 22%;
 }
 
 @keyframes scanMove {
-  0%   { top: 16px; opacity: 1; }
-  50%  { opacity: 1; }
-  100% { top: calc(100% - 18px); opacity: 0.6; }
+  0% {
+    top: 23%;
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    top: 77%;
+    opacity: 1;
+  }
 }
 
-.btnStopCam {
+/* Texto guía debajo del recuadro */
+.scanHint {
+  position: absolute;
+  bottom: 14%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: inherit;
+  pointer-events: none;
+}
+
+/* ── CONTROLES SOBRE CÁMARA ── */
+.camControls {
   position: absolute;
   bottom: 10px;
   right: 10px;
   display: flex;
   align-items: center;
+  gap: 6px;
+}
+
+/* Botón linterna */
+.btnTorch {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(15, 23, 42, 0.7);
+  color: #94a3b8;
+  border: 0.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: all 0.15s;
+}
+
+.btnTorch:hover {
+  background: rgba(30, 41, 59, 0.85);
+  color: #fde68a;
+}
+
+.btnTorchOn {
+  background: rgba(234, 179, 8, 0.25) !important;
+  color: #fde68a !important;
+  border-color: rgba(234, 179, 8, 0.4) !important;
+}
+
+/* Botón detener */
+.btnStopCam {
+  display: flex;
+  align-items: center;
   gap: 5px;
   background: rgba(15, 23, 42, 0.7);
   color: #fff;
-  border: 0.5px solid rgba(255,255,255,0.2);
+  border: 0.5px solid rgba(255, 255, 255, 0.15);
   border-radius: 6px;
   padding: 5px 10px;
   font-size: 11px;
@@ -277,7 +408,7 @@
   background: transparent;
   font-size: 12px;
   color: #1e293b;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   outline: none;
   flex: 1;
   letter-spacing: 0.04em;
@@ -312,7 +443,18 @@
   flex: 1;
   overflow-y: auto;
   min-height: 80px;
-  max-height: 220px;
+  max-height: 200px;
+}
+
+.serialList::-webkit-scrollbar {
+  width: 3px;
+}
+.serialList::-webkit-scrollbar-track {
+  background: transparent;
+}
+.serialList::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 99px;
 }
 
 .emptyList {
@@ -335,14 +477,19 @@
 }
 
 @keyframes itemIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .serialItem:last-child {
   border-bottom: none;
 }
-
 .serialItem:hover {
   background: #f8fafc;
 }
@@ -353,13 +500,11 @@
 }
 
 .serialDuplicado {
-  background: #fffbeb;
+  background: #fef9f0;
 }
-
 .serialDuplicado:hover {
-  background: #fef9c3;
+  background: #fef3e2;
 }
-
 .serialDuplicado .serialDot {
   background: #f59e0b;
 }
@@ -380,7 +525,7 @@
 
 .serialCode {
   font-size: 12px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-weight: 600;
   color: #1e293b;
   letter-spacing: 0.04em;
@@ -394,11 +539,11 @@
   margin-left: 7px;
   font-size: 10px;
   font-weight: 500;
-  color: #d97706;
+  color: #b45309;
   background: #fef3c7;
   border: 0.5px solid #fcd34d;
   border-radius: 4px;
-  padding: 1px 5px;
+  padding: 1px 6px;
 }
 
 .serialRight {
@@ -411,7 +556,7 @@
 .serialTime {
   font-size: 10px;
   color: #cbd5e1;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .btnRemove {
@@ -432,11 +577,6 @@
   background: #fee2e2;
   color: #ef4444;
 }
-
-/* ── SCROLLBAR lista ── */
-.serialList::-webkit-scrollbar { width: 3px; }
-.serialList::-webkit-scrollbar-track { background: transparent; }
-.serialList::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
 
 /* ── FOOTER MODAL ── */
 .modalFooter {
@@ -506,19 +646,17 @@
 .btnConfirmar:hover:not(:disabled) {
   background: #1d4ed8;
 }
-
 .btnConfirmar:disabled {
   background: #cbd5e1;
   cursor: not-allowed;
 }
 
-/* ── RESPONSIVE ── */
+/* ── MÓVIL: bottom sheet ── */
 @media (max-width: 520px) {
   .overlay {
     padding: 0;
     align-items: flex-end;
   }
-
   .modal {
     max-width: 100%;
     border-radius: 14px 14px 0 0;
