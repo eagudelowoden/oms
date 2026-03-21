@@ -29,14 +29,17 @@ export default function ScannerModal({
   const [torchOn, setTorchOn] = useState<boolean>(false);
   const [torchAvailable, setTorchAvailable] = useState<boolean>(false);
 
-  const videoRef    = useRef<HTMLVideoElement>(null);
-  const streamRef   = useRef<MediaStream | null>(null);
-  const scannerRef  = useRef<any>(null);
-  const inputRef    = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const scannerRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // FIX DUPLICADOS: ref espejo del estado — siempre actualizado dentro de closures
-  const serialesRef   = useRef<SerialItem[]>([]);
-  const lastScanRef   = useRef<{ serial: string; time: number }>({ serial: "", time: 0 });
+  const serialesRef = useRef<SerialItem[]>([]);
+  const lastScanRef = useRef<{ serial: string; time: number }>({
+    serial: "",
+    time: 0,
+  });
 
   // Mantener ref sincronizado con estado
   useEffect(() => {
@@ -53,7 +56,8 @@ export default function ScannerModal({
     if (
       serial === lastScanRef.current.serial &&
       now - lastScanRef.current.time < 2500
-    ) return;
+    )
+      return;
     lastScanRef.current = { serial, time: now };
 
     // Lee el estado actual desde el ref — no el closure desactualizado
@@ -153,7 +157,6 @@ export default function ScannerModal({
       codeReader.decodeFromVideoElement(videoEl, (result: any) => {
         if (result) agregarSerial(result.getText());
       });
-
     } catch (err: any) {
       const msg =
         err?.name === "NotAllowedError"
@@ -183,7 +186,9 @@ export default function ScannerModal({
   /* ── Detener cámara ── */
   const detenerCamara = useCallback(() => {
     if (scannerRef.current) {
-      try { scannerRef.current.reset?.(); } catch (_) {}
+      try {
+        scannerRef.current.reset?.();
+      } catch (_) {}
       scannerRef.current = null;
     }
     if (streamRef.current) {
@@ -232,8 +237,11 @@ export default function ScannerModal({
   if (!isOpen) return null;
 
   const flashClass =
-    flashScan === "ok"  ? styles.flashGreen :
-    flashScan === "dup" ? styles.flashRed   : "";
+    flashScan === "ok"
+      ? styles.flashGreen
+      : flashScan === "dup"
+        ? styles.flashRed
+        : "";
 
   return (
     <div
@@ -241,16 +249,23 @@ export default function ScannerModal({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className={styles.modal}>
-
         {/* HEADER */}
         <div className={styles.modalHeader}>
           <div className={styles.headerLeft}>
             <span className={styles.headerIcon}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <rect x="1" y="1" width="5" height="5" rx="1"/>
-                <rect x="10" y="1" width="5" height="5" rx="1"/>
-                <rect x="1" y="10" width="5" height="5" rx="1"/>
-                <path d="M10 10h2v2h-2zM12 12h3M12 10h3M10 12v3"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              >
+                <rect x="1" y="1" width="5" height="5" rx="1" />
+                <rect x="10" y="1" width="5" height="5" rx="1" />
+                <rect x="1" y="10" width="5" height="5" rx="1" />
+                <path d="M10 10h2v2h-2zM12 12h3M12 10h3M10 12v3" />
               </svg>
             </span>
             <div>
@@ -263,24 +278,43 @@ export default function ScannerModal({
             </div>
           </div>
           <button className={styles.btnClose} onClick={onClose} type="button">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <line x1="2" y1="2" x2="12" y2="12"/>
-              <line x1="12" y1="2" x2="2" y2="12"/>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            >
+              <line x1="2" y1="2" x2="12" y2="12" />
+              <line x1="12" y1="2" x2="2" y2="12" />
             </svg>
           </button>
         </div>
 
         {/* CÁMARA */}
         <div className={`${styles.cameraSection} ${flashClass}`}>
-
           {!scanning && !camError && (
             <div className={styles.cameraPlaceholder}>
-              <svg width="36" height="36" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
-                <path d="M6 14V9a2 2 0 0 1 2-2h4M30 7h4a2 2 0 0 1 2 2v5M36 26v5a2 2 0 0 1-2 2h-4M10 33H6a2 2 0 0 1-2-2v-5"/>
-                <circle cx="20" cy="20" r="5"/>
+              <svg
+                width="36"
+                height="36"
+                viewBox="0 0 40 40"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              >
+                <path d="M6 14V9a2 2 0 0 1 2-2h4M30 7h4a2 2 0 0 1 2 2v5M36 26v5a2 2 0 0 1-2 2h-4M10 33H6a2 2 0 0 1-2-2v-5" />
+                <circle cx="20" cy="20" r="5" />
               </svg>
               <p>Apunta al código de barras y activa la cámara</p>
-              <button type="button" className={styles.btnStartCam} onClick={iniciarCamara}>
+              <button
+                type="button"
+                className={styles.btnStartCam}
+                onClick={iniciarCamara}
+              >
                 Activar cámara
               </button>
             </div>
@@ -288,13 +322,25 @@ export default function ScannerModal({
 
           {camError && (
             <div className={styles.camError}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                <circle cx="10" cy="10" r="8"/>
-                <line x1="10" y1="6" x2="10" y2="11"/>
-                <circle cx="10" cy="14" r=".5" fill="currentColor"/>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              >
+                <circle cx="10" cy="10" r="8" />
+                <line x1="10" y1="6" x2="10" y2="11" />
+                <circle cx="10" cy="14" r=".5" fill="currentColor" />
               </svg>
               <p>{camError}</p>
-              <button type="button" className={styles.btnStartCam} onClick={iniciarCamara}>
+              <button
+                type="button"
+                className={styles.btnStartCam}
+                onClick={iniciarCamara}
+              >
                 Reintentar
               </button>
             </div>
@@ -316,7 +362,9 @@ export default function ScannerModal({
                 <div className={styles.cornerBL} />
                 <div className={styles.cornerBR} />
                 <div className={styles.scanLine} />
-                <p className={styles.scanHint}>Centra el código en el recuadro</p>
+                <p className={styles.scanHint}>
+                  Centra el código en el recuadro
+                </p>
               </div>
 
               {/* Controles */}
@@ -328,17 +376,35 @@ export default function ScannerModal({
                     onClick={toggleTorch}
                   >
                     {/* Icono linterna */}
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill={torchOn ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 2h6l-1 7h-4L9 2z"/>
-                      <path d="M10 9l-3 13h10L14 9"/>
-                      <line x1="12" y1="13" x2="12" y2="17"/>
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill={torchOn ? "currentColor" : "none"}
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 2h6l-1 7h-4L9 2z" />
+                      <path d="M10 9l-3 13h10L14 9" />
+                      <line x1="12" y1="13" x2="12" y2="17" />
                     </svg>
                     {torchOn ? "Linterna ON" : "Linterna"}
                   </button>
                 )}
-                <button type="button" className={styles.btnStopCam} onClick={detenerCamara}>
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
-                    <rect x="2" y="2" width="8" height="8" rx="1"/>
+                <button
+                  type="button"
+                  className={styles.btnStopCam}
+                  onClick={detenerCamara}
+                >
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 12 12"
+                    fill="currentColor"
+                  >
+                    <rect x="2" y="2" width="8" height="8" rx="1" />
                   </svg>
                   Detener
                 </button>
@@ -350,9 +416,17 @@ export default function ScannerModal({
         {/* INPUT MANUAL */}
         <div className={styles.manualSection}>
           <div className={styles.manualBar}>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-              <rect x="1" y="3" width="10" height="7" rx="1"/>
-              <path d="M4 3V2M8 3V2M1 6h10"/>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+            >
+              <rect x="1" y="3" width="10" height="7" rx="1" />
+              <path d="M4 3V2M8 3V2M1 6h10" />
             </svg>
             <input
               ref={inputRef}
@@ -367,7 +441,10 @@ export default function ScannerModal({
               <button
                 type="button"
                 className={styles.btnAddManual}
-                onClick={() => { agregarSerial(manualInput); setManualInput(""); }}
+                onClick={() => {
+                  agregarSerial(manualInput);
+                  setManualInput("");
+                }}
               >
                 Agregar
               </button>
@@ -395,9 +472,17 @@ export default function ScannerModal({
                     className={styles.btnRemove}
                     onClick={() => eliminarSerial(item.id)}
                   >
-                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                      <line x1="1.5" y1="1.5" x2="9.5" y2="9.5"/>
-                      <line x1="9.5" y1="1.5" x2="1.5" y2="9.5"/>
+                    <svg
+                      width="11"
+                      height="11"
+                      viewBox="0 0 11 11"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    >
+                      <line x1="1.5" y1="1.5" x2="9.5" y2="9.5" />
+                      <line x1="9.5" y1="1.5" x2="1.5" y2="9.5" />
                     </svg>
                   </button>
                 </div>
@@ -408,7 +493,11 @@ export default function ScannerModal({
 
         {/* FOOTER */}
         <div className={styles.modalFooter}>
-          <button type="button" className={styles.btnCancelar} onClick={onClose}>
+          <button
+            type="button"
+            className={styles.btnCancelar}
+            onClick={onClose}
+          >
             Cancelar
           </button>
           <div className={styles.footerRight}>
@@ -416,7 +505,10 @@ export default function ScannerModal({
               <button
                 type="button"
                 className={styles.btnLimpiar}
-                onClick={() => { setSeriales([]); serialesRef.current = []; }}
+                onClick={() => {
+                  setSeriales([]);
+                  serialesRef.current = [];
+                }}
               >
                 Limpiar todo
               </button>
@@ -431,7 +523,6 @@ export default function ScannerModal({
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );
