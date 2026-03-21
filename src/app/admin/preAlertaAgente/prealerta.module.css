@@ -308,7 +308,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 8px;
   padding: 8px 12px;
   font-size: 12px;
   font-weight: 500;
@@ -319,8 +319,8 @@
   cursor: pointer;
   transition: background 0.15s;
   white-space: nowrap;
-  width: 40%; /* ← ancho fijo */
-  height: 60%;
+  width: 50%; /* ← ancho fijo */
+  height: 70%;
   flex-shrink: 0; /* ← evita que se encoja */
 }
 .btnUpload:hover {
@@ -341,8 +341,8 @@
   border-radius: var(--radius);
   cursor: pointer;
   transition: background 0.15s;
-  width: 40%; /* ← ancho fijo */
-  height: 60%;
+  width: 50%; /* ← ancho fijo */
+  height: 70%;
   white-space: nowrap;
 }
 .btnManual:hover {
@@ -357,11 +357,22 @@
   background: var(--c-white);
   border: 0.5px solid var(--c-border);
   border-radius: var(--radius);
-  padding: 8px 12px;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 160px;
+  flex-direction: row; /* ← fila en vez de columna */
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  min-width: 200px;
+  height: 100%;
+  overflow: hidden;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.fechaCard:focus-within {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
 }
 
 .fechaLabel {
@@ -370,6 +381,11 @@
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--c-hint);
+  white-space: nowrap; /* ← evita que el label se parta */
+  flex-shrink: 0; /* ← no se encoge */
+  background: none; /* ← quita el fondo gris */
+  border: none; /* ← quita el borde inferior */
+  padding: 0;
 }
 
 .fechaInput {
@@ -381,6 +397,18 @@
   outline: none;
   width: 100%;
   cursor: pointer;
+  padding: 8px 0;
+  color-scheme: light;
+}
+
+.fechaInput::-webkit-calendar-picker-indicator {
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.fechaInput::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
 /* ── BOTTOM GRID ── */
