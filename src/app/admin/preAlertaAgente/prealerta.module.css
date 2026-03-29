@@ -835,3 +835,162 @@
     grid-template-columns: 1fr;
   }
 }
+/* ── BADGES ── */
+.badgeApi {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--c-blue-bg);
+  color: var(--c-blue);
+  border: 1px solid var(--c-blue-border);
+  white-space: nowrap;
+}
+
+.badgeManual {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
+}
+
+.estadoPill {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 99px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
+}
+
+/* ── COUNT PILL SELECTED ── */
+.countPillSelected {
+  font-size: 10px;
+  font-weight: 500;
+  background: var(--c-blue-bg);
+  color: var(--c-blue);
+  border: 1px solid var(--c-blue-border);
+  border-radius: 99px;
+  padding: 1px 7px;
+}
+
+/* ── SERIAL CODE ── */
+.serialRowCode {
+  font-size: 11px;
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  color: var(--c-text);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+/* ── REGISTRO SERIES ── */
+.registroCard {
+  background: var(--c-white);
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.registroBody {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.registroField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.registroLabel {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--c-hint);
+}
+
+.registroInput {
+  height: 30px;
+  padding: 0 8px;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--c-text);
+  background: var(--c-bg);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.registroInput:focus {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+.registroInput:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.registroInput::placeholder {
+  color: var(--c-light);
+}
+
+.registroSelectWrap {
+  position: relative;
+}
+
+.registroSelect {
+  height: 30px;
+  padding: 0 28px 0 8px;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--c-text);
+  background: var(--c-bg);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+.registroSelect:focus {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+.registroSelect:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.registroHint {
+  font-size: 10px;
+  color: var(--c-hint);
+  font-style: italic;
+}
+
+.btnGuardar {
+  height: 30px;
+  padding: 0 16px;
+  background: var(--c-blue);
+  color: var(--c-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  align-self: flex-end;
+}
+.btnGuardar:hover {
+  background: #1d4ed8;
+}

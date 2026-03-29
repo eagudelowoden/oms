@@ -7,10 +7,8 @@ import { usePrealerta } from "./hooks/usePrealerta";
 import PrealertaHeader from "./components/PrealertaHeader";
 import PrealertaTabla from "./components/PrealertaTabla";
 import PrealertaAcciones from "./components/PrealertaAcciones";
-import {
-  PrealertaSeriales,
-  PrealertaMaterial,
-} from "./components/PrealertaGrid";
+import RegistroSeries from "./components/RegistroSeries";
+import { PrealertaSeriales } from "./components/PrealertaGrid"; // ← solo este
 import { ConfirmModal, Toast } from "./components/PrealertaModals";
 import ScannerModal from "../../_modulos/auth/components/scanner/scannerModal";
 import SincronizarModal from "./components/SincronizarModal";
@@ -74,9 +72,9 @@ export default function PreAlertaAgentePage() {
         onShowToast={showToast}
         onSincronizar={() => setModalSincronizar(true)}
         sincronizando={sincronizando}
-        onEmpacar={handleEmpacar} // ← nuevo
-        empacando={empacando} // ← nuevo
-        progreso={progreso} // ← nuevo
+        onEmpacar={handleEmpacar}
+        empacando={empacando}
+        progreso={progreso}
       />
 
       <ScannerModal
@@ -85,16 +83,17 @@ export default function PreAlertaAgentePage() {
         onConfirm={handleSerialConfirm}
       />
 
-      <div className={styles.bottomGrid}>
-        <PrealertaSeriales
-          seriales={serialesEscaneados}
-          seleccionados={seleccionados}
-          onToggle={handleToggleSerial}
-          onToggleAll={handleToggleAll}
-          onRemove={handleRemoveSerial}
-        />
-        <PrealertaMaterial />
-      </div>
+      {/* Seriales — fila completa */}
+      <PrealertaSeriales
+        seriales={serialesEscaneados}
+        seleccionados={seleccionados}
+        onToggle={handleToggleSerial}
+        onToggleAll={handleToggleAll}
+        onRemove={handleRemoveSerial}
+      />
+
+      {/* Registro Series — fila completa */}
+      <RegistroSeries />
 
       <ConfirmModal
         item={confirmItem}

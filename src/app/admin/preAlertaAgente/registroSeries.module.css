@@ -1,0 +1,116 @@
+/* ── REGISTRO SERIES ── */
+.registroCard {
+  --c-border: #e2e8f0;
+  --c-bg: #f8fafc;
+  --c-white: #ffffff;
+  --c-text: #1e293b;
+  --c-muted: #64748b;
+  --c-hint: #94a3b8;
+  --c-light: #cbd5e1;
+  --c-blue: #2563eb;
+  --radius: 10px;
+  --radius-sm: 6px;
+
+  background: var(--c-white);
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.registroBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.registroRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.registroLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--c-hint);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.registroInput {
+  height: 30px;
+  padding: 0 8px;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--c-text);
+  background: var(--c-bg);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  flex: 1;
+  max-width: 300px;
+}
+.registroInput:focus {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+.registroInput:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.registroInput::placeholder {
+  color: var(--c-light);
+}
+
+.registroSelect {
+  height: 30px;
+  padding: 0 28px 0 8px;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--c-text);
+  background: var(--c-bg);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  flex: 1;
+  max-width: 300px;
+  transition: border-color 0.15s;
+}
+.registroSelect:focus {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+.registroSelect:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.registroHint {
+  font-size: 10px;
+  color: var(--c-hint);
+  font-style: italic;
+}
+
+.btnGuardar {
+  align-self: flex-start;
+  height: 30px;
+  padding: 0 20px;
+  background: var(--c-blue);
+  color: var(--c-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 4px;
+}
+.btnGuardar:hover {
+  background: #1d4ed8;
+}
