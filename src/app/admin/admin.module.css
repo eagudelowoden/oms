@@ -22,7 +22,7 @@
 
 .sidebarHeader {
   height: 45px;
-  padding: 0 1.20rem;
+  padding: 0 1.2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -54,7 +54,7 @@
 /* --- INDICADOR DE CLIENTE --- */
 .currentClientBadge {
   margin: 1rem;
-  padding: 0.70rem;
+  padding: 0.7rem;
   background: rgba(37, 99, 235, 0.05);
   border-radius: 10px;
   display: flex;
@@ -81,7 +81,7 @@
 /* --- NAVEGACIÓN --- */
 .navMenu {
   flex: 1;
-  padding: 0.50rem;
+  padding: 0.5rem;
   overflow-y: auto;
 }
 
@@ -181,7 +181,7 @@
 }
 
 .userRole {
-  font-size: 0.70rem;
+  font-size: 0.7rem;
   color: #94a3b8;
   text-transform: uppercase;
   margin: 0;
@@ -254,13 +254,13 @@
 }
 
 .topHeader {
-  height: 70px;
+  height: 45px; /* ← era 70px / 64px, bájalo */
   display: flex;
   align-items: center;
-  padding: 0 1.5rem;
+  justify-content: space-between;
+  padding: 0 1.25rem;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  gap: 1rem;
 }
 
 .headerBreadcrumb {
@@ -404,15 +404,6 @@
   }
 }
 /* --- TOP HEADER ALINEACIÓN --- */
-.topHeader {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Separa breadcrumb del menú móvil */
-  padding: 0 1.25rem;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-}
 
 .headerLeft {
   display: flex;
@@ -476,7 +467,7 @@
 }
 .currentClientBadge {
   margin: 0.5rem;
-  padding: 0.70rem;
+  padding: 0.7rem;
   background: #f8fafc; /* Fondo muy suave */
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -485,7 +476,7 @@
 .sessionInfoGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px; 
+  gap: 8px;
 }
 
 .infoRow {
@@ -508,7 +499,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 
 .userName {
   margin: 0;
@@ -536,4 +526,3 @@
   background: #f1f5f9;
   margin: 2px 0;
 }
-
