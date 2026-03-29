@@ -247,7 +247,6 @@
   border-radius: var(--radius-md);
   font-size: 12px;
 }
-
 .selectedLeft {
   display: flex;
   align-items: center;
@@ -255,7 +254,6 @@
   min-width: 0;
   flex: 1;
 }
-
 .selectedDot {
   width: 7px;
   height: 7px;
@@ -264,7 +262,6 @@
   box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
   flex-shrink: 0;
 }
-
 .selectedLabel {
   color: var(--c-muted);
   white-space: nowrap;
@@ -276,7 +273,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .selectedClear {
   background: transparent;
   border: none;
@@ -293,57 +289,58 @@
 
 /* ── MID ROW ── */
 .midRow {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  align-items: center;
   gap: 10px;
-  align-items: stretch;
 }
 
 .uploadGroup {
   display: flex;
   flex-direction: row;
   gap: 6px;
+  flex: 1;
 }
-.btnUpload {
+
+/* ── BOTONES BASE ── */
+.btnUpload,
+.btnManual,
+.btnEmpacar,
+.btnDesempacar {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
   font-size: 12px;
   font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+  flex: 1;
+  min-width: 0;
+  border: none;
+}
+
+.btnUpload {
   color: var(--c-white);
   background: var(--c-blue);
-  border: none;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: background 0.15s;
-  white-space: nowrap;
-  width: 50%; /* ← ancho fijo */
-  height: 70%;
-  flex-shrink: 0; /* ← evita que se encoja */
 }
 .btnUpload:hover {
   background: #1d4ed8;
 }
+.btnUpload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .btnManual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 500;
   color: var(--c-blue);
   background: var(--c-blue-bg);
-  border: 0.5px solid var(--c-blue-border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: background 0.15s;
-  width: 50%; /* ← ancho fijo */
-  height: 70%;
-  white-space: nowrap;
+  border: 1px solid var(--c-blue-border);
 }
 .btnManual:hover {
   background: #dbeafe;
@@ -353,23 +350,44 @@
   cursor: not-allowed;
 }
 
+.btnEmpacar {
+  background: var(--c-green);
+  color: var(--c-white);
+  position: relative;
+  overflow: hidden;
+}
+.btnEmpacar:hover {
+  opacity: 0.85;
+}
+.btnEmpacar:disabled {
+  cursor: not-allowed;
+}
+
+.btnDesempacar {
+  background: var(--c-amber);
+  color: var(--c-white);
+}
+.btnDesempacar:hover {
+  opacity: 0.85;
+}
+
+/* ── FECHA CARD ── */
 .fechaCard {
-  background: var(--c-white);
-  border: 0.5px solid var(--c-border);
-  border-radius: var(--radius);
   display: flex;
-  flex-direction: row; /* ← fila en vez de columna */
+  flex-direction: row;
   align-items: center;
   gap: 8px;
   padding: 0 12px;
-  min-width: 200px;
-  height: 100%;
-  overflow: hidden;
+  background: var(--c-white);
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-md);
+  height: 34px;
+  min-width: 190px;
+  flex-shrink: 0;
   transition:
     border-color 0.15s,
     box-shadow 0.15s;
 }
-
 .fechaCard:focus-within {
   border-color: var(--c-blue);
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
@@ -381,10 +399,10 @@
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--c-hint);
-  white-space: nowrap; /* ← evita que el label se parta */
-  flex-shrink: 0; /* ← no se encoge */
-  background: none; /* ← quita el fondo gris */
-  border: none; /* ← quita el borde inferior */
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: none;
+  border: none;
   padding: 0;
 }
 
@@ -400,13 +418,11 @@
   padding: 8px 0;
   color-scheme: light;
 }
-
 .fechaInput::-webkit-calendar-picker-indicator {
   opacity: 0.4;
   cursor: pointer;
   transition: opacity 0.15s;
 }
-
 .fechaInput::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
@@ -427,7 +443,6 @@
   border-bottom: 0.5px solid var(--c-border);
   background: var(--c-bg);
 }
-
 .cardInnerTitle {
   font-size: 10px;
   font-weight: 500;
@@ -435,7 +450,6 @@
   letter-spacing: 0.07em;
   color: var(--c-hint);
 }
-
 .countPill {
   font-size: 10px;
   font-weight: 500;
@@ -479,14 +493,12 @@
 .serialRow:hover {
   background: var(--c-bg);
 }
-
 .serialRowLeft {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
-
 .serialRowDot {
   width: 6px;
   height: 6px;
@@ -495,7 +507,6 @@
   box-shadow: 0 0 4px rgba(34, 197, 94, 0.4);
   flex-shrink: 0;
 }
-
 .serialRowCode {
   font-size: 12px;
   font-family: "Courier New", monospace;
@@ -506,7 +517,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .serialRowRemove {
   display: flex;
   align-items: center;
@@ -531,7 +541,6 @@
   width: 100%;
   border-collapse: collapse;
 }
-
 .miniTable th {
   padding: 6px 12px;
   text-align: left;
@@ -543,7 +552,6 @@
   background: var(--c-bg);
   border-bottom: 0.5px solid var(--c-border);
 }
-
 .miniTable td {
   padding: 7px 12px;
   border-bottom: 0.5px solid var(--c-border-soft);
@@ -575,50 +583,56 @@
   color: var(--c-light);
 }
 
-/* ── FOOTER ── */
-.footer {
+/* ── EMPACAR PROGRESS ── */
+.btnEmpacarLoading {
+  position: relative;
+  overflow: hidden;
+  cursor: not-allowed;
+  opacity: 0.9;
+  padding: 0;
+}
+.empacarProgress {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: var(--c-white);
-  border: 0.5px solid var(--c-border);
-  border-radius: var(--radius);
+  justify-content: center;
+  padding: 8px 28px;
+  min-width: 120px;
+}
+.empacarProgressBar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  transition: width 0.3s ease;
+  border-radius: inherit;
+}
+.empacarProgressText {
+  position: relative;
+  z-index: 1;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  font-family: "Courier New", monospace;
+  letter-spacing: 0.04em;
 }
 
-.btnEmpacar {
-  background: var(--c-green);
-  color: var(--c-white);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 8px 28px; /* ← padding fijo, no flex */
-  font-size: 12px;
-  font-weight: 500;
+/* ── SELECT SEDE ── */
+.selectSede {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  background: white;
   cursor: pointer;
-  transition: opacity 0.15s;
-  white-space: nowrap;
-  width: auto; /* ← no se estira */
+  height: 32px;
 }
-.btnEmpacar:hover {
-  opacity: 0.85;
-}
-
-.btnDesempacar {
-  background: var(--c-amber);
-  color: var(--c-white);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 8px 28px; /* ← padding fijo */
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.15s;
-  white-space: nowrap;
-  width: auto; /* ← no se estira */
-}
-.btnDesempacar:hover {
-  opacity: 0.85;
+.selectSede:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ── TOAST ── */
@@ -645,17 +659,6 @@
   color: var(--c-white);
 }
 
-@keyframes toastIn {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
 /* ── CONFIRM MODAL ── */
 .confirmOverlay {
   position: fixed;
@@ -669,26 +672,6 @@
   padding: 16px;
   animation: fadeIn 0.15s ease;
 }
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes slideUp {
-  from {
-    transform: translateY(10px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
 .confirmBox {
   background: var(--c-white);
   border: 0.5px solid var(--c-border);
@@ -703,7 +686,6 @@
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
   animation: slideUp 0.18s ease;
 }
-
 .confirmIcon {
   color: var(--c-amber);
   margin-bottom: 4px;
@@ -730,7 +712,6 @@
   margin-top: 12px;
   width: 100%;
 }
-
 .confirmCancel {
   flex: 1;
   background: transparent;
@@ -747,7 +728,6 @@
   background: var(--c-bg);
   color: var(--c-text);
 }
-
 .confirmDelete {
   flex: 1;
   background: var(--c-red);
@@ -764,8 +744,73 @@
   opacity: 0.85;
 }
 
+/* ── ANIMACIONES ── */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
+  .midRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .uploadGroup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .fechaCard {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .btnUpload,
+  .btnManual,
+  .btnEmpacar,
+  .btnDesempacar {
+    height: 30px;
+    font-size: 11px;
+    padding: 0 8px;
+    gap: 4px;
+    width: 100%;
+    min-width: unset;
+    flex: unset;
+  }
+
+  .btnUpload svg,
+  .btnManual svg {
+    width: 12px;
+    height: 12px;
+  }
+
   .bottomGrid {
     grid-template-columns: 1fr;
   }
@@ -773,9 +818,8 @@
 
 @media (max-width: 580px) {
   .wrapper {
-    padding: 10px 10px 80px;
+    padding: 10px;
   }
-
   .header {
     flex-direction: column;
     align-items: flex-start;
@@ -784,94 +828,10 @@
     width: 100%;
     justify-content: center;
   }
+}
 
-  .midRow {
+@media (max-width: 280px) {
+  .uploadGroup {
     grid-template-columns: 1fr;
   }
-  .uploadGroup {
-    flex-direction: row;
-  }
-  .btnUpload,
-  .btnManual {
-    font-size: 11px;
-    padding: 8px 8px;
-  }
-  .fechaCard {
-    min-width: unset;
-  }
-
-  .footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-bottom: none;
-    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
-    z-index: 100;
-    padding: 8px 16px; /* ← menos padding */
-  }
-
-  .btnEmpacar,
-  .btnDesempacar {
-    flex: 1;
-    padding: 7px 12px; /* ← menos padding vertical */
-    font-size: 12px; /* ← era 13px */
-    text-align: center;
-    max-width: 160px; /* ← limita el ancho máximo */
-  }
-}
-/* ── BOTÓN EMPACAR CON PROGRESO ── */
-.btnEmpacarLoading {
-  position: relative;
-  overflow: hidden;
-  cursor: not-allowed;
-  opacity: 0.9;
-  padding: 0;
-}
-
-.empacarProgress {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 28px;
-  min-width: 120px;
-}
-
-.empacarProgressBar {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.25);
-  transition: width 0.3s ease;
-  border-radius: inherit;
-}
-
-.empacarProgressText {
-  position: relative;
-  z-index: 1;
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  font-family: "Courier New", monospace;
-  letter-spacing: 0.04em;
-}
-.selectSede {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  font-size: 13px;
-  background: white;
-  cursor: pointer;
-  height: 32px;
-}
-.selectSede:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }

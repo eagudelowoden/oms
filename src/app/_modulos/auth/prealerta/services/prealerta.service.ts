@@ -13,18 +13,20 @@ export const PrealertaBackendService = {
     estado: string;
   }) {
     const pool = await getDBConnection();
-    await pool
+    const result = await pool
       .request()
       .input("Nombre", sql.VarChar(50), data.nombre)
       .input("TipoOrigenId", sql.Int, data.tipoOrigenId)
       .input("OrigenId", sql.Int, data.origenId)
       .input("Guia", sql.VarChar(30), data.guia)
       .input("UsuarioId", sql.Int, data.usuarioId)
-      .input("Fecha", sql.DateTime, new Date()) // Fecha actual
+      .input("Fecha", sql.DateTime, new Date())
       .input("IdResponsable", sql.Int, data.idResponsable)
       .input("Estado", sql.VarChar(20), data.estado)
-      .execute("pa_InsertPrealert");
-    return { success: true };
+      .execute("pa_InsertPrealertOms");
+
+    const id = result.recordset?.[0]?.Id ?? null;
+    return { success: true, id };
   },
   async insertPrealertSerial(data: {
     prealertaId: number;
@@ -67,7 +69,7 @@ export const PrealertaBackendService = {
   > {
     try {
       const pool = await getDBConnection();
-      const result = await pool.request().execute("pa_GetListPrealert");
+      const result = await pool.request().execute("pa_GetListPrealertOms");
       if (!result.recordset) return [];
 
       return result.recordset.map((r) => ({
@@ -75,6 +77,10 @@ export const PrealertaBackendService = {
         nombre: r.Nombre || r.nombre || "Sin Nombre",
         fecha: r.Fecha || r.fecha,
         estado: r.Estado || r.estado,
+        usuarioId: r.UsuarioId || r.usuarioId,
+        usuarioNombre: r.UsuarioNombre || r.usuarioNombre,
+        tipoOrigenId: r.TipoOrigenId || r.tipoOrigenId,
+        origenId: r.OrigenId || r.origenId,
       }));
     } catch (error) {
       console.error("Error en getListPrealert:", error);

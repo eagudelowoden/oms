@@ -9,6 +9,9 @@ interface Props {
   onShowToast: (msg: string, type?: "ok" | "error") => void;
   onSincronizar: (fecha: string) => void;
   sincronizando: boolean;
+  onEmpacar: () => void;
+  empacando: boolean;
+  progreso: number;
 }
 
 export default function PrealertaAcciones({
@@ -18,6 +21,9 @@ export default function PrealertaAcciones({
   onShowToast,
   onSincronizar,
   sincronizando,
+  onEmpacar, // ← agrega
+  empacando, // ← agrega
+  progreso, // ← agrega
 }: Props) {
   const fechaRef = useRef<HTMLInputElement>(null);
 
@@ -32,10 +38,9 @@ export default function PrealertaAcciones({
 
   return (
     <>
-      {/* Botones carga + fecha */}
       <div className={styles.midRow}>
         <div className={styles.uploadGroup}>
-          {/* ── Sincronizar desde API ── */}
+          {/* ── Sincronizar ── */}
           <button
             type="button"
             className={styles.btnUpload}
@@ -48,7 +53,6 @@ export default function PrealertaAcciones({
             }
           >
             {sincronizando ? (
-              /* spinner SVG simple */
               <svg
                 width="14"
                 height="14"
@@ -76,10 +80,10 @@ export default function PrealertaAcciones({
                 <path d="M2 12.5h12" />
               </svg>
             )}
-            {sincronizando ? "Sincronizando…" : "Sincronizar Datos"}
+            {sincronizando ? "Sincronizando…" : "Sincronizar"}
           </button>
 
-          {/* ── Escanear / Carga manual ── */}
+          {/* ── Carga manual ── */}
           <button
             type="button"
             className={`${styles.btnManual} ${!seleccionada ? styles.btnManualDisabled : ""}`}
@@ -105,7 +109,32 @@ export default function PrealertaAcciones({
               <rect x="1" y="10" width="5" height="5" rx="1" />
               <path d="M10 10h2v2h-2zM12 12h3M12 10h3M10 12v3" />
             </svg>
-            {seleccionada ? "Escanear seriales" : "Carga manual"}
+            {seleccionada ? "Escanear" : "Carga manual"}
+          </button>
+
+          {/* ── Empacar ── */}
+          <button
+            type="button"
+            className={`${styles.btnEmpacar} ${empacando ? styles.btnEmpacarLoading : ""}`}
+            onClick={onEmpacar}
+            disabled={empacando}
+          >
+            {empacando ? (
+              <div className={styles.empacarProgress}>
+                <div
+                  className={styles.empacarProgressBar}
+                  style={{ width: `${progreso}%` }}
+                />
+                <span className={styles.empacarProgressText}>{progreso}%</span>
+              </div>
+            ) : (
+              "Empacar"
+            )}
+          </button>
+
+          {/* ── Desempacar ── */}
+          <button type="button" className={styles.btnDesempacar}>
+            Desempacar
           </button>
         </div>
 
@@ -124,7 +153,6 @@ export default function PrealertaAcciones({
         </div>
       </div>
 
-      {/* keyframe spin inline para el loader */}
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </>
   );

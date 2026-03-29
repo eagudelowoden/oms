@@ -73,7 +73,10 @@ export default function PreAlertaAgentePage() {
         onAbrirScanner={() => setScannerOpen(true)}
         onShowToast={showToast}
         onSincronizar={() => setModalSincronizar(true)}
-        sincronizando={sincronizando} // ← nuevo
+        sincronizando={sincronizando}
+        onEmpacar={handleEmpacar} // ← nuevo
+        empacando={empacando} // ← nuevo
+        progreso={progreso} // ← nuevo
       />
 
       <ScannerModal
@@ -91,30 +94,6 @@ export default function PreAlertaAgentePage() {
           onRemove={handleRemoveSerial}
         />
         <PrealertaMaterial />
-      </div>
-
-      <div className={styles.footer}>
-        <button
-          type="button"
-          className={`${styles.btnEmpacar} ${empacando ? styles.btnEmpacarLoading : ""}`}
-          onClick={handleEmpacar}
-          disabled={empacando}
-        >
-          {empacando ? (
-            <div className={styles.empacarProgress}>
-              <div
-                className={styles.empacarProgressBar}
-                style={{ width: `${progreso}%` }}
-              />
-              <span className={styles.empacarProgressText}>{progreso}%</span>
-            </div>
-          ) : (
-            "Empacar"
-          )}
-        </button>
-        <button type="button" className={styles.btnDesempacar}>
-          Desempacar
-        </button>
       </div>
 
       <ConfirmModal

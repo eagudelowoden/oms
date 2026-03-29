@@ -7,6 +7,10 @@ export interface PrealertaItem {
   nombre: string;
   fecha?: string;
   estado?: string;
+  usuarioId?: number;
+  usuarioNombre?: string;
+  tipoOrigenId?: number;
+  origenId?: number;
 }
 
 // ← nuevo: cada serial sabe de dónde vino
@@ -61,6 +65,7 @@ export function usePrealerta() {
     const cargar = async () => {
       try {
         const res = await fetch("/api/prealerta/list");
+
         if (!res.ok) throw new Error("Error al obtener datos");
         setPrealertas(await res.json());
       } catch (e) {
@@ -109,7 +114,8 @@ export function usePrealerta() {
     }
 
     const ahora = new Date();
-    const nombreAuto = `${usuario.nombres} ${usuario.apellidos} - ${sedeNombre}`;
+    const codigoUnico = String(Math.floor(Math.random() * 90000) + 10000);
+    const nombreAuto = `${usuario.nombres} ${usuario.apellidos} - ${codigoUnico} - ${sedeNombre}`;
 
     try {
       const res = await fetch("/api/prealerta/create", {
@@ -128,15 +134,28 @@ export function usePrealerta() {
 
       if (res.ok) {
         const created = await res.json();
+
+        const fechaFormateada = ahora.toLocaleDateString("es-CO", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          timeZone: "America/Bogota",
+        });
+        console.log("✅ created:", created);
         setPrealertas((prev) => [
           {
-            id: created?.id ?? undefined,
+            id: created?.id, // ← viene del SP
             nombre: nombreAuto,
-            fecha: ahora.toLocaleDateString("es-CO"),
+            fecha: fechaFormateada,
             estado: "Pendiente",
+            usuarioId: usuario?.id,
+            usuarioNombre: `${usuario?.nombres} ${usuario?.apellidos}`, // ← agrega el nombre
+            tipoOrigenId: 13,
+            origenId: sedeId,
           },
           ...prev,
         ]);
+
         showToast(`✓ Prealerta creada — ${nombreAuto}`);
       } else {
         showToast("Error al crear la prealerta", "error");
