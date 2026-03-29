@@ -98,4 +98,17 @@ export const PrealertaBackendService = {
     await pool.request().input("Id", sql.Int, id).execute("pa_DeletePrealert");
     return { success: true };
   },
+
+  async getSedes(): Promise<{ id: number; nombre: string }[]> {
+    const pool = await getDBConnection();
+    const result = await pool
+      .request()
+      .query("SELECT Id, Nombre FROM WmsWdGeneral.dbo.Sede");
+
+    if (!result.recordset) return [];
+    return result.recordset.map((r) => ({
+      id: r.Id || r.id,
+      nombre: r.Nombre || r.nombre || "Sin nombre",
+    }));
+  },
 };

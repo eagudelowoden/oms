@@ -13,6 +13,7 @@ import {
 } from "./components/PrealertaGrid";
 import { ConfirmModal, Toast } from "./components/PrealertaModals";
 import ScannerModal from "../../_modulos/auth/components/scanner/scannerModal";
+import SincronizarModal from "./components/SincronizarModal";
 
 export default function PreAlertaAgentePage() {
   const {
@@ -40,6 +41,13 @@ export default function PreAlertaAgentePage() {
     showToast,
     empacando,
     progreso,
+    sincronizando,
+    sincronizarDesdeAPI,
+    seleccionados,
+    handleToggleSerial,
+    handleToggleAll,
+    modalSincronizar,
+    setModalSincronizar,
   } = usePrealerta();
 
   return (
@@ -64,6 +72,8 @@ export default function PreAlertaAgentePage() {
         onClearSeleccion={() => setPreAlertaSeleccionada(null)}
         onAbrirScanner={() => setScannerOpen(true)}
         onShowToast={showToast}
+        onSincronizar={() => setModalSincronizar(true)}
+        sincronizando={sincronizando} // ← nuevo
       />
 
       <ScannerModal
@@ -75,6 +85,9 @@ export default function PreAlertaAgentePage() {
       <div className={styles.bottomGrid}>
         <PrealertaSeriales
           seriales={serialesEscaneados}
+          seleccionados={seleccionados}
+          onToggle={handleToggleSerial}
+          onToggleAll={handleToggleAll}
           onRemove={handleRemoveSerial}
         />
         <PrealertaMaterial />
@@ -111,6 +124,15 @@ export default function PreAlertaAgentePage() {
       />
 
       <Toast toast={toast} />
+
+      <SincronizarModal
+        isOpen={modalSincronizar}
+        fecha={new Date().toLocaleDateString("en-CA", {
+          timeZone: "America/Bogota",
+        })}
+        onClose={() => setModalSincronizar(false)}
+        onConfirm={(fecha, documento) => sincronizarDesdeAPI(fecha, documento)}
+      />
     </div>
   );
 }

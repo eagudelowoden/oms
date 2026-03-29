@@ -9,6 +9,12 @@ export interface PrealertaItem {
   estado?: string;
 }
 
+// ← nuevo: cada serial sabe de dónde vino
+export interface SerialItem {
+  codigo: string;
+  origen: "manual" | "api";
+}
+
 interface UsuarioSesion {
   id: number;
   nombres: string;
@@ -18,6 +24,11 @@ interface UsuarioSesion {
   correo?: string;
 }
 
+// ── Constantes API WFSM ──
+const WFSM_LOGIN_URL = "https://wfsapi.tcpip.tech/api/usuarios/login";
+const WFSM_CONSULTA_URL = "https://wfsapi.tcpip.tech/api/consultas/seriales";
+const WFSM_AUTH_BASIC = "Basic bXB1bGlkb0B3b2Rlbi5jb20uY286TTFjaDQzbDIwMjAq";
+
 export function usePrealerta() {
   const [prealertas, setPrealertas] = useState<PrealertaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +36,7 @@ export function usePrealerta() {
   const [sortCol, setSortCol] = useState<"nombre" | "fecha" | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
   const [scannerOpen, setScannerOpen] = useState(false);
-  const [serialesEscaneados, setSerialEscaneados] = useState<string[]>([]);
+  const [serialesEscaneados, setSerialEscaneados] = useState<SerialItem[]>([]); // ← cambiado a SerialItem[]
   const [confirmItem, setConfirmItem] = useState<PrealertaItem | null>(null);
   const [preAlertaSeleccionada, setPreAlertaSeleccionada] =
     useState<PrealertaItem | null>(null);
@@ -35,6 +46,9 @@ export function usePrealerta() {
   } | null>(null);
   const [empacando, setEmpacando] = useState(false);
   const [progreso, setProgreso] = useState(0);
+  const [sincronizando, setSincronizando] = useState(false);
+  const [seleccionados, setSeleccionados] = useState<Set<number>>(new Set());
+  const [modalSincronizar, setModalSincronizar] = useState(false);
 
   /* ── TOAST ── */
   const showToast = (msg: string, type: "ok" | "error" = "ok") => {
@@ -82,7 +96,8 @@ export function usePrealerta() {
   };
 
   /* ── CREAR PREALERTA ── */
-  const handleCrearPrealerta = async () => {
+  // Cambia la firma para recibir los datos de sede
+  const handleCrearPrealerta = async (sedeId: number, sedeNombre: string) => {
     const usuarioRaw = localStorage.getItem("usuario");
     const usuario: UsuarioSesion | null = usuarioRaw
       ? JSON.parse(usuarioRaw)
@@ -93,30 +108,8 @@ export function usePrealerta() {
       return;
     }
 
-    let ciudad = "Sin ubicación";
-    try {
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) =>
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            timeout: 5000,
-          }),
-      );
-      const geo = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`,
-      );
-      const geoData = await geo.json();
-      ciudad =
-        geoData.address?.city ||
-        geoData.address?.town ||
-        geoData.address?.municipality ||
-        geoData.address?.village ||
-        "Sin ciudad";
-    } catch (_) {
-      ciudad = "Sin ubicación";
-    }
-
     const ahora = new Date();
-    const nombreAuto = `${usuario.nombres} ${usuario.apellidos} - ${ciudad}`;
+    const nombreAuto = `${usuario.nombres} ${usuario.apellidos} - ${sedeNombre}`;
 
     try {
       const res = await fetch("/api/prealerta/create", {
@@ -125,13 +118,14 @@ export function usePrealerta() {
         body: JSON.stringify({
           nombre: nombreAuto,
           tipoOrigenId: 13,
-          origenId: 9,
+          origenId: sedeId, // <-- usa el id de sede
           guia: `GUIA-${Math.floor(Math.random() * 1000)}`,
           usuarioId: usuario.id,
           idResponsable: usuario.id,
           estado: "Pendiente",
         }),
       });
+
       if (res.ok) {
         const created = await res.json();
         setPrealertas((prev) => [
@@ -196,13 +190,123 @@ export function usePrealerta() {
     }
   };
 
-  /* ── SERIALES ── */
+  /* ── SERIALES manuales ── */
   const handleSerialConfirm = (seriales: string[]) => {
-    setSerialEscaneados((prev) => [...prev, ...seriales]);
+    const nuevos: SerialItem[] = seriales.map((codigo) => ({
+      codigo,
+      origen: "manual",
+    }));
+    setSerialEscaneados((prev) => [...prev, ...nuevos]);
   };
 
   const handleRemoveSerial = (idx: number) => {
     setSerialEscaneados((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  /* ── SELECCIÓN DE SERIALES ── */
+  const handleToggleSerial = (idx: number) => {
+    setSeleccionados((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
+  const handleToggleAll = () => {
+    if (seleccionados.size === serialesEscaneados.length) {
+      setSeleccionados(new Set()); // deseleccionar todos
+    } else {
+      setSeleccionados(new Set(serialesEscaneados.map((_, i) => i))); // seleccionar todos
+    }
+  };
+
+  /* ── SINCRONIZAR DESDE API WFSM ── */
+  const sincronizarDesdeAPI = async (
+    fechaProceso?: string,
+    documento?: string,
+  ) => {
+    setSincronizando(true);
+    try {
+      // 1. Login
+      const loginRes = await fetch(WFSM_LOGIN_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: WFSM_AUTH_BASIC,
+        },
+      });
+      if (!loginRes.ok) throw new Error(`Login fallido: ${loginRes.status}`);
+      const { token } = await loginRes.json();
+      if (!token) throw new Error("Token no recibido");
+
+      // 2. Construir rango — la API espera hora Colombia directa (no UTC)
+      const hoyCol = new Date().toLocaleDateString("en-CA", {
+        timeZone: "America/Bogota",
+      });
+      const fecha = fechaProceso ?? hoyCol;
+      // Dia completo en hora Colombia: 00:00:00 a 23:59:59
+      const minRecepcion = `${fecha}T00:00:00.000Z`;
+      const maxRecepcion = `${fecha}T23:59:59.000Z`;
+
+      // 3. Consulta
+      const params = new URLSearchParams({
+        "visita/min_recepcion": minRecepcion,
+        "visita/max_recepcion": maxRecepcion,
+        "conf/timezone": "300",
+        "servicio/id_proyecto": "1",
+        modelo: "EXPORTACION_SERIALES",
+      });
+
+      const consultaRes = await fetch(
+        `${WFSM_CONSULTA_URL}?${params.toString()}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Token ${token}`,
+          },
+        },
+      );
+      if (!consultaRes.ok)
+        throw new Error(`Consulta fallida: ${consultaRes.status}`);
+
+      const data = await consultaRes.json();
+      const registros: Array<Record<string, unknown>> = data?.registros ?? [];
+
+      // 4. Filtrar por documento_identidad si se proporcionó
+      const registrosFiltrados = documento
+        ? registros.filter(
+            (r) => String(r.documento_identidad ?? "") === documento.trim(),
+          )
+        : registros;
+
+      // 5. Extraer seriales únicos (no nulos, no ya presentes)
+      const codigosExistentes = new Set(
+        serialesEscaneados.map((s) => s.codigo),
+      );
+
+      const nuevos: SerialItem[] = registrosFiltrados
+        .map((r) => r.serial as string)
+        .filter((s): s is string => !!s && !codigosExistentes.has(s))
+        .map((codigo) => ({ codigo, origen: "api" as const }));
+
+      if (nuevos.length === 0) {
+        showToast("Sin seriales nuevos en esa fecha");
+      } else {
+        setSerialEscaneados((prev) => [...prev, ...nuevos]);
+        showToast(
+          `✓ ${nuevos.length} serial${nuevos.length !== 1 ? "es" : ""} importado${nuevos.length !== 1 ? "s" : ""} desde API`,
+        );
+      }
+    } catch (err) {
+      console.error("Error sincronizando API:", err);
+      showToast("Error al sincronizar con la API", "error");
+    } finally {
+      setSincronizando(false);
+    }
   };
 
   /* ── EMPACAR ── */
@@ -211,8 +315,13 @@ export function usePrealerta() {
       showToast("Selecciona una prealerta primero", "error");
       return;
     }
-    if (serialesEscaneados.length === 0) {
-      showToast("No hay seriales escaneados", "error");
+    const serialesAEmpacar =
+      seleccionados.size > 0
+        ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
+        : serialesEscaneados; // si no hay ninguno marcado, empacar todos
+
+    if (serialesAEmpacar.length === 0) {
+      showToast("No hay seriales para empacar", "error");
       return;
     }
 
@@ -233,10 +342,10 @@ export function usePrealerta() {
 
     let exitosos = 0;
     let fallidos = 0;
-    const total = serialesEscaneados.length;
+    const total = serialesAEmpacar.length;
 
     for (let i = 0; i < total; i++) {
-      const serial = serialesEscaneados[i];
+      const { codigo: serial } = serialesAEmpacar[i];
       try {
         const res = await fetch("/api/prealerta/insertSerial", {
           method: "POST",
@@ -263,7 +372,6 @@ export function usePrealerta() {
         fallidos++;
       }
 
-      // Actualizar progreso después de cada serial
       setProgreso(Math.round(((i + 1) / total) * 100));
     }
 
@@ -274,7 +382,12 @@ export function usePrealerta() {
       showToast(
         `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""}`,
       );
-      setSerialEscaneados([]);
+      // Quitar solo los seriales que se empacaron
+      const codigosEmpacados = new Set(serialesAEmpacar.map((s) => s.codigo));
+      setSerialEscaneados((prev) =>
+        prev.filter((s) => !codigosEmpacados.has(s.codigo)),
+      );
+      setSeleccionados(new Set());
     }
     if (fallidos > 0) {
       showToast(
@@ -302,6 +415,11 @@ export function usePrealerta() {
     preAlertaSeleccionada,
     setPreAlertaSeleccionada,
     toast,
+    empacando,
+    progreso,
+    sincronizando,
+    modalSincronizar,
+    setModalSincronizar,
     // acciones
     handleSort,
     handleCrearPrealerta,
@@ -311,7 +429,9 @@ export function usePrealerta() {
     handleRemoveSerial,
     handleEmpacar,
     showToast,
-    empacando,
-    progreso,
+    sincronizarDesdeAPI,
+    seleccionados,
+    handleToggleSerial,
+    handleToggleAll,
   };
 }

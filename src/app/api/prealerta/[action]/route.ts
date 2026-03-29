@@ -24,6 +24,10 @@ export async function GET(
       const id = await PrealertaBackendService.getIdPrealert(nombre);
       return NextResponse.json(id);
     }
+    if (action === "sedes") {
+      const data = await PrealertaBackendService.getSedes();
+      return NextResponse.json(data);
+    }
 
     return NextResponse.json({ error: "Acción no válida" }, { status: 404 });
   } catch (error) {

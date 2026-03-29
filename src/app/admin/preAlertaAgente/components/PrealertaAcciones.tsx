@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import styles from "../prealerta.module.css";
 import { PrealertaItem } from "../hooks/usePrealerta";
 
@@ -7,6 +7,8 @@ interface Props {
   onClearSeleccion: () => void;
   onAbrirScanner: () => void;
   onShowToast: (msg: string, type?: "ok" | "error") => void;
+  onSincronizar: (fecha: string) => void;
+  sincronizando: boolean;
 }
 
 export default function PrealertaAcciones({
@@ -14,46 +16,70 @@ export default function PrealertaAcciones({
   onClearSeleccion,
   onAbrirScanner,
   onShowToast,
+  onSincronizar,
+  sincronizando,
 }: Props) {
+  const fechaRef = useRef<HTMLInputElement>(null);
+
+  const handleSincronizar = () => {
+    const fecha = fechaRef.current?.value;
+    if (!fecha) {
+      onShowToast("Selecciona una fecha de proceso primero", "error");
+      return;
+    }
+    onSincronizar(fecha);
+  };
+
   return (
     <>
-      {/* Banner prealerta seleccionada */}
-      {/* {seleccionada && (
-        <div className={styles.selectedBanner}>
-          <div className={styles.selectedLeft}>
-            <span className={styles.selectedDot} />
-            <span className={styles.selectedLabel}>Prealerta activa:</span>
-            <span className={styles.selectedNombre}>{seleccionada.nombre}</span>
-          </div>
-          <button
-            type="button"
-            className={styles.selectedClear}
-            onClick={onClearSeleccion}
-          >
-            ✕
-          </button>
-        </div>
-      )} */}
-
       {/* Botones carga + fecha */}
       <div className={styles.midRow}>
         <div className={styles.uploadGroup}>
-          <button type="button" className={styles.btnUpload}>
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M8 10V4M5 7l3-3 3 3" />
-              <path d="M2 12.5h12" />
-            </svg>
-            Sincronizar Datos
+          {/* ── Sincronizar desde API ── */}
+          <button
+            type="button"
+            className={styles.btnUpload}
+            onClick={handleSincronizar}
+            disabled={sincronizando}
+            style={
+              sincronizando
+                ? { opacity: 0.7, cursor: "not-allowed" }
+                : undefined
+            }
+          >
+            {sincronizando ? (
+              /* spinner SVG simple */
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                style={{ animation: "spin 0.8s linear infinite" }}
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+            ) : (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M8 10V4M5 7l3-3 3 3" />
+                <path d="M2 12.5h12" />
+              </svg>
+            )}
+            {sincronizando ? "Sincronizando…" : "Sincronizar Datos"}
           </button>
+
+          {/* ── Escanear / Carga manual ── */}
           <button
             type="button"
             className={`${styles.btnManual} ${!seleccionada ? styles.btnManualDisabled : ""}`}
@@ -82,13 +108,24 @@ export default function PrealertaAcciones({
             {seleccionada ? "Escanear seriales" : "Carga manual"}
           </button>
         </div>
+
+        {/* ── Fecha proceso ── */}
         <div className={styles.fechaCard}>
           <label htmlFor="fechaProceso" className={styles.fechaLabel}>
             Fecha Proceso
           </label>
-          <input id="fechaProceso" type="date" className={styles.fechaInput} />
+          <input
+            id="fechaProceso"
+            ref={fechaRef}
+            type="date"
+            className={styles.fechaInput}
+            defaultValue={new Date().toISOString().slice(0, 10)}
+          />
         </div>
       </div>
+
+      {/* keyframe spin inline para el loader */}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </>
   );
 }
