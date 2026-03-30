@@ -42,6 +42,7 @@ export const PrealertaBackendService = {
     tramite: string;
     novedad: string;
     garantia: number;
+    tipo: string;
   }) {
     const pool = await getDBConnection();
     try {
@@ -60,7 +61,8 @@ export const PrealertaBackendService = {
         .input("Tramite", sql.VarChar(30), data.tramite)
         .input("Novedad", sql.VarChar(30), data.novedad)
         .input("Garantia", sql.Int, data.garantia)
-        .execute("pa_InsertPrealertSerial");
+        .input("Tipo", sql.VarChar(30), data.tipo)
+        .execute("pa_InsertPrealertSerialOms");
       console.log("✅ serial insertado ok"); // ← agrega
       return { success: true };
     } catch (err) {

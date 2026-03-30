@@ -1,30 +1,43 @@
 import React, { useState } from "react";
 import styles from "../registroSeries.module.css";
 import preStyles from "../prealerta.module.css";
+import { SerialItem } from "../hooks/usePrealerta";
 
 const FAMILIAS = [
   { value: "", label: "Ninguna..." },
   { value: "equipos", label: "Equipos" },
   { value: "accesorios", label: "Accesorios" },
 ];
+interface Props {
+  seleccionados: Set<number>;
+  onActualizarTipo: (tipo: "Serializable" | "No-serializable") => void;
+  onShowToast: (msg: string, type?: "ok" | "error") => void;
+}
 
-export default function RegistroSeries() {
+export default function RegistroSeries({
+  seleccionados,
+  onActualizarTipo,
+  onShowToast,
+}: Props) {
   const [familia, setFamilia] = useState("");
   const [serial, setSerial] = useState("");
-  const [tipo, setTipo] = useState<"serializable" | "no-serializable">(
-    "serializable",
+  const [mac, setMac] = useState(""); // ← nuevo
+  const [tipo, setTipo] = useState<"Serializable" | "No-serializable">(
+    "Serializable",
   );
   const [cant, setCant] = useState(1);
 
-  const esSerialiable = tipo === "serializable";
+  const esSerialiable = tipo === "Serializable";
   const familiaSeleccionada = familia !== "";
-
+  // En handleGuardar:
   const handleGuardar = () => {
-    console.log({ familia, serial, tipo, cant });
-    setSerial("");
-    setCant(1);
+    if (seleccionados.size === 0) {
+      onShowToast("Selecciona seriales en la tabla primero", "error");
+      return;
+    }
+    onActualizarTipo(tipo); // ← nuevo: actualiza tipo de los seleccionados
+    onShowToast(`✓ Tipo "${tipo}" asignado a ${seleccionados.size} serial(es)`);
   };
-
   return (
     <div className={styles.registroCard}>
       <div className={preStyles.cardInnerHeader}>
@@ -76,12 +89,12 @@ export default function RegistroSeries() {
             className={styles.registroSelect}
             value={tipo}
             onChange={(e) =>
-              setTipo(e.target.value as "serializable" | "no-serializable")
+              setTipo(e.target.value as "Serializable" | "No-serializable")
             }
             disabled={familiaSeleccionada}
           >
-            <option value="serializable">Serializable</option>
-            <option value="no-serializable">No serializable</option>
+            <option value="Serializable">Serializable</option>
+            <option value="No-serializable">No serializable</option>
           </select>
         </div>
 

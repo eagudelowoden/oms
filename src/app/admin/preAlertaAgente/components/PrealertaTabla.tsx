@@ -131,8 +131,17 @@ export default function PrealertaTabla({
                     {item.fecha ?? new Date().toLocaleDateString("es-CO")}
                   </td>
                   <td>{item.usuarioNombre}</td>
-                  <td className={styles.tdMuted}>
-                    {item.estado ?? "Pendiente"}
+                  {/* Estado */}
+                  <td>
+                    <span
+                      className={
+                        item.estado === "Empacado"
+                          ? styles.estadoPill
+                          : styles.estadoPillPendiente
+                      }
+                    >
+                      {item.estado ?? "Pendiente"}
+                    </span>
                   </td>
                   <td>
                     <button

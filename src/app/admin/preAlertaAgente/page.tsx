@@ -46,6 +46,8 @@ export default function PreAlertaAgentePage() {
     handleToggleAll,
     modalSincronizar,
     setModalSincronizar,
+    handleAgregarSerial,
+    handleActualizarTipo,
   } = usePrealerta();
 
   return (
@@ -93,7 +95,11 @@ export default function PreAlertaAgentePage() {
       />
 
       {/* Registro Series — fila completa */}
-      <RegistroSeries />
+      <RegistroSeries
+        seleccionados={seleccionados}
+        onActualizarTipo={handleActualizarTipo} // ← reemplaza onAgregarSerial
+        onShowToast={showToast}
+      />
 
       <ConfirmModal
         item={confirmItem}

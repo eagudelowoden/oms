@@ -136,14 +136,24 @@ export function PrealertaSeriales({
 
                     {/* Estado */}
                     <td>
-                      <span className={styles.estadoPill}>Empacado</span>
+                      <span
+                        className={
+                          item.estado === "Empacado"
+                            ? styles.estadoPill
+                            : styles.estadoPillPendiente
+                        }
+                      >
+                        {item.estado ?? "Pendiente"}
+                      </span>
                     </td>
 
                     {/* Cant */}
                     <td className={styles.tdMuted}>1</td>
 
                     {/* Tipo */}
-                    <td className={styles.tdMuted}>Serializable</td>
+                    <td className={styles.tdMuted}>
+                      {item.tipo ?? "Serializable"}
+                    </td>
 
                     {/* Técnico */}
                     <td className={styles.tdMuted}>—</td>

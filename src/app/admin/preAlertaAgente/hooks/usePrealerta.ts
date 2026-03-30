@@ -17,6 +17,9 @@ export interface PrealertaItem {
 export interface SerialItem {
   codigo: string;
   origen: "manual" | "api";
+  estado?: "Pendiente" | "Empacado";
+  tipo?: "Serializable" | "No-serializable"; // ← nuevo
+  mac?: string; // ← nuevo
 }
 
 interface UsuarioSesion {
@@ -99,7 +102,10 @@ export function usePrealerta() {
       setSortAsc(true);
     }
   };
-
+  const handleAgregarSerial = (item: SerialItem) => {
+    console.log("➕ serial agregado:", item); // ← agrega
+    setSerialEscaneados((prev) => [...prev, item]);
+  };
   /* ── CREAR PREALERTA ── */
   // Cambia la firma para recibir los datos de sede
   const handleCrearPrealerta = async (sedeId: number, sedeNombre: string) => {
@@ -327,6 +333,11 @@ export function usePrealerta() {
       setSincronizando(false);
     }
   };
+  const handleActualizarTipo = (tipo: "Serializable" | "No-serializable") => {
+    setSerialEscaneados((prev) =>
+      prev.map((s, i) => (seleccionados.has(i) ? { ...s, tipo } : s)),
+    );
+  };
 
   /* ── EMPACAR ── */
   const handleEmpacar = async () => {
@@ -364,7 +375,8 @@ export function usePrealerta() {
     const total = serialesAEmpacar.length;
 
     for (let i = 0; i < total; i++) {
-      const { codigo: serial } = serialesAEmpacar[i];
+      const { codigo: serial, tipo, mac } = serialesAEmpacar[i];
+      console.log(`📦 [${i}] serial: ${serial} | tipo: ${tipo} | mac: ${mac}`); // ← agrega
       try {
         const res = await fetch("/api/prealerta/insertSerial", {
           method: "POST",
@@ -372,7 +384,7 @@ export function usePrealerta() {
           body: JSON.stringify({
             prealertaId: idPrealerta,
             serial,
-            mac: "",
+            mac: mac ?? "",
             codigoSap: "",
             descripcion: "",
             cantidad: 1,
@@ -383,6 +395,7 @@ export function usePrealerta() {
             tramite: "",
             novedad: "",
             garantia: 0,
+            tipo: tipo ?? "Serializable",
           }),
         });
         if (res.ok) exitosos++;
@@ -401,10 +414,15 @@ export function usePrealerta() {
       showToast(
         `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""}`,
       );
-      // Quitar solo los seriales que se empacaron
+
+      // En vez de quitar, marcar como empacados
       const codigosEmpacados = new Set(serialesAEmpacar.map((s) => s.codigo));
       setSerialEscaneados((prev) =>
-        prev.filter((s) => !codigosEmpacados.has(s.codigo)),
+        prev.map((s) =>
+          codigosEmpacados.has(s.codigo)
+            ? { ...s, estado: "Empacado" } // ← marca en vez de eliminar
+            : s,
+        ),
       );
       setSeleccionados(new Set());
     }
@@ -452,5 +470,7 @@ export function usePrealerta() {
     seleccionados,
     handleToggleSerial,
     handleToggleAll,
+    handleAgregarSerial,
+    handleActualizarTipo,
   };
 }
