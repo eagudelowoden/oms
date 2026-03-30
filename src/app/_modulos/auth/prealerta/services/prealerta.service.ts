@@ -44,23 +44,29 @@ export const PrealertaBackendService = {
     garantia: number;
   }) {
     const pool = await getDBConnection();
-    await pool
-      .request()
-      .input("PrealertaId", sql.Int, data.prealertaId)
-      .input("Serial", sql.VarChar(50), data.serial)
-      .input("Mac", sql.VarChar(50), data.mac)
-      .input("CodigoSap", sql.VarChar(20), data.codigoSap)
-      .input("Descripcion", sql.VarChar(150), data.descripcion)
-      .input("Cantidad", sql.Int, data.cantidad)
-      .input("Caja", sql.Int, data.caja)
-      .input("Falla", sql.VarChar(100), data.falla)
-      .input("TecnicoCliente", sql.VarChar(50), data.tecnicoCliente)
-      .input("Pedido", sql.VarChar(30), data.pedido)
-      .input("Tramite", sql.VarChar(30), data.tramite)
-      .input("Novedad", sql.VarChar(30), data.novedad)
-      .input("Garantia", sql.Int, data.garantia)
-      .execute("pa_InsertPrealertSerial");
-    return { success: true };
+    try {
+      await pool
+        .request()
+        .input("PrealertaId", sql.Int, data.prealertaId)
+        .input("Serial", sql.VarChar(50), data.serial)
+        .input("Mac", sql.VarChar(50), data.mac)
+        .input("CodigoSap", sql.VarChar(20), data.codigoSap)
+        .input("Descripcion", sql.VarChar(150), data.descripcion)
+        .input("Cantidad", sql.Int, data.cantidad)
+        .input("Caja", sql.Int, data.caja)
+        .input("Falla", sql.VarChar(100), data.falla)
+        .input("TecnicoCliente", sql.VarChar(50), data.tecnicoCliente)
+        .input("Pedido", sql.VarChar(30), data.pedido)
+        .input("Tramite", sql.VarChar(30), data.tramite)
+        .input("Novedad", sql.VarChar(30), data.novedad)
+        .input("Garantia", sql.Int, data.garantia)
+        .execute("pa_InsertPrealertSerial");
+      console.log("✅ serial insertado ok"); // ← agrega
+      return { success: true };
+    } catch (err) {
+      console.error("❌ error insertando serial:", err); // ← agrega
+      throw err;
+    }
   },
 
   // Consume pa_GetListPrealert
