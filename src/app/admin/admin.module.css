@@ -5,7 +5,6 @@
   overflow: hidden; /* ← el wrapper no scrollea */
 }
 
-
 /* --- SIDEBAR --- */
 .sidebar {
   width: 255px;
@@ -257,7 +256,6 @@
   overflow-y: auto;
   min-height: 0;
 }
-
 
 .topHeader {
   height: 45px; /* ← era 70px / 64px, bájalo */

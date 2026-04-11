@@ -41,7 +41,7 @@ export default function RegistroSeries({
   return (
     <div className={styles.registroCard}>
       <div className={preStyles.cardInnerHeader}>
-        <span className={preStyles.cardInnerTitle}>Registro Series</span>
+        <span className={preStyles.cardInnerTitle}>Registro Accesorios</span>
       </div>
 
       <div className={styles.registroBody}>

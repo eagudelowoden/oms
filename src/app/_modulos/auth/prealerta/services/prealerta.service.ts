@@ -46,7 +46,7 @@ export const PrealertaBackendService = {
   }) {
     const pool = await getDBConnection();
     try {
-      await pool
+      const result = await pool
         .request()
         .input("PrealertaId", sql.Int, data.prealertaId)
         .input("Serial", sql.VarChar(50), data.serial)
@@ -63,10 +63,17 @@ export const PrealertaBackendService = {
         .input("Garantia", sql.Int, data.garantia)
         .input("Tipo", sql.VarChar(30), data.tipo)
         .execute("pa_InsertPrealertSerialOms");
-      console.log("✅ serial insertado ok"); // ← agrega
-      return { success: true };
+
+      const row = result.recordset?.[0];
+      console.log(`📦 Serial ${data.serial}: ${row?.estado}`);
+
+      return {
+        success: true,
+        estado: row?.estado ?? "INSERTADO",
+        insertado: row?.insertado ?? 1,
+      };
     } catch (err) {
-      console.error("❌ error insertando serial:", err); // ← agrega
+      console.error("❌ error insertando serial:", err);
       throw err;
     }
   },
