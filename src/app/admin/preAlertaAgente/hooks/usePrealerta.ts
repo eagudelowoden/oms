@@ -120,17 +120,15 @@ export function usePrealerta() {
     }
 
     const ahora = new Date();
-    const codigoUnico = String(Math.floor(Math.random() * 90000) + 10000);
-    const nombreAuto = `${usuario.nombres} ${usuario.apellidos} - ${codigoUnico} - ${sedeNombre}`;
 
     try {
       const res = await fetch("/api/prealerta/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nombre: nombreAuto,
+          nombre: `${usuario.nombres} ${usuario.apellidos} - CODIGO - ${sedeNombre}`, // SP reemplaza CODIGO por el ID
           tipoOrigenId: 13,
-          origenId: sedeId, // <-- usa el id de sede
+          origenId: sedeId,
           guia: `GUIA-${Math.floor(Math.random() * 1000)}`,
           usuarioId: usuario.id,
           idResponsable: usuario.id,
@@ -138,34 +136,40 @@ export function usePrealerta() {
         }),
       });
 
-      if (res.ok) {
-        const created = await res.json();
-
-        const fechaFormateada = ahora.toLocaleDateString("es-CO", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          timeZone: "America/Bogota",
-        });
-        console.log("✅ created:", created);
-        setPrealertas((prev) => [
-          {
-            id: created?.id, // ← viene del SP
-            nombre: nombreAuto,
-            fecha: fechaFormateada,
-            estado: "Pendiente",
-            usuarioId: usuario?.id,
-            usuarioNombre: `${usuario?.nombres} ${usuario?.apellidos}`, // ← agrega el nombre
-            tipoOrigenId: 13,
-            origenId: sedeId,
-          },
-          ...prev,
-        ]);
-
-        showToast(`✓ Prealerta creada — ${nombreAuto}`);
-      } else {
+      if (!res.ok) {
         showToast("Error al crear la prealerta", "error");
+        return;
       }
+
+      const created = await res.json();
+      const idCreado = created?.id;
+
+      // ✅ Nombre con ID real para mostrar en pantalla
+      const nombreAuto = `${usuario.nombres} ${usuario.apellidos} - ${idCreado} - ${sedeNombre}`;
+
+      const fechaFormateada = ahora.toLocaleDateString("es-CO", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        timeZone: "America/Bogota",
+      });
+
+      console.log("✅ created:", created);
+      setPrealertas((prev) => [
+        {
+          id: idCreado,
+          nombre: nombreAuto,
+          fecha: fechaFormateada,
+          estado: "Pendiente",
+          usuarioId: usuario?.id,
+          usuarioNombre: `${usuario?.nombres} ${usuario?.apellidos}`,
+          tipoOrigenId: 13,
+          origenId: sedeId,
+        },
+        ...prev,
+      ]);
+
+      showToast(`✓ Prealerta creada — ${nombreAuto}`);
     } catch (e) {
       console.error("Error al insertar:", e);
       showToast("Error de conexión", "error");

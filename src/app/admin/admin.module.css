@@ -2,10 +2,9 @@
 .adminWrapper {
   display: flex;
   height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  background-color: #f8fafc;
+  overflow: hidden; /* ← el wrapper no scrollea */
 }
+
 
 /* --- SIDEBAR --- */
 .sidebar {
@@ -250,8 +249,15 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* ← tampoco */
   min-width: 0;
 }
+.pageContainer {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
 
 .topHeader {
   height: 45px; /* ← era 70px / 64px, bájalo */

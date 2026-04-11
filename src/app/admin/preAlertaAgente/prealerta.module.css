@@ -34,14 +34,14 @@
   flex-direction: column;
   gap: 10px;
   padding: 14px;
+  padding-bottom: 80px;    /* ← espacio extra al final en móvil */
   font-family: var(--font-main, "Inter", sans-serif);
   font-size: 12px;
   background: var(--c-bg);
   box-sizing: border-box;
-  overflow-y: auto;
-  height: 100%;
+  min-height: 100%;        /* ← cambia height: 100% por min-height: 100% */
+                           /* elimina overflow-y: auto */
 }
-
 /* ── CARD ── */
 .card {
   background: var(--c-white);
@@ -819,6 +819,7 @@
 @media (max-width: 580px) {
   .wrapper {
     padding: 10px;
+    padding-bottom: 120px;
   }
   .header {
     flex-direction: column;
@@ -828,8 +829,15 @@
     width: 100%;
     justify-content: center;
   }
-}
 
+  /* ❌ NO tocar .tableWrap — la tabla de prealertas necesita su scroll */
+
+  /* Solo quitar scroll interno de seriales */
+  .checkList {
+    max-height: unset;
+    overflow-y: visible;
+  }
+}
 @media (max-width: 280px) {
   .uploadGroup {
     grid-template-columns: 1fr;
