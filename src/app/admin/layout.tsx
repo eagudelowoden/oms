@@ -247,10 +247,10 @@ export default function AdminLayout({
 
         <nav className={styles.navMenu}>
           <p className={styles.navSectionTitle}>Módulos</p>
-          <Link href="/admin" className={linkClass("/admin")}>
+          {/* <Link href="/admin" className={linkClass("/admin")}>
             <span className="material-symbols-rounded">dashboard</span>
             <span>Dashboard</span>
-          </Link>
+          </Link> */}
           <Link
             href="/admin/preAlertaAgente"
             className={linkClass("/admin/preAlertaAgente")}
