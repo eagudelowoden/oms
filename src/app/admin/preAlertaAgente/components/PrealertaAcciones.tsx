@@ -12,6 +12,9 @@ interface Props {
   onEmpacar: () => void;
   empacando: boolean;
   progreso: number;
+  cajaActual: number;
+  onCajaChange: (caja: number) => void;
+  onDesempacar: () => void;
 }
 
 export default function PrealertaAcciones({
@@ -24,6 +27,9 @@ export default function PrealertaAcciones({
   onEmpacar, // ← agrega
   empacando, // ← agrega
   progreso, // ← agrega
+  cajaActual, // ✅ faltaba
+  onCajaChange, // ✅ faltaba — este era el error
+  onDesempacar,
 }: Props) {
   const fechaRef = useRef<HTMLInputElement>(null);
 
@@ -112,28 +118,34 @@ export default function PrealertaAcciones({
             {seleccionada ? "Escanear" : "Carga manual"}
           </button>
 
-          {/* ── Empacar ── */}
+          <div className={styles.cajaWrapper}>
+            <label className={styles.cajaLabel}>Caja</label>
+            <input
+              type="number"
+              min={1}
+              className={styles.cajaInput}
+              value={cajaActual}
+              onChange={(e) => onCajaChange(Number(e.target.value))}
+              disabled={empacando}
+            />
+          </div>
+
           <button
             type="button"
-            className={`${styles.btnEmpacar} ${empacando ? styles.btnEmpacarLoading : ""}`}
+            className={styles.btnEmpacar}
             onClick={onEmpacar}
             disabled={empacando}
           >
-            {empacando ? (
-              <div className={styles.empacarProgress}>
-                <div
-                  className={styles.empacarProgressBar}
-                  style={{ width: `${progreso}%` }}
-                />
-                <span className={styles.empacarProgressText}>{progreso}%</span>
-              </div>
-            ) : (
-              "Empacar"
-            )}
+            {empacando ? `${progreso}%` : "Empacar"}
           </button>
 
           {/* ── Desempacar ── */}
-          <button type="button" className={styles.btnDesempacar}>
+          {/* ── Desempacar ── */}
+          <button
+            type="button"
+            className={styles.btnDesempacar}
+            onClick={onDesempacar}
+          >
             Desempacar
           </button>
         </div>
@@ -141,7 +153,7 @@ export default function PrealertaAcciones({
         {/* ── Fecha proceso ── */}
         <div className={styles.fechaCard}>
           <label htmlFor="fechaProceso" className={styles.fechaLabel}>
-            Fecha Proceso
+            Fecha
           </label>
           <input
             id="fechaProceso"

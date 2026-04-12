@@ -78,6 +78,20 @@ export const PrealertaBackendService = {
     }
   },
 
+  async desempacarSeriales(
+    prealertaId: number,
+    seriales: string[],
+  ): Promise<number> {
+    const pool = await getDBConnection();
+    const result = await pool
+      .request()
+      .input("PrealertaId", sql.Int, prealertaId)
+      .input("Seriales", sql.NVarChar(sql.MAX), JSON.stringify(seriales))
+      .execute("pa_DesempacarSerialesOms");
+
+    return result.recordset[0]?.eliminados ?? 0;
+  },
+
   // Consume pa_GetListPrealert
   async getListPrealert(): Promise<
     { id: number; nombre: string; fecha?: string; estado?: string }[]
@@ -111,6 +125,17 @@ export const PrealertaBackendService = {
       .input("Nombre", sql.VarChar(50), nombre)
       .execute("pa_GetIdPrealert");
     return result.recordset[0]?.Id || result.recordset[0]?.id || null;
+  },
+  async getUltimaCaja(prealertaId: number): Promise<number> {
+    const pool = await getDBConnection();
+    const result = await pool
+      .request()
+      .input("PrealertaId", sql.Int, prealertaId).query(`
+      SELECT ISNULL(MAX(Caja), 0) AS ultimaCaja
+      FROM PrealertaSerial
+      WHERE PrealertaId = @PrealertaId
+    `);
+    return result.recordset[0].ultimaCaja;
   },
 
   // Consume pa_DeletePrealert

@@ -56,6 +56,7 @@ export function usePrealerta() {
   const [sincronizando, setSincronizando] = useState(false);
   const [seleccionados, setSeleccionados] = useState<Set<number>>(new Set());
   const [modalSincronizar, setModalSincronizar] = useState(false);
+  const [cajaActual, setCajaActual] = useState<number>(1);
 
   /* ── TOAST ── */
   const showToast = (msg: string, type: "ok" | "error" = "ok") => {
@@ -173,6 +174,70 @@ export function usePrealerta() {
     } catch (e) {
       console.error("Error al insertar:", e);
       showToast("Error de conexión", "error");
+    }
+  };
+
+  const handleDesempacar = async () => {
+    if (!preAlertaSeleccionada) {
+      showToast("Selecciona una prealerta primero", "error");
+      return;
+    }
+
+    // Solo desempacar los seleccionados que estén empacados
+    const serialesADesempacar =
+      seleccionados.size > 0
+        ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
+        : serialesEscaneados.filter((s) => s.estado === "Empacado");
+
+    const soloEmpacados = serialesADesempacar.filter(
+      (s) => s.estado === "Empacado",
+    );
+
+    if (soloEmpacados.length === 0) {
+      showToast("No hay seriales empacados para desempacar", "error");
+      return;
+    }
+
+    let idPrealerta = preAlertaSeleccionada.id;
+    if (!idPrealerta) {
+      const resId = await fetch(
+        `/api/prealerta/getId?nombre=${encodeURIComponent(preAlertaSeleccionada.nombre)}`,
+      );
+      if (resId.ok) idPrealerta = await resId.json();
+    }
+    if (!idPrealerta) {
+      showToast("No se pudo obtener el Id", "error");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/prealerta/desempacar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prealertaId: idPrealerta,
+          seriales: soloEmpacados.map((s) => s.codigo),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.eliminados > 0) {
+        // Quitar de la lista local los desempacados
+        const codigosDesempacados = new Set(soloEmpacados.map((s) => s.codigo));
+        setSerialEscaneados((prev) =>
+          prev.filter((s) => !codigosDesempacados.has(s.codigo)),
+        );
+        setSeleccionados(new Set());
+
+        showToast(
+          `✓ ${data.eliminados} serial${data.eliminados !== 1 ? "es" : ""} desempacado${data.eliminados !== 1 ? "s" : ""}`,
+        );
+      } else {
+        showToast("No se eliminaron seriales", "error");
+      }
+    } catch {
+      showToast("Error al desempacar", "error");
     }
   };
 
@@ -343,18 +408,47 @@ export function usePrealerta() {
     );
   };
 
+  // Cuando seleccionas una prealerta, obtén la última caja usada
+  useEffect(() => {
+    if (!preAlertaSeleccionada?.id) return;
+
+    const fetchUltimaCaja = async () => {
+      try {
+        const res = await fetch(
+          `/api/prealerta/ultimaCaja?prealertaId=${preAlertaSeleccionada.id}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          // Si ya tiene cajas usadas, la siguiente es ultimaCaja + 1
+          // Si no tiene ninguna, empieza en 1
+          setCajaActual((data.ultimaCaja ?? 0) + 1);
+        }
+      } catch {
+        setCajaActual(1);
+      }
+    };
+
+    fetchUltimaCaja();
+  }, [preAlertaSeleccionada?.id]);
+
   /* ── EMPACAR ── */
   const handleEmpacar = async () => {
     if (!preAlertaSeleccionada) {
       showToast("Selecciona una prealerta primero", "error");
       return;
     }
+
     const serialesAEmpacar =
       seleccionados.size > 0
         ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
-        : serialesEscaneados; // si no hay ninguno marcado, empacar todos
+        : serialesEscaneados;
 
-    if (serialesAEmpacar.length === 0) {
+    const serialesSinDuplicados = serialesAEmpacar.filter(
+      (s, index, self) =>
+        index === self.findIndex((x) => x.codigo === s.codigo),
+    );
+
+    if (serialesSinDuplicados.length === 0) {
       showToast("No hay seriales para empacar", "error");
       return;
     }
@@ -375,12 +469,13 @@ export function usePrealerta() {
     setProgreso(0);
 
     let exitosos = 0;
+    let yaExistian = 0;
     let fallidos = 0;
-    const total = serialesAEmpacar.length;
+    const total = serialesSinDuplicados.length;
+    const cajaParaEsteEmpacar = cajaActual; // ✅ captura la caja antes del loop
 
     for (let i = 0; i < total; i++) {
-      const { codigo: serial, tipo, mac } = serialesAEmpacar[i];
-      console.log(`📦 [${i}] serial: ${serial} | tipo: ${tipo} | mac: ${mac}`); // ← agrega
+      const { codigo: serial, tipo, mac } = serialesSinDuplicados[i];
       try {
         const res = await fetch("/api/prealerta/insertSerial", {
           method: "POST",
@@ -392,7 +487,7 @@ export function usePrealerta() {
             codigoSap: "",
             descripcion: "",
             cantidad: 1,
-            caja: 0,
+            caja: cajaParaEsteEmpacar, // ✅ ya no es 0
             falla: "",
             tecnicoCliente: "",
             pedido: "",
@@ -402,8 +497,19 @@ export function usePrealerta() {
             tipo: tipo ?? "Serializable",
           }),
         });
-        if (res.ok) exitosos++;
-        else fallidos++;
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.estado === "INSERTADO" && data.insertado === 1) {
+            exitosos++;
+          } else if (data.estado === "YA_EXISTE") {
+            yaExistian++;
+          } else {
+            fallidos++;
+          }
+        } else {
+          fallidos++;
+        }
       } catch {
         fallidos++;
       }
@@ -414,30 +520,43 @@ export function usePrealerta() {
     setEmpacando(false);
     setProgreso(0);
 
-    if (exitosos > 0) {
-      showToast(
-        `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""}`,
-      );
-
-      // En vez de quitar, marcar como empacados
-      const codigosEmpacados = new Set(serialesAEmpacar.map((s) => s.codigo));
+    const codigosEmpacados = new Set(
+      serialesSinDuplicados.map((s) => s.codigo),
+    );
+    if (exitosos > 0 || yaExistian > 0) {
       setSerialEscaneados((prev) =>
         prev.map((s) =>
           codigosEmpacados.has(s.codigo)
-            ? { ...s, estado: "Empacado" } // ← marca en vez de eliminar
+            ? { ...s, estado: "Empacado", caja: cajaParaEsteEmpacar } // ✅ guarda la caja en la fila
             : s,
         ),
       );
       setSeleccionados(new Set());
     }
+
+    // ✅ Auto-incrementar solo si hubo al menos un insertado nuevo
+    if (exitosos > 0) {
+      setCajaActual((prev) => prev + 1);
+    }
+
+    if (exitosos > 0) {
+      showToast(
+        `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaParaEsteEmpacar}`,
+      );
+    }
+    if (yaExistian > 0) {
+      showToast(
+        `⚠ ${yaExistian} serial${yaExistian !== 1 ? "es" : ""} ya estaba${yaExistian !== 1 ? "n" : ""} empacado${yaExistian !== 1 ? "s" : ""}`,
+        "error",
+      );
+    }
     if (fallidos > 0) {
       showToast(
-        `${fallidos} serial${fallidos !== 1 ? "es" : ""} no se insertaron`,
+        `✗ ${fallidos} serial${fallidos !== 1 ? "es" : ""} no se pudo${fallidos !== 1 ? "n" : ""} insertar`,
         "error",
       );
     }
   };
-
   return {
     // estado
     prealertas,
@@ -476,5 +595,8 @@ export function usePrealerta() {
     handleToggleAll,
     handleAgregarSerial,
     handleActualizarTipo,
+    cajaActual, // ✅ agrega
+    setCajaActual, // ✅ agrega
+    handleDesempacar,
   };
 }

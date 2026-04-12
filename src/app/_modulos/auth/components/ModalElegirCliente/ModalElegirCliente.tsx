@@ -3,11 +3,10 @@
 import { useState, useEffect } from "react";
 import styles from "./modalElegirCliente.module.css";
 
-// 1. La interfaz ahora usa 'dbase' para ser fiel a la base de datos
 interface Cliente {
   id: number;
   nombre: string;
-  dbase: string; // Nombre técnico (ej: WmsWdGlobalLiberty)
+  dbase: string;
 }
 
 interface ClientSwitchResponse {
@@ -30,8 +29,8 @@ export default function ModalElegirCliente({
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [seleccionado, setSeleccionado] = useState<Cliente | null>(null);
   const [isChanging, setIsChanging] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
 
-  // Cargar lista de clientes
   useEffect(() => {
     const fetchClientes = async () => {
       try {
@@ -39,7 +38,6 @@ export default function ModalElegirCliente({
           `/api/clientes/list?usuarioId=${usuarioId}`,
         );
         if (!response.ok) throw new Error("Error en la respuesta");
-
         const data: Cliente[] = await response.json();
         setClientes(data);
       } catch (err) {
@@ -48,6 +46,22 @@ export default function ModalElegirCliente({
     };
     fetchClientes();
   }, [usuarioId]);
+
+  const clientesFiltrados = clientes.filter((c) =>
+    c.nombre.toLowerCase().includes(busqueda.toLowerCase()),
+  );
+
+  const handleBusquedaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valor = e.target.value;
+    setBusqueda(valor);
+    // Deseleccionar si el seleccionado ya no está en los resultados
+    if (
+      seleccionado &&
+      !seleccionado.nombre.toLowerCase().includes(valor.toLowerCase())
+    ) {
+      setSeleccionado(null);
+    }
+  };
 
   const handleConfirmar = async () => {
     if (!seleccionado) return;
@@ -59,7 +73,7 @@ export default function ModalElegirCliente({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientId: seleccionado.id,
-          clienteNombre: seleccionado.nombre, // Este es el comercial (HUGHES CO BOG)
+          clienteNombre: seleccionado.nombre,
           dbNameReal: seleccionado.dbase,
         }),
       });
@@ -67,14 +81,9 @@ export default function ModalElegirCliente({
       const result: ClientSwitchResponse = await resSwitch.json();
 
       if (resSwitch.ok) {
-        // ⚠️ IMPORTANTE: Pasa también el nombre comercial al onSuccess
-        // para que el Layout sepa qué nombre mandarle al SP.
-        onSuccess({
-          ...result,
-          clientDbName: seleccionado.nombre, // Aseguramos que pasamos el nombre comercial
-        });
+        onSuccess({ ...result, clientDbName: seleccionado.nombre });
       } else {
-        alert(`Error: No se pudo conectar a la base de datos técnica.`);
+        alert("Error: No se pudo conectar a la base de datos.");
       }
     } catch (err) {
       console.error("Error en switch:", err);
@@ -91,30 +100,63 @@ export default function ModalElegirCliente({
           <h3>Seleccionar Cliente</h3>
         </div>
 
-        <p>Selecciona la operación con la que deseas trabajar:</p>
+        <p className={styles.subtitle}>
+          Selecciona la operación con la que deseas trabajar:
+        </p>
 
-        <select
-          className={styles.select}
-          // Usamos 'dbase' como valor de control para asegurar la coincidencia visual
-          value={seleccionado?.dbase || ""}
-          onChange={(e) => {
-            const clienteEncontrado = clientes.find(
-              (c) => c.dbase === e.target.value,
-            );
-            setSeleccionado(clienteEncontrado || null);
-          }}
-          disabled={isChanging}
-        >
-          <option value="" disabled>
-            -- Seleccione un cliente --
-          </option>
-          {clientes.map((c, index) => (
-            <option key={`${c.dbase}-${index}`} value={c.dbase}>
-              {c.nombre}
-            </option>
-          ))}
-        </select>
+        {/* Buscador */}
+        <div className={styles.searchWrapper}>
+          <span className="material-symbols-rounded">search</span>
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Buscar cliente..."
+            value={busqueda}
+            onChange={handleBusquedaChange}
+            disabled={isChanging}
+            autoFocus
+          />
+          {busqueda && (
+            <button
+              type="button"
+              className={styles.clearBtn}
+              onClick={() => {
+                setBusqueda("");
+                setSeleccionado(null);
+              }}
+              disabled={isChanging}
+            >
+              <span className="material-symbols-rounded">close</span>
+            </button>
+          )}
+        </div>
 
+        {/* Lista filtrada */}
+        <ul className={styles.lista}>
+          {clientesFiltrados.length > 0 ? (
+            clientesFiltrados.map((c) => (
+              <li
+                key={c.dbase}
+                className={`${styles.listaItem} ${seleccionado?.dbase === c.dbase ? styles.listaItemActivo : ""}`}
+                onClick={() => !isChanging && setSeleccionado(c)}
+              >
+                <span className="material-symbols-rounded">
+                  {seleccionado?.dbase === c.dbase
+                    ? "radio_button_checked"
+                    : "radio_button_unchecked"}
+                </span>
+                {c.nombre}
+              </li>
+            ))
+          ) : (
+            <li className={styles.sinResultados}>
+              <span className="material-symbols-rounded">search_off</span>
+              Sin resultados para "{busqueda}"
+            </li>
+          )}
+        </ul>
+
+        {/* Botones */}
         <div className={styles.footerButtons}>
           <button
             type="button"

@@ -28,6 +28,19 @@ export async function GET(
       const data = await PrealertaBackendService.getSedes();
       return NextResponse.json(data);
     }
+    // En el GET:
+    if (action === "ultimaCaja") {
+      const prealertaId = parseInt(searchParams.get("prealertaId") ?? "0");
+      if (!prealertaId)
+        return NextResponse.json(
+          { error: "prealertaId requerido" },
+          { status: 400 },
+        );
+
+      const ultimaCaja =
+        await PrealertaBackendService.getUltimaCaja(prealertaId);
+      return NextResponse.json({ ultimaCaja });
+    }
 
     return NextResponse.json({ error: "Acción no válida" }, { status: 404 });
   } catch (error) {
@@ -62,6 +75,33 @@ export async function POST(
       console.error("Error al insertar serial:", error);
       return NextResponse.json(
         { error: "Error al insertar serial" },
+        { status: 500 },
+      );
+    }
+  }
+
+  if (action === "desempacar") {
+    try {
+      const body = await request.json();
+      const { prealertaId, seriales } = body;
+
+      if (!prealertaId || !seriales?.length) {
+        return NextResponse.json(
+          { error: "prealertaId y seriales son requeridos" },
+          { status: 400 },
+        );
+      }
+
+      const eliminados = await PrealertaBackendService.desempacarSeriales(
+        prealertaId,
+        seriales,
+      );
+
+      return NextResponse.json({ success: true, eliminados });
+    } catch (error) {
+      console.error("Error al desempacar:", error);
+      return NextResponse.json(
+        { error: "Error al desempacar seriales" },
         { status: 500 },
       );
     }

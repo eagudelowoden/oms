@@ -48,6 +48,9 @@ export default function PreAlertaAgentePage() {
     setModalSincronizar,
     handleAgregarSerial,
     handleActualizarTipo,
+    cajaActual,
+    setCajaActual,
+    handleDesempacar,
   } = usePrealerta();
 
   return (
@@ -66,7 +69,6 @@ export default function PreAlertaAgentePage() {
         onSeleccionar={setPreAlertaSeleccionada}
         onEliminar={pedirConfirmacion}
       />
-
       <PrealertaAcciones
         seleccionada={preAlertaSeleccionada}
         onClearSeleccion={() => setPreAlertaSeleccionada(null)}
@@ -77,6 +79,9 @@ export default function PreAlertaAgentePage() {
         onEmpacar={handleEmpacar}
         empacando={empacando}
         progreso={progreso}
+        cajaActual={cajaActual} // ✅ agrega
+        onCajaChange={setCajaActual} // ✅ agrega
+        onDesempacar={handleDesempacar}
       />
 
       <ScannerModal
