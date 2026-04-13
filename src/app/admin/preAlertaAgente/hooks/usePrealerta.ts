@@ -241,6 +241,30 @@ export function usePrealerta() {
     }
   };
 
+  // usePrealerta.ts — reemplaza o agrega este efecto
+  useEffect(() => {
+    if (!preAlertaSeleccionada?.id) {
+      setSerialEscaneados([]);
+      return;
+    }
+
+    const fetchSeriales = async () => {
+      try {
+        const res = await fetch(
+          `/api/prealerta/seriales?prealertaId=${preAlertaSeleccionada.id}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setSerialEscaneados(data);
+        }
+      } catch {
+        showToast("Error al cargar seriales", "error");
+      }
+    };
+
+    fetchSeriales();
+  }, [preAlertaSeleccionada?.id]);
+
   /* ── ELIMINAR PREALERTA ── */
   const pedirConfirmacion = (item: PrealertaItem) => setConfirmItem(item);
 

@@ -28,6 +28,19 @@ export async function GET(
       const data = await PrealertaBackendService.getSedes();
       return NextResponse.json(data);
     }
+
+    if (action === "seriales") {
+      const prealertaId = parseInt(searchParams.get("prealertaId") ?? "0");
+      if (!prealertaId)
+        return NextResponse.json(
+          { error: "prealertaId requerido" },
+          { status: 400 },
+        );
+
+      const data =
+        await PrealertaBackendService.getSerialsByPrealerta(prealertaId);
+      return NextResponse.json(data);
+    }
     // En el GET:
     if (action === "ultimaCaja") {
       const prealertaId = parseInt(searchParams.get("prealertaId") ?? "0");

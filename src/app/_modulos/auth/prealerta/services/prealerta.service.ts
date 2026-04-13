@@ -77,7 +77,30 @@ export const PrealertaBackendService = {
       throw err;
     }
   },
-
+  // prealerta.service.ts
+  async getSerialsByPrealerta(prealertaId: number): Promise<
+    {
+      codigo: string;
+      origen: "api";
+      estado: "Empacado";
+      tipo: string;
+    }[]
+  > {
+    const pool = await getDBConnection();
+    const result = await pool
+      .request()
+      .input("PrealertaId", sql.Int, prealertaId).query(`
+      SELECT Serial AS codigo, Caja AS caja, Tipo AS tipo
+      FROM PrealertaSerial
+      WHERE PrealertaId = @PrealertaId
+    `);
+    return result.recordset.map((r) => ({
+      codigo: r.codigo,
+      origen: "api" as const,
+      estado: "Empacado" as const,
+      tipo: r.tipo ?? "Serializable",
+    }));
+  },
   async desempacarSeriales(
     prealertaId: number,
     seriales: string[],

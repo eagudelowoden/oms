@@ -8,7 +8,12 @@ interface Props {
   onConfirm: (fecha: string, documento: string) => void;
 }
 
-export default function SincronizarModal({ isOpen, fecha, onClose, onConfirm }: Props) {
+export default function SincronizarModal({
+  isOpen,
+  fecha,
+  onClose,
+  onConfirm,
+}: Props) {
   const [documento, setDocumento] = useState("");
   const [fechaLocal, setFechaLocal] = useState(fecha);
 
@@ -21,7 +26,12 @@ export default function SincronizarModal({ isOpen, fecha, onClose, onConfirm }: 
       if (raw) {
         const u = JSON.parse(raw);
         // intentar campo documento_identidad o cedula o numeroDocumento
-        const doc = u.documento_identidad ?? u.cedula ?? u.numeroDocumento ?? u.documento ?? "";
+        const doc =
+          u.documento_identidad ??
+          u.cedula ??
+          u.numeroDocumento ??
+          u.documento ??
+          "";
         setDocumento(String(doc));
       }
     } catch (_) {}
@@ -45,19 +55,34 @@ export default function SincronizarModal({ isOpen, fecha, onClose, onConfirm }: 
         {/* Ícono */}
         <svg
           className={styles.confirmIcon}
-          width="28" height="28" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
         >
           <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           <path d="M12 8v4l2 2" />
         </svg>
 
         <p className={styles.confirmTitle}>Sincronizar seriales</p>
-        <p className={styles.confirmSub}>Ingresa tu documento para traer solo tus registros</p>
+        <p className={styles.confirmSub}>
+          Ingresa tu documento para traer solo tus registros
+        </p>
 
         {/* Fecha */}
         <div style={{ width: "100%", marginTop: 8 }}>
-          <label style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.07em", color: "#94a3b8" }}>
+          <label
+            style={{
+              fontSize: 10,
+              fontWeight: 500,
+              textTransform: "uppercase",
+              letterSpacing: "0.07em",
+              color: "#94a3b8",
+            }}
+          >
             Fecha proceso
           </label>
           <input
@@ -65,10 +90,16 @@ export default function SincronizarModal({ isOpen, fecha, onClose, onConfirm }: 
             value={fechaLocal}
             onChange={(e) => setFechaLocal(e.target.value)}
             style={{
-              width: "100%", marginTop: 4, padding: "7px 10px",
-              border: "0.5px solid #e2e8f0", borderRadius: 8,
-              fontSize: 12, fontFamily: "'Courier New', monospace",
-              outline: "none", boxSizing: "border-box", color: "#1e293b",
+              width: "100%",
+              marginTop: 4,
+              padding: "7px 10px",
+              border: "0.5px solid #e2e8f0",
+              borderRadius: 8,
+              fontSize: 12,
+              fontFamily: "'Courier New', monospace",
+              outline: "none",
+              boxSizing: "border-box",
+              color: "#1e293b",
               background: "#f8fafc",
             }}
           />
@@ -76,7 +107,15 @@ export default function SincronizarModal({ isOpen, fecha, onClose, onConfirm }: 
 
         {/* Documento */}
         <div style={{ width: "100%", marginTop: 10 }}>
-          <label style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.07em", color: "#94a3b8" }}>
+          <label
+            style={{
+              fontSize: 10,
+              fontWeight: 500,
+              textTransform: "uppercase",
+              letterSpacing: "0.07em",
+              color: "#94a3b8",
+            }}
+          >
             Documento de identidad
           </label>
           <input
@@ -87,11 +126,17 @@ export default function SincronizarModal({ isOpen, fecha, onClose, onConfirm }: 
             onKeyDown={(e) => e.key === "Enter" && handleConfirm()}
             autoFocus
             style={{
-              width: "100%", marginTop: 4, padding: "7px 10px",
+              width: "100%",
+              marginTop: 4,
+              padding: "7px 10px",
               border: `0.5px solid ${documento ? "#2563eb" : "#e2e8f0"}`,
-              borderRadius: 8, fontSize: 13,
-              fontFamily: "'Courier New', monospace", fontWeight: 600,
-              outline: "none", boxSizing: "border-box", color: "#1e293b",
+              borderRadius: 8,
+              fontSize: 13,
+              fontFamily: "'Courier New', monospace",
+              fontWeight: 600,
+              outline: "none",
+              boxSizing: "border-box",
+              color: "#1e293b",
               background: "#f8fafc",
               boxShadow: documento ? "0 0 0 2px rgba(37,99,235,0.08)" : "none",
             }}
@@ -99,7 +144,11 @@ export default function SincronizarModal({ isOpen, fecha, onClose, onConfirm }: 
         </div>
 
         <div className={styles.confirmBtns}>
-          <button type="button" className={styles.confirmCancel} onClick={onClose}>
+          <button
+            type="button"
+            className={styles.confirmCancel}
+            onClick={onClose}
+          >
             Cancelar
           </button>
           <button
