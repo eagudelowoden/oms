@@ -7,8 +7,8 @@ interface SerialesProps {
   seleccionados: Set<number>;
   onToggle: (idx: number) => void;
   onToggleAll: () => void;
-  onRemove: (idx: number) => void;
   cargandoSeriales?: boolean; // ← nuevo
+  onRemove: (idx: number) => Promise<void>;
 }
 
 export function PrealertaSeriales({

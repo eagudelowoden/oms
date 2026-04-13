@@ -116,6 +116,17 @@ export const PrealertaBackendService = {
     return result.recordset[0]?.actualizados ?? 0; // ← eliminados → actualizados
   },
 
+  async eliminarSerial(prealertaId: number, serial: string): Promise<number> {
+    const pool = await getDBConnection();
+    const result = await pool
+      .request()
+      .input("PrealertaId", sql.Int, prealertaId)
+      .input("Serial", sql.NVarChar(50), serial)
+      .execute("pa_EliminarSerialOms");
+
+    return result.recordset[0]?.eliminados ?? 0;
+  },
+
   // Consume pa_GetListPrealert
   async getListPrealert(): Promise<
     { id: number; nombre: string; fecha?: string; estado?: string }[]

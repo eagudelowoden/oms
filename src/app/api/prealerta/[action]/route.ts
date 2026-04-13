@@ -120,6 +120,31 @@ export async function POST(
     }
   }
 
+  if (action === "eliminarSerial") {
+    try {
+      const body = await request.json();
+      const { prealertaId, serial } = body;
+
+      if (!prealertaId || !serial) {
+        return NextResponse.json(
+          { error: "prealertaId y serial son requeridos" },
+          { status: 400 },
+        );
+      }
+
+      const eliminados = await PrealertaBackendService.eliminarSerial(
+        prealertaId,
+        serial,
+      );
+
+      return NextResponse.json({ success: true, eliminados });
+    } catch {
+      return NextResponse.json(
+        { error: "Error al eliminar serial" },
+        { status: 500 },
+      );
+    }
+  }
   return NextResponse.json({ error: "Acción no válida" }, { status: 404 });
 }
 

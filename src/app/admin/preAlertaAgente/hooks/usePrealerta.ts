@@ -327,10 +327,38 @@ export function usePrealerta() {
     setSerialEscaneados((prev) => [...prev, ...nuevos]);
   };
 
-  const handleRemoveSerial = (idx: number) => {
-    setSerialEscaneados((prev) => prev.filter((_, i) => i !== idx));
-  };
+  const handleRemoveSerial = async (idx: number) => {
+    const serial = serialesEscaneados[idx];
 
+    // Sin prealerta o sin empacar → solo quitar de la vista
+    if (!preAlertaSeleccionada?.id || !serial.caja || serial.caja === 0) {
+      setSerialEscaneados((prev) => prev.filter((_, i) => i !== idx));
+      return;
+    }
+
+    // Siempre eliminar de BD si tiene caja asignada
+    try {
+      const res = await fetch("/api/prealerta/eliminarSerial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prealertaId: preAlertaSeleccionada.id,
+          serial: serial.codigo,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.eliminados > 0) {
+        setSerialEscaneados((prev) => prev.filter((_, i) => i !== idx));
+        showToast("✓ Serial eliminado");
+      } else {
+        showToast("No se pudo eliminar", "error");
+      }
+    } catch {
+      showToast("Error al eliminar", "error");
+    }
+  };
   /* ── SELECCIÓN DE SERIALES ── */
   const handleToggleSerial = (idx: number) => {
     setSeleccionados((prev) => {
@@ -633,6 +661,5 @@ export function usePrealerta() {
     setCajaActual,
     handleDesempacar,
     cargandoSeriales,
-    setCargandoSeriales,
   };
 }

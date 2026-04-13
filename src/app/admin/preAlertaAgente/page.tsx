@@ -52,7 +52,6 @@ export default function PreAlertaAgentePage() {
     setCajaActual,
     handleDesempacar,
     cargandoSeriales,
-    setCargandoSeriales,
   } = usePrealerta();
 
   return (
