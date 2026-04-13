@@ -99,6 +99,7 @@ export const PrealertaBackendService = {
       origen: "api" as const,
       estado: "Empacado" as const,
       tipo: r.tipo ?? "Serializable",
+      caja: r.caja,
     }));
   },
   async desempacarSeriales(
@@ -112,7 +113,7 @@ export const PrealertaBackendService = {
       .input("Seriales", sql.NVarChar(sql.MAX), JSON.stringify(seriales))
       .execute("pa_DesempacarSerialesOms");
 
-    return result.recordset[0]?.eliminados ?? 0;
+    return result.recordset[0]?.actualizados ?? 0; // ← eliminados → actualizados
   },
 
   // Consume pa_GetListPrealert

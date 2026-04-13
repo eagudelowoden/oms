@@ -8,6 +8,7 @@ interface SerialesProps {
   onToggle: (idx: number) => void;
   onToggleAll: () => void;
   onRemove: (idx: number) => void;
+  cargandoSeriales?: boolean; // ← nuevo
 }
 
 export function PrealertaSeriales({
@@ -16,6 +17,7 @@ export function PrealertaSeriales({
   onToggle,
   onToggleAll,
   onRemove,
+  cargandoSeriales,
 }: SerialesProps) {
   const todosSeleccionados =
     seriales.length > 0 && seleccionados.size === seriales.length;
@@ -55,7 +57,23 @@ export function PrealertaSeriales({
         </div>
       </div>
 
-      {seriales.length === 0 ? (
+      {cargandoSeriales ? (
+        <div className={styles.emptySeriales}>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            style={{ animation: "spin 1s linear infinite" }}
+          >
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+          </svg>
+          <p>Cargando seriales...</p>
+        </div>
+      ) : seriales.length === 0 ? (
         <div className={styles.emptySeriales}>
           <svg
             width="20"
@@ -132,7 +150,7 @@ export function PrealertaSeriales({
                     <td className={styles.serialRowCode}>{item.codigo}</td>
 
                     {/* Caja */}
-                    <td className={styles.tdMuted}>—</td>
+                    <td className={styles.tdMuted}>{item.caja ?? "—"}</td>
 
                     {/* Estado */}
                     <td>

@@ -18,8 +18,9 @@ export interface SerialItem {
   codigo: string;
   origen: "manual" | "api";
   estado?: "Pendiente" | "Empacado";
-  tipo?: "Serializable" | "No-serializable"; // ← nuevo
-  mac?: string; // ← nuevo
+  tipo?: "Serializable" | "No-serializable";
+  mac?: string;
+  caja?: number; // ← agregar
 }
 
 interface UsuarioSesion {
@@ -57,6 +58,7 @@ export function usePrealerta() {
   const [seleccionados, setSeleccionados] = useState<Set<number>>(new Set());
   const [modalSincronizar, setModalSincronizar] = useState(false);
   const [cajaActual, setCajaActual] = useState<number>(1);
+  const [cargandoSeriales, setCargandoSeriales] = useState(false);
 
   /* ── TOAST ── */
   const showToast = (msg: string, type: "ok" | "error" = "ok") => {
@@ -223,10 +225,15 @@ export function usePrealerta() {
       const data = await res.json();
 
       if (res.ok && data.eliminados > 0) {
-        // Quitar de la lista local los desempacados
         const codigosDesempacados = new Set(soloEmpacados.map((s) => s.codigo));
+
+        // En lugar de filtrar, actualiza caja a 0 y estado a Pendiente
         setSerialEscaneados((prev) =>
-          prev.filter((s) => !codigosDesempacados.has(s.codigo)),
+          prev.map((s) =>
+            codigosDesempacados.has(s.codigo)
+              ? { ...s, estado: "Pendiente", caja: 0 }
+              : s,
+          ),
         );
         setSeleccionados(new Set());
 
@@ -249,6 +256,7 @@ export function usePrealerta() {
     }
 
     const fetchSeriales = async () => {
+      setCargandoSeriales(true); // ← inicio
       try {
         const res = await fetch(
           `/api/prealerta/seriales?prealertaId=${preAlertaSeleccionada.id}`,
@@ -259,6 +267,8 @@ export function usePrealerta() {
         }
       } catch {
         showToast("Error al cargar seriales", "error");
+      } finally {
+        setCargandoSeriales(false); // ← fin
       }
     };
 
@@ -619,8 +629,10 @@ export function usePrealerta() {
     handleToggleAll,
     handleAgregarSerial,
     handleActualizarTipo,
-    cajaActual, // ✅ agrega
-    setCajaActual, // ✅ agrega
+    cajaActual,
+    setCajaActual,
     handleDesempacar,
+    cargandoSeriales,
+    setCargandoSeriales,
   };
 }

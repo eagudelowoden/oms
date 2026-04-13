@@ -51,6 +51,8 @@ export default function PreAlertaAgentePage() {
     cajaActual,
     setCajaActual,
     handleDesempacar,
+    cargandoSeriales,
+    setCargandoSeriales,
   } = usePrealerta();
 
   return (
@@ -97,6 +99,7 @@ export default function PreAlertaAgentePage() {
         onToggle={handleToggleSerial}
         onToggleAll={handleToggleAll}
         onRemove={handleRemoveSerial}
+        cargandoSeriales={cargandoSeriales} // ← nuevo
       />
 
       {/* Registro Series — fila completa */}
