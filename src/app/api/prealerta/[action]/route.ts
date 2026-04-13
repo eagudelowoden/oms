@@ -79,10 +79,11 @@ export async function POST(
   }
 
   // ── INSERTAR SERIAL ──
-  if (action === "insertSerial") {
+  if (action === "insertSerialBatch") {
     try {
       const body = await request.json();
-      const result = await PrealertaBackendService.insertPrealertSerial(body);
+      const result =
+        await PrealertaBackendService.insertPrealertSerialBatch(body);
       return NextResponse.json(result);
     } catch (error) {
       console.error("Error al insertar serial:", error);

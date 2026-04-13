@@ -66,38 +66,6 @@ export default function RegistroSeries({
           )}
         </div>
 
-        {/* Fila: Serial */}
-        <div className={styles.registroRow}>
-          <label className={styles.registroLabel}>Serial</label>
-          <input
-            type="text"
-            className={styles.registroInput}
-            placeholder="Ingresa el serial..."
-            value={serial}
-            onChange={(e) => setSerial(e.target.value)}
-            disabled={familiaSeleccionada}
-          />
-          {!familiaSeleccionada && (
-            <span className={styles.registroHint}>Serializable</span>
-          )}
-        </div>
-
-        {/* Fila: Tipo */}
-        <div className={styles.registroRow}>
-          <label className={styles.registroLabel}>Tipo</label>
-          <select
-            className={styles.registroSelect}
-            value={tipo}
-            onChange={(e) =>
-              setTipo(e.target.value as "Serializable" | "No-serializable")
-            }
-            disabled={familiaSeleccionada}
-          >
-            <option value="Serializable">Serializable</option>
-            <option value="No-serializable">No serializable</option>
-          </select>
-        </div>
-
         {/* Fila: Cant */}
         <div className={styles.registroRow}>
           <label className={styles.registroLabel}>Cant</label>

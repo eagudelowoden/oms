@@ -173,11 +173,14 @@ export default function ScannerModal({
         streamRef.current = stream;
 
         const track = stream.getVideoTracks()[0];
+        interface TrackCapabilities extends MediaTrackCapabilities {
+          torch?: boolean;
+        }
         setTimeout(async () => {
           try {
-            const capabilities = track.getCapabilities() as any;
+            const capabilities = track.getCapabilities() as TrackCapabilities;
             setTorchAvailable(
-              "torch" in capabilities ? capabilities.torch : true,
+              "torch" in capabilities ? (capabilities.torch ?? true) : true,
             );
           } catch (_) {
             setTorchAvailable(true);

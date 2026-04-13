@@ -28,55 +28,102 @@ export const PrealertaBackendService = {
     const id = result.recordset?.[0]?.Id ?? null;
     return { success: true, id };
   },
-  async insertPrealertSerial(data: {
+  async insertPrealertSerialBatch(data: {
     prealertaId: number;
-    serial: string;
-    mac: string;
-    codigoSap: string;
-    descripcion: string;
-    cantidad: number;
     caja: number;
-    falla: string;
-    tecnicoCliente: string;
-    pedido: string;
-    tramite: string;
-    novedad: string;
-    garantia: number;
-    tipo: string;
+    seriales: { serial: string; mac: string; tipo: string }[];
   }) {
     const pool = await getDBConnection();
-    try {
-      const result = await pool
-        .request()
-        .input("PrealertaId", sql.Int, data.prealertaId)
-        .input("Serial", sql.VarChar(50), data.serial)
-        .input("Mac", sql.VarChar(50), data.mac)
-        .input("CodigoSap", sql.VarChar(20), data.codigoSap)
-        .input("Descripcion", sql.VarChar(150), data.descripcion)
-        .input("Cantidad", sql.Int, data.cantidad)
-        .input("Caja", sql.Int, data.caja)
-        .input("Falla", sql.VarChar(100), data.falla)
-        .input("TecnicoCliente", sql.VarChar(50), data.tecnicoCliente)
-        .input("Pedido", sql.VarChar(30), data.pedido)
-        .input("Tramite", sql.VarChar(30), data.tramite)
-        .input("Novedad", sql.VarChar(30), data.novedad)
-        .input("Garantia", sql.Int, data.garantia)
-        .input("Tipo", sql.VarChar(30), data.tipo)
-        .execute("pa_InsertPrealertSerialOms");
+    let exitosos = 0,
+      yaExistian = 0,
+      fallidos = 0;
 
-      const row = result.recordset?.[0];
-      console.log(`📦 Serial ${data.serial}: ${row?.estado}`);
+    // Ejecutar en paralelo con Promise.all (o en lotes de 10)
+    const LOTE = 10;
+    for (let i = 0; i < data.seriales.length; i += LOTE) {
+      const lote = data.seriales.slice(i, i + LOTE);
+      await Promise.all(
+        lote.map(async ({ serial, mac, tipo }) => {
+          try {
+            const result = await pool
+              .request()
+              .input("PrealertaId", sql.Int, data.prealertaId)
+              .input("Serial", sql.VarChar(50), serial)
+              .input("Mac", sql.VarChar(50), mac)
+              .input("CodigoSap", sql.VarChar(20), "")
+              .input("Descripcion", sql.VarChar(150), "")
+              .input("Cantidad", sql.Int, 1)
+              .input("Caja", sql.Int, data.caja)
+              .input("Falla", sql.VarChar(100), "")
+              .input("TecnicoCliente", sql.VarChar(50), "")
+              .input("Pedido", sql.VarChar(30), "")
+              .input("Tramite", sql.VarChar(30), "")
+              .input("Novedad", sql.VarChar(30), "")
+              .input("Garantia", sql.Int, 0)
+              .input("Tipo", sql.VarChar(30), tipo)
+              .execute("pa_InsertPrealertSerialOms");
 
-      return {
-        success: true,
-        estado: row?.estado ?? "INSERTADO",
-        insertado: row?.insertado ?? 1,
-      };
-    } catch (err) {
-      console.error("❌ error insertando serial:", err);
-      throw err;
+            const row = result.recordset?.[0];
+            if (row?.estado === "YA_EXISTE") yaExistian++;
+            else exitosos++;
+          } catch {
+            fallidos++;
+          }
+        }),
+      );
     }
+
+    return { success: true, exitosos, yaExistian, fallidos };
   },
+  // async insertPrealertSerial(data: {
+  //   prealertaId: number;
+  //   serial: string;
+  //   mac: string;
+  //   codigoSap: string;
+  //   descripcion: string;
+  //   cantidad: number;
+  //   caja: number;
+  //   falla: string;
+  //   tecnicoCliente: string;
+  //   pedido: string;
+  //   tramite: string;
+  //   novedad: string;
+  //   garantia: number;
+  //   tipo: string;
+  // }) {
+  //   const pool = await getDBConnection();
+  //   try {
+  //     const result = await pool
+  //       .request()
+  //       .input("PrealertaId", sql.Int, data.prealertaId)
+  //       .input("Serial", sql.VarChar(50), data.serial)
+  //       .input("Mac", sql.VarChar(50), data.mac)
+  //       .input("CodigoSap", sql.VarChar(20), data.codigoSap)
+  //       .input("Descripcion", sql.VarChar(150), data.descripcion)
+  //       .input("Cantidad", sql.Int, data.cantidad)
+  //       .input("Caja", sql.Int, data.caja)
+  //       .input("Falla", sql.VarChar(100), data.falla)
+  //       .input("TecnicoCliente", sql.VarChar(50), data.tecnicoCliente)
+  //       .input("Pedido", sql.VarChar(30), data.pedido)
+  //       .input("Tramite", sql.VarChar(30), data.tramite)
+  //       .input("Novedad", sql.VarChar(30), data.novedad)
+  //       .input("Garantia", sql.Int, data.garantia)
+  //       .input("Tipo", sql.VarChar(30), data.tipo)
+  //       .execute("pa_InsertPrealertSerialOms");
+
+  //     const row = result.recordset?.[0];
+  //     console.log(`📦 Serial ${data.serial}: ${row?.estado}`);
+
+  //     return {
+  //       success: true,
+  //       estado: row?.estado ?? "INSERTADO",
+  //       insertado: row?.insertado ?? 1,
+  //     };
+  //   } catch (err) {
+  //     console.error("❌ error insertando serial:", err);
+  //     throw err;
+  //   }
+  // },
   // prealerta.service.ts
   async getSerialsByPrealerta(prealertaId: number): Promise<
     {

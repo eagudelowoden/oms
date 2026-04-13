@@ -97,7 +97,7 @@ export function PrealertaSeriales({
             <thead>
               <tr>
                 <th style={{ width: 28 }}></th>
-                <th>Familia</th>
+                <th>Material</th>
                 <th>Serial</th>
                 <th>Caja</th>
                 <th>Estado</th>
