@@ -147,7 +147,21 @@ export function PrealertaSeriales({
                     </td>
 
                     {/* Serial */}
-                    <td className={styles.serialRowCode}>{item.codigo}</td>
+                    <td className={styles.serialRowCode}>
+                      {item.codigo}
+                      {item.descripcion && (
+                        <span
+                          style={{
+                            color: "#94a3b8",
+                            fontSize: 11,
+                            marginLeft: 6,
+                            fontWeight: 400,
+                          }}
+                        >
+                          {item.descripcion}
+                        </span>
+                      )}
+                    </td>
 
                     {/* Caja */}
                     <td className={styles.tdMuted}>{item.caja ?? "—"}</td>
@@ -166,7 +180,7 @@ export function PrealertaSeriales({
                     </td>
 
                     {/* Cant */}
-                    <td className={styles.tdMuted}>1</td>
+                    <td className={styles.tdMuted}>{item.cantidad ?? 1}</td>
 
                     {/* Tipo */}
                     <td className={styles.tdMuted}>

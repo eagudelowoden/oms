@@ -9,6 +9,8 @@ interface Props {
   onShowToast: (msg: string, type?: "ok" | "error") => void;
   onSincronizar: (fecha: string) => void;
   sincronizando: boolean;
+  onSincronizarAccesorios: (fecha?: string) => void; // ← NUEVA
+  sincronizandoAccesorios: boolean; // ← NUEVA
   onEmpacar: () => void;
   empacando: boolean;
   progreso: number;
@@ -24,12 +26,14 @@ export default function PrealertaAcciones({
   onShowToast,
   onSincronizar,
   sincronizando,
-  onEmpacar, // ← agrega
-  empacando, // ← agrega
-  progreso, // ← agrega
-  cajaActual, // ✅ faltaba
-  onCajaChange, // ✅ faltaba — este era el error
+  onEmpacar,
+  empacando,
+  progreso,
+  cajaActual,
+  onCajaChange,
   onDesempacar,
+  onSincronizarAccesorios,
+  sincronizandoAccesorios,
 }: Props) {
   const fechaRef = useRef<HTMLInputElement>(null);
 
@@ -41,10 +45,27 @@ export default function PrealertaAcciones({
     }
     onSincronizar(fecha);
   };
+  const handleSincronizarAccesorios = () => {
+    const fecha = fechaRef.current?.value;
+    onSincronizarAccesorios(fecha ?? undefined);
+  };
 
   return (
     <>
       <div className={styles.midRow}>
+        {/* ── Fecha proceso ── */}
+        <div className={styles.fechaCard}>
+          <label htmlFor="fechaProceso" className={styles.fechaLabel}>
+            Fecha
+          </label>
+          <input
+            id="fechaProceso"
+            ref={fechaRef}
+            type="date"
+            className={styles.fechaInput}
+            defaultValue={new Date().toISOString().slice(0, 10)}
+          />
+        </div>
         <div className={styles.uploadGroup}>
           {/* ── Sincronizar ── */}
           <button
@@ -86,9 +107,51 @@ export default function PrealertaAcciones({
                 <path d="M2 12.5h12" />
               </svg>
             )}
-            {sincronizando ? "Sincronizando…" : "Sincronizar"}
+            {sincronizando ? "Sincronizando…" : "Sincronizar Seriales"}
           </button>
-
+          <button
+            type="button"
+            className={styles.btnUpload}
+            onClick={handleSincronizarAccesorios}
+            disabled={sincronizandoAccesorios}
+            style={
+              sincronizandoAccesorios
+                ? { opacity: 0.7, cursor: "not-allowed" }
+                : undefined
+            }
+          >
+            {sincronizandoAccesorios ? (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                style={{ animation: "spin 0.8s linear infinite" }}
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+            ) : (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M8 10V4M5 7l3-3 3 3" />
+                <path d="M2 12.5h12" />
+              </svg>
+            )}
+            {sincronizandoAccesorios
+              ? "Sincronizando…"
+              : "Sincronizar Accesorios"}
+          </button>
           {/* ── Carga manual ── */}
           <button
             type="button"
@@ -140,7 +203,7 @@ export default function PrealertaAcciones({
           </button>
 
           {/* ── Desempacar ── */}
-          {/* ── Desempacar ── */}
+
           <button
             type="button"
             className={styles.btnDesempacar}
@@ -148,20 +211,6 @@ export default function PrealertaAcciones({
           >
             Desempacar
           </button>
-        </div>
-
-        {/* ── Fecha proceso ── */}
-        <div className={styles.fechaCard}>
-          <label htmlFor="fechaProceso" className={styles.fechaLabel}>
-            Fecha
-          </label>
-          <input
-            id="fechaProceso"
-            ref={fechaRef}
-            type="date"
-            className={styles.fechaInput}
-            defaultValue={new Date().toISOString().slice(0, 10)}
-          />
         </div>
       </div>
 

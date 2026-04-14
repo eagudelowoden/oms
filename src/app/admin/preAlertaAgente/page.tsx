@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react"; // ← agregar useState
 import styles from "./prealerta.module.css";
 
 import { usePrealerta } from "./hooks/usePrealerta";
@@ -8,12 +8,15 @@ import PrealertaHeader from "./components/PrealertaHeader";
 import PrealertaTabla from "./components/PrealertaTabla";
 import PrealertaAcciones from "./components/PrealertaAcciones";
 import RegistroSeries from "./components/RegistroSeries";
-import { PrealertaSeriales } from "./components/PrealertaGrid"; // ← solo este
+import { PrealertaSeriales } from "./components/PrealertaGrid";
 import { ConfirmModal, Toast } from "./components/PrealertaModals";
 import ScannerModal from "../../_modulos/auth/components/scanner/scannerModal";
 import SincronizarModal from "./components/SincronizarModal";
+import SincronizarAccesoriosModal from "./components/SincronizarAccesoriosModal"; // ← NUEVA
 
 export default function PreAlertaAgentePage() {
+  const [modalAccesorios, setModalAccesorios] = useState(false); // ← NUEVA
+
   const {
     isLoading,
     query,
@@ -41,6 +44,8 @@ export default function PreAlertaAgentePage() {
     progreso,
     sincronizando,
     sincronizarDesdeAPI,
+    sincronizandoAccesorios,
+    empacarAccesoriosAgrupados, // ← NUEVA
     seleccionados,
     handleToggleSerial,
     handleToggleAll,
@@ -70,6 +75,7 @@ export default function PreAlertaAgentePage() {
         onSeleccionar={setPreAlertaSeleccionada}
         onEliminar={pedirConfirmacion}
       />
+
       <PrealertaAcciones
         seleccionada={preAlertaSeleccionada}
         onClearSeleccion={() => setPreAlertaSeleccionada(null)}
@@ -80,9 +86,11 @@ export default function PreAlertaAgentePage() {
         onEmpacar={handleEmpacar}
         empacando={empacando}
         progreso={progreso}
-        cajaActual={cajaActual} // ✅ agrega
-        onCajaChange={setCajaActual} // ✅ agrega
+        cajaActual={cajaActual}
+        onCajaChange={setCajaActual}
         onDesempacar={handleDesempacar}
+        onSincronizarAccesorios={() => setModalAccesorios(true)} // ← NUEVA
+        sincronizandoAccesorios={sincronizandoAccesorios}
       />
 
       <ScannerModal
@@ -91,20 +99,18 @@ export default function PreAlertaAgentePage() {
         onConfirm={handleSerialConfirm}
       />
 
-      {/* Seriales — fila completa */}
       <PrealertaSeriales
         seriales={serialesEscaneados}
         seleccionados={seleccionados}
         onToggle={handleToggleSerial}
         onToggleAll={handleToggleAll}
         onRemove={handleRemoveSerial}
-        cargandoSeriales={cargandoSeriales} // ← nuevo
+        cargandoSeriales={cargandoSeriales}
       />
 
-      {/* Registro Series — fila completa */}
       <RegistroSeries
         seleccionados={seleccionados}
-        onActualizarTipo={handleActualizarTipo} // ← reemplaza onAgregarSerial
+        onActualizarTipo={handleActualizarTipo}
         onShowToast={showToast}
       />
 
@@ -123,6 +129,17 @@ export default function PreAlertaAgentePage() {
         })}
         onClose={() => setModalSincronizar(false)}
         onConfirm={(fecha, documento) => sincronizarDesdeAPI(fecha, documento)}
+      />
+
+      {/* ← NUEVA */}
+      <SincronizarAccesoriosModal
+        isOpen={modalAccesorios}
+        onClose={() => setModalAccesorios(false)}
+        sincronizando={sincronizandoAccesorios}
+        onConfirm={(accesorios) => {
+          empacarAccesoriosAgrupados(accesorios);
+          setModalAccesorios(false);
+        }}
       />
     </div>
   );

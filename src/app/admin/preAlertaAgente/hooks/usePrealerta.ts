@@ -20,7 +20,9 @@ export interface SerialItem {
   estado?: "Pendiente" | "Empacado";
   tipo?: "Serializable" | "No-serializable";
   mac?: string;
-  caja?: number; // ← agregar
+  caja?: number;
+  cantidad?: number; // ← NUEVA
+  descripcion?: string; // ← NUEVA (para mostrar nombre del accesorio)
 }
 
 interface UsuarioSesion {
@@ -33,8 +35,11 @@ interface UsuarioSesion {
 }
 
 // ── Constantes API WFSM ──
+// ── Constantes API WFSM ──
 const WFSM_LOGIN_URL = "https://wfsapi.tcpip.tech/api/usuarios/login";
 const WFSM_CONSULTA_URL = "https://wfsapi.tcpip.tech/api/consultas/seriales";
+const WFSM_CONSULTA_ACCESORIOS_URL =
+  "https://wfsapi.tcpip.tech/api/consultas/seriales/accesorios";
 const WFSM_AUTH_BASIC = "Basic bXB1bGlkb0B3b2Rlbi5jb20uY286TTFjaDQzbDIwMjAq";
 
 export function usePrealerta() {
@@ -44,6 +49,7 @@ export function usePrealerta() {
   const [sortCol, setSortCol] = useState<"nombre" | "fecha" | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [sincronizandoAccesorios, setSincronizandoAccesorios] = useState(false);
   const [serialesEscaneados, setSerialEscaneados] = useState<SerialItem[]>([]); // ← cambiado a SerialItem[]
   const [confirmItem, setConfirmItem] = useState<PrealertaItem | null>(null);
   const [preAlertaSeleccionada, setPreAlertaSeleccionada] =
@@ -464,6 +470,44 @@ export function usePrealerta() {
       setSincronizando(false);
     }
   };
+
+  const empacarAccesoriosAgrupados = async (
+    accesorios: Array<{
+      codigoAccesorio: string;
+      accesorio: string;
+      cantidad: number;
+    }>,
+  ) => {
+    setSincronizandoAccesorios(true);
+    try {
+      const codigosExistentes = new Set(
+        serialesEscaneados.map((s) => s.codigo),
+      );
+
+      const nuevos: SerialItem[] = accesorios
+        .filter((a) => !codigosExistentes.has(a.codigoAccesorio))
+        .map((a) => ({
+          codigo: a.codigoAccesorio,
+          descripcion: a.accesorio,
+          cantidad: a.cantidad,
+          origen: "api" as const,
+          tipo: "No-serializable" as const,
+        }));
+
+      if (nuevos.length === 0) {
+        showToast("Todos los accesorios ya están cargados");
+      } else {
+        setSerialEscaneados((prev) => [...prev, ...nuevos]);
+        const total = nuevos.reduce((s, a) => s + (a.cantidad ?? 1), 0);
+        showToast(
+          `✓ ${nuevos.length} material(es) · ${total} unidades importadas`,
+        );
+      }
+    } finally {
+      setSincronizandoAccesorios(false);
+    }
+  };
+
   const handleActualizarTipo = (tipo: "Serializable" | "No-serializable") => {
     setSerialEscaneados((prev) =>
       prev.map((s, i) => (seleccionados.has(i) ? { ...s, tipo } : s)),
@@ -601,131 +645,6 @@ export function usePrealerta() {
       setProgreso(0);
     }
   };
-  // const handleEmpacar = async () => {
-  //   if (!preAlertaSeleccionada) {
-  //     showToast("Selecciona una prealerta primero", "error");
-  //     return;
-  //   }
-
-  //   const serialesAEmpacar =
-  //     seleccionados.size > 0
-  //       ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
-  //       : serialesEscaneados;
-
-  //   const serialesSinDuplicados = serialesAEmpacar.filter(
-  //     (s, index, self) =>
-  //       index === self.findIndex((x) => x.codigo === s.codigo),
-  //   );
-
-  //   if (serialesSinDuplicados.length === 0) {
-  //     showToast("No hay seriales para empacar", "error");
-  //     return;
-  //   }
-
-  //   let idPrealerta = preAlertaSeleccionada.id;
-  //   if (!idPrealerta) {
-  //     const resId = await fetch(
-  //       `/api/prealerta/getId?nombre=${encodeURIComponent(preAlertaSeleccionada.nombre)}`,
-  //     );
-  //     if (resId.ok) idPrealerta = await resId.json();
-  //   }
-  //   if (!idPrealerta) {
-  //     showToast("No se pudo obtener el Id", "error");
-  //     return;
-  //   }
-
-  //   setEmpacando(true);
-  //   setProgreso(0);
-
-  //   let exitosos = 0;
-  //   let yaExistian = 0;
-  //   let fallidos = 0;
-  //   const total = serialesSinDuplicados.length;
-  //   const cajaParaEsteEmpacar = cajaActual; // ✅ captura la caja antes del loop
-
-  //   for (let i = 0; i < total; i++) {
-  //     const { codigo: serial, tipo, mac } = serialesSinDuplicados[i];
-  //     try {
-  //       const res = await fetch("/api/prealerta/insertSerial", {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({
-  //           prealertaId: idPrealerta,
-  //           serial,
-  //           mac: mac ?? "",
-  //           codigoSap: "",
-  //           descripcion: "",
-  //           cantidad: 1,
-  //           caja: cajaParaEsteEmpacar, // ✅ ya no es 0
-  //           falla: "",
-  //           tecnicoCliente: "",
-  //           pedido: "",
-  //           tramite: "",
-  //           novedad: "",
-  //           garantia: 0,
-  //           tipo: tipo ?? "Serializable",
-  //         }),
-  //       });
-
-  //       if (res.ok) {
-  //         const data = await res.json();
-  //         if (data.estado === "INSERTADO" && data.insertado === 1) {
-  //           exitosos++;
-  //         } else if (data.estado === "YA_EXISTE") {
-  //           yaExistian++;
-  //         } else {
-  //           fallidos++;
-  //         }
-  //       } else {
-  //         fallidos++;
-  //       }
-  //     } catch {
-  //       fallidos++;
-  //     }
-
-  //     setProgreso(Math.round(((i + 1) / total) * 100));
-  //   }
-
-  //   setEmpacando(false);
-  //   setProgreso(0);
-
-  //   const codigosEmpacados = new Set(
-  //     serialesSinDuplicados.map((s) => s.codigo),
-  //   );
-  //   if (exitosos > 0 || yaExistian > 0) {
-  //     setSerialEscaneados((prev) =>
-  //       prev.map((s) =>
-  //         codigosEmpacados.has(s.codigo)
-  //           ? { ...s, estado: "Empacado", caja: cajaParaEsteEmpacar } // ✅ guarda la caja en la fila
-  //           : s,
-  //       ),
-  //     );
-  //     setSeleccionados(new Set());
-  //   }
-
-  //   // ✅ Auto-incrementar solo si hubo al menos un insertado nuevo
-  //   if (exitosos > 0) {
-  //     setCajaActual((prev) => prev + 1);
-  //   }
-
-  //   if (exitosos > 0) {
-  //     showToast(
-  //       `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaParaEsteEmpacar}`,
-  //     );
-  //   }
-  //   if (yaExistian > 0) {
-  //     showToast(
-  //       `⚠ ${yaExistian} serial${yaExistian !== 1 ? "es" : ""} ya estaba${yaExistian !== 1 ? "n" : ""} empacado${yaExistian !== 1 ? "s" : ""}`,
-  //       "error",
-  //     );
-  //   }
-  //   if (fallidos > 0) {
-  //     showToast(
-  //       `✗ ${fallidos} serial${fallidos !== 1 ? "es" : ""} no se pudo${fallidos !== 1 ? "n" : ""} insertar`,
-  //       "error",
-  //     );
-  //   }
-  // };
   return {
     // estado
     prealertas,
@@ -768,5 +687,7 @@ export function usePrealerta() {
     setCajaActual,
     handleDesempacar,
     cargandoSeriales,
+    sincronizandoAccesorios,
+    empacarAccesoriosAgrupados,
   };
 }

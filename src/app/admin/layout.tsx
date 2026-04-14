@@ -124,7 +124,7 @@ export default function AdminLayout({
   };
 
   const handleClientSwitchSuccess = (result: ClientSwitchResult) => {
-    console.log("🔄 result completo:", result); // 👈 agrega esto
+    console.log("🔄 result completo:", result);
     if (usuario) {
       const updatedUser = {
         ...usuario,
