@@ -157,7 +157,12 @@ export default function SincronizarAccesoriosModal({
       <div
         className={styles.confirmBox}
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 420 }}
+        style={{
+          maxWidth: 420,
+          maxHeight: "90vh", // ← altura máxima
+          overflowY: "auto", // ← scroll vertical
+          overflowX: "hidden",
+        }}
       >
         {/* Ícono */}
         <svg
