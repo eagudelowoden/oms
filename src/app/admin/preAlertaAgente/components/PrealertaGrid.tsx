@@ -134,16 +134,18 @@ export function PrealertaSeriales({
                     </td>
 
                     {/* Familia */}
+                    {/* Material / codigo_sap */}
                     <td>
-                      <span
-                        className={
-                          item.origen === "api"
-                            ? styles.badgeApi
-                            : styles.badgeManual
-                        }
-                      >
-                        {item.origen === "api" ? "API" : "Manual"}
-                      </span>
+                      {item.origen === "api" ? (
+                        <span
+                          className={styles.serialRowCode}
+                          style={{ fontSize: 11 }}
+                        >
+                          {item.codigo_sap ?? "—"}
+                        </span>
+                      ) : (
+                        <span className={styles.badgeManual}>Manual</span>
+                      )}
                     </td>
 
                     {/* Serial */}

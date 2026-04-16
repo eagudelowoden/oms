@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { aplicarFiltros } from "../config/sincronizarFiltros.config";
 
 export interface PrealertaItem {
   id?: number;
@@ -23,6 +24,7 @@ export interface SerialItem {
   caja?: number;
   cantidad?: number; // ← NUEVA
   descripcion?: string; // ← NUEVA (para mostrar nombre del accesorio)
+  codigo_sap?: string;
 }
 
 interface UsuarioSesion {
@@ -439,21 +441,28 @@ export function usePrealerta() {
       const registros: Array<Record<string, unknown>> = data?.registros ?? [];
 
       // 4. Filtrar por documento_identidad si se proporcionó
+      const registrosFiltradosPorProyecto = aplicarFiltros(registros, 1); // ← ID del proyecto
+
       const registrosFiltrados = documento
-        ? registros.filter(
+        ? registrosFiltradosPorProyecto.filter(
             (r) => String(r.documento_identidad ?? "") === documento.trim(),
           )
-        : registros;
-
+        : registrosFiltradosPorProyecto;
       // 5. Extraer seriales únicos (no nulos, no ya presentes)
       const codigosExistentes = new Set(
         serialesEscaneados.map((s) => s.codigo),
       );
 
       const nuevos: SerialItem[] = registrosFiltrados
-        .map((r) => r.serial as string)
-        .filter((s): s is string => !!s && !codigosExistentes.has(s))
-        .map((codigo) => ({ codigo, origen: "api" as const }));
+        .filter((r) => {
+          const serial = r.serial as string;
+          return !!serial && !codigosExistentes.has(serial);
+        })
+        .map((r) => ({
+          codigo: r.serial as string,
+          codigo_sap: r.codigo_sap as string | undefined, // ← mapear aquí
+          origen: "api" as const,
+        }));
 
       if (nuevos.length === 0) {
         showToast("Sin seriales nuevos en esa fecha");

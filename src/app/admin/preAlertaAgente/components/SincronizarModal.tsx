@@ -8,34 +8,47 @@ interface Props {
   onConfirm: (fecha: string, documento: string) => void;
 }
 
+// Función auxiliar para leer el documento del usuario desde localStorage
+function getDocumentoFromStorage(): string {
+  try {
+    const raw = localStorage.getItem("usuario");
+    if (raw) {
+      const u = JSON.parse(raw);
+      const doc =
+        u.documento_identidad ??
+        u.cedula ??
+        u.numeroDocumento ??
+        u.documento ??
+        "";
+      return String(doc);
+    }
+  } catch (_) {}
+  return "";
+}
+
 export default function SincronizarModal({
   isOpen,
   fecha,
   onClose,
   onConfirm,
 }: Props) {
-  const [documento, setDocumento] = useState("");
-  const [fechaLocal, setFechaLocal] = useState(fecha);
+  // Inicialización lazy: se ejecuta solo una vez al montar
+  const [documento, setDocumento] = useState<string>(() =>
+    getDocumentoFromStorage(),
+  );
+  const [fechaLocal, setFechaLocal] = useState<string>(fecha);
 
-  // Pre-llenar con el documento del usuario en sesión
+  // Solo sincroniza fechaLocal cuando cambia la prop `fecha`
+  useEffect(() => {
+    setFechaLocal(fecha);
+  }, [fecha]);
+
+  // Re-leer documento cuando el modal se abre (sin setState síncrono en el effect body)
   useEffect(() => {
     if (!isOpen) return;
-    setFechaLocal(fecha);
-    try {
-      const raw = localStorage.getItem("usuario");
-      if (raw) {
-        const u = JSON.parse(raw);
-        // intentar campo documento_identidad o cedula o numeroDocumento
-        const doc =
-          u.documento_identidad ??
-          u.cedula ??
-          u.numeroDocumento ??
-          u.documento ??
-          "";
-        setDocumento(String(doc));
-      }
-    } catch (_) {}
-  }, [isOpen, fecha]);
+    const doc = getDocumentoFromStorage();
+    setDocumento(doc);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
