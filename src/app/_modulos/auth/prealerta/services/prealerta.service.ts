@@ -75,56 +75,7 @@ export const PrealertaBackendService = {
 
     return { success: true, exitosos, yaExistian, fallidos };
   },
-  // async insertPrealertSerial(data: {
-  //   prealertaId: number;
-  //   serial: string;
-  //   mac: string;
-  //   codigoSap: string;
-  //   descripcion: string;
-  //   cantidad: number;
-  //   caja: number;
-  //   falla: string;
-  //   tecnicoCliente: string;
-  //   pedido: string;
-  //   tramite: string;
-  //   novedad: string;
-  //   garantia: number;
-  //   tipo: string;
-  // }) {
-  //   const pool = await getDBConnection();
-  //   try {
-  //     const result = await pool
-  //       .request()
-  //       .input("PrealertaId", sql.Int, data.prealertaId)
-  //       .input("Serial", sql.VarChar(50), data.serial)
-  //       .input("Mac", sql.VarChar(50), data.mac)
-  //       .input("CodigoSap", sql.VarChar(20), data.codigoSap)
-  //       .input("Descripcion", sql.VarChar(150), data.descripcion)
-  //       .input("Cantidad", sql.Int, data.cantidad)
-  //       .input("Caja", sql.Int, data.caja)
-  //       .input("Falla", sql.VarChar(100), data.falla)
-  //       .input("TecnicoCliente", sql.VarChar(50), data.tecnicoCliente)
-  //       .input("Pedido", sql.VarChar(30), data.pedido)
-  //       .input("Tramite", sql.VarChar(30), data.tramite)
-  //       .input("Novedad", sql.VarChar(30), data.novedad)
-  //       .input("Garantia", sql.Int, data.garantia)
-  //       .input("Tipo", sql.VarChar(30), data.tipo)
-  //       .execute("pa_InsertPrealertSerialOms");
 
-  //     const row = result.recordset?.[0];
-  //     console.log(`📦 Serial ${data.serial}: ${row?.estado}`);
-
-  //     return {
-  //       success: true,
-  //       estado: row?.estado ?? "INSERTADO",
-  //       insertado: row?.insertado ?? 1,
-  //     };
-  //   } catch (err) {
-  //     console.error("❌ error insertando serial:", err);
-  //     throw err;
-  //   }
-  // },
-  // prealerta.service.ts
   async getSerialsByPrealerta(prealertaId: number): Promise<
     {
       codigo: string;
