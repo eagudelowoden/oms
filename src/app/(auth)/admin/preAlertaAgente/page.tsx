@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import styles from "./css/prealerta.module.css";
-import { usePrealerta } from "./hooks/usePrealerta";
+import { usePrealerta, SerialItem } from "./hooks/usePrealerta";
 import PrealertaHeader from "./components/PrealertaEncabezado";
 import PrealertaTabla from "./components/PrealertaTablaDetalle";
 
@@ -103,11 +103,20 @@ export default function PreAlertaAgentePage() {
     };
   }, [preAlertaSeleccionada?.id]);
 
+  const esCajaExistente = cajas.some((c) => c.numero === cajaActual);
+  const serialesMostrados: SerialItem[] = esCajaExistente
+    ? serialesDeCaja.map((s) => ({
+        codigo: s.serial,
+        origen: "api" as const,
+        estado: "Empacado" as const,
+        tipo: s.tipo as "Serializable" | "No-serializable",
+        caja: cajaActual,
+      }))
+    : serialesEscaneados;
+
   // ── Carga seriales cuando se selecciona una caja existente ──
   useEffect(() => {
     if (!preAlertaSeleccionada?.id) return;
-
-    const esCajaExistente = cajas.some((c) => c.numero === cajaActual);
 
     let cancelled = false;
 
@@ -199,7 +208,7 @@ export default function PreAlertaAgentePage() {
       />
 
       <PrealertaSeriales
-        seriales={serialesEscaneados}
+        seriales={serialesMostrados}
         seleccionados={seleccionados}
         onToggle={handleToggleSerial}
         onToggleAll={handleToggleAll}

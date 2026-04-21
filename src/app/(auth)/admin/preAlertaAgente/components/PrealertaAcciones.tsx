@@ -35,7 +35,6 @@ interface Props {
 
 export default function PrealertaAcciones({
   seleccionada,
-  onClearSeleccion,
   onAbrirScanner,
   onShowToast,
   onSincronizar,
@@ -49,7 +48,6 @@ export default function PrealertaAcciones({
   onSincronizarAccesorios,
   sincronizandoAccesorios,
   cajas,
-  serialesDeCaja,
 }: Props) {
   const fechaRef = useRef<HTMLInputElement>(null);
 
@@ -68,7 +66,6 @@ export default function PrealertaAcciones({
   };
 
   const siguienteNumero = (cajas.at(-1)?.numero ?? 0) + 1;
-  const esCajaExistente = cajas.some((c) => c.numero === cajaActual);
 
   return (
     <>
