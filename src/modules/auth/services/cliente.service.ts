@@ -1,5 +1,5 @@
-import sql from 'mssql';
-import { getDBConnection } from '../../../../lib/db';
+import sql from "mssql";
+import { getDBConnection } from "@/lib/db";
 
 export interface ClienteData {
   id: number;
@@ -25,9 +25,10 @@ export const ClienteBackendService = {
       const pool = await getDBConnection(true);
 
       // 1. Ejecutar SP pa_GetListClient con el parámetro EXACTO @UsuarioId
-      const resultSP = await pool.request()
-        .input('UsuarioId', sql.Int, usuarioId)
-        .execute('pa_GetListClient');
+      const resultSP = await pool
+        .request()
+        .input("UsuarioId", sql.Int, usuarioId)
+        .execute("pa_GetListClient");
 
       const rowsSP = resultSP.recordset as SQLRow[];
       const nombres = rowsSP
@@ -40,9 +41,9 @@ export const ClienteBackendService = {
        * 2. Como el SP no trae el dbase, lo consultamos directamente de la tabla.
        * Filtramos por UsuarioId para asegurar que solo vea lo permitido.
        */
-      const resultDetalles = await pool.request()
-        .input('UId', sql.Int, usuarioId)
-        .query(`
+      const resultDetalles = await pool
+        .request()
+        .input("UId", sql.Int, usuarioId).query(`
           SELECT 
             c.id, 
             c.nombre, 
@@ -55,15 +56,17 @@ export const ClienteBackendService = {
 
       const rowsDetalles = resultDetalles.recordset as SQLRow[];
 
-      return rowsDetalles.map((r): ClienteData => ({
-        id: (r.id ?? 0) as number,
-        nombre: (r.nombre ?? "") as string,
-        dbase: (r.dbase ?? "") as string
-      }));
-
+      return rowsDetalles.map(
+        (r): ClienteData => ({
+          id: (r.id ?? 0) as number,
+          nombre: (r.nombre ?? "") as string,
+          dbase: (r.dbase ?? "") as string,
+        }),
+      );
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : "Error desconocido en SQL";
-      console.error('❌ Error en ClienteBackendService.getListClient:', msg);
+      const msg =
+        error instanceof Error ? error.message : "Error desconocido en SQL";
+      console.error("❌ Error en ClienteBackendService.getListClient:", msg);
       throw new Error(msg);
     }
   },
@@ -74,15 +77,16 @@ export const ClienteBackendService = {
   async getIdClient(nombre: string): Promise<number | null> {
     try {
       const pool = await getDBConnection(true);
-      const result = await pool.request()
-        .input('Nombre', sql.VarChar(50), nombre) // Parámetro EXACTO @Nombre
-        .execute('pa_GetIdClient');
+      const result = await pool
+        .request()
+        .input("Nombre", sql.VarChar(50), nombre) // Parámetro EXACTO @Nombre
+        .execute("pa_GetIdClient");
 
       const record = result.recordset[0] as SQLRow | undefined;
       return (record?.id ?? record?.Id ?? null) as number | null;
     } catch (error: unknown) {
-      console.error('❌ Error en getIdClient:', error);
+      console.error("❌ Error en getIdClient:", error);
       return null;
     }
-  }
+  },
 };

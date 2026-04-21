@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import styles from "./login.module.css";
 // 1. IMPORTAR EL COMPONENTE
-import ModalElegirCliente from "../../app/_modulos/auth/components/ModalElegirCliente/ModalElegirCliente";
+import ModalElegirCliente from "@/modules/auth/components/ModalElegirCliente/ModalElegirCliente";
 
 // --- INTERFACES PARA TYPESCRIPT ---
 interface LoginFormInputs {

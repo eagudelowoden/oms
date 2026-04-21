@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MenuService } from "../../_modulos/auth/services/menu.service";
+import { MenuService } from "@/modules/menu/services/menu.service";
 
 export async function GET(request: NextRequest) {
   try {

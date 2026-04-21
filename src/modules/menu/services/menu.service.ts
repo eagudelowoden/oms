@@ -1,5 +1,5 @@
 import sql from "mssql";
-import { getDBConnection } from "../../../../lib/db";
+import { getDBConnection } from "@/lib/db";
 
 export interface MenuItem {
   id: string;

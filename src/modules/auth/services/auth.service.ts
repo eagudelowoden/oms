@@ -1,5 +1,6 @@
 import sql from "mssql";
-import { getDBConnection } from "../../../../lib/db";
+
+import { getDBConnection } from "@/lib/db";
 import { UsuarioModel } from "../models/UsuarioModel";
 
 export const AuthBackendService = {
