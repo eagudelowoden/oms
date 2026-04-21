@@ -86,6 +86,7 @@ export const PrealertaBackendService = {
       origen: "api";
       estado: "Empacado";
       tipo: string;
+      cantidad: number;
       caja: number;
     }[]
   > {
@@ -93,7 +94,7 @@ export const PrealertaBackendService = {
     const result = await pool
       .request()
       .input("PrealertaId", sql.Int, prealertaId).query(`
-        SELECT Serial AS codigo, Caja AS caja, Tipo AS tipo
+        SELECT Serial AS codigo, cantidad as Cantidad,Caja AS caja, Tipo AS tipo
         FROM PrealertaSerial
         WHERE PrealertaId = @PrealertaId
       `);
@@ -102,6 +103,7 @@ export const PrealertaBackendService = {
       origen: "api" as const,
       estado: "Empacado" as const,
       tipo: r.tipo ?? "Serializable",
+      cantidad: r.cantidad,
       caja: r.caja,
     }));
   },
@@ -145,7 +147,8 @@ export const PrealertaBackendService = {
         SELECT
           Serial  AS serial,
           Mac     AS mac,
-          Tipo    AS tipo
+          Tipo    AS tipo,
+          Cantidad as cantidad
         FROM PrealertaSerial
         WHERE PrealertaId = @PrealertaId
           AND Caja = @Caja

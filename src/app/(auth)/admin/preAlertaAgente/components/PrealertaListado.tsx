@@ -22,6 +22,7 @@ export function PrealertaSeriales({
   const todosSeleccionados =
     seriales.length > 0 && seleccionados.size === seriales.length;
   const algunoSeleccionado = seleccionados.size > 0 && !todosSeleccionados;
+  console.log("SERIALES", seriales);
 
   return (
     <div className={styles.card}>
@@ -182,7 +183,7 @@ export function PrealertaSeriales({
                     </td>
 
                     {/* Cant */}
-                    <td className={styles.tdMuted}>{item.cantidad ?? 1}</td>
+                    <td className={styles.tdMuted}>{item.cantidad ?? 2}</td>
 
                     {/* Tipo */}
                     <td className={styles.tdMuted}>

@@ -110,6 +110,7 @@ export default function PreAlertaAgentePage() {
         origen: "api" as const,
         estado: "Empacado" as const,
         tipo: s.tipo as "Serializable" | "No-serializable",
+        cantidad: s.cantidad,
         caja: cajaActual,
       }))
     : serialesEscaneados;

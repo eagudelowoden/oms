@@ -12,6 +12,7 @@ export interface SerialEmpacado {
   serial: string;
   mac: string;
   tipo: string;
+  cantidad: number;
 }
 
 interface Props {
