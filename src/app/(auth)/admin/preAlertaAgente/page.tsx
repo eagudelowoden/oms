@@ -10,7 +10,7 @@ import PrealertaAcciones from "./components/PrealertaAcciones";
 import RegistroSeries from "./components/RegistroSeries";
 import { PrealertaSeriales } from "./components/PrealertaGrid";
 import { ConfirmModal, Toast } from "./components/PrealertaModals";
-import ScannerModal from "../../_modulos/auth/components/scanner/scannerModal";
+import ScannerModal from "@/modules/auth/components/scanner/scannerModal";
 import SincronizarModal from "./components/SincronizarModal";
 import SincronizarAccesoriosModal from "./components/SincronizarAccesoriosModal"; // ← NUEVA
 

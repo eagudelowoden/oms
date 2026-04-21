@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import styles from "./admin.module.css";
-import ModalElegirCliente from "../../../src/app/_modulos/auth/components/ModalElegirCliente/ModalElegirCliente";
-import { useMenu } from "../_modulos/auth/components/menu/useMenu";
-
+import ModalElegirCliente from "@/modules/auth/components/ModalElegirCliente/ModalElegirCliente";
+import { useMenu } from "@/modules/auth/hooks/useMenu";
 // --- INTERFACES ACTUALIZADAS ---
 interface Usuario {
   id: number;
