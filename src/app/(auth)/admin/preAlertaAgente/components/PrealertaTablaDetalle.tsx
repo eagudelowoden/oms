@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "../prealerta.module.css";
+import styles from "../css/prealerta.module.css";
 import { PrealertaItem } from "../hooks/usePrealerta";
 
 interface Props {

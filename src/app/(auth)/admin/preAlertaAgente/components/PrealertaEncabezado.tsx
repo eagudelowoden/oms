@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import styles from "../prealerta.module.css";
+import styles from "../css/prealerta.module.css";
 
 interface Sede {
   id: number;

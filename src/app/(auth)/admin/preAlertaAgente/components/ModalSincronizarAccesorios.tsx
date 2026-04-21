@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styles from "../prealerta.module.css";
+import styles from "../css/prealerta.module.css";
 
 interface AccesorioAgrupado {
   codigoAccesorio: string;

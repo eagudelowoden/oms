@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import styles from "./admin.module.css";
+import styles from "../admin/preAlertaAgente/css/admin.module.css";
 import ModalElegirCliente from "@/modules/auth/components/ModalElegirCliente/ModalElegirCliente";
 import { useMenu } from "@/modules/auth/hooks/useMenu";
 // --- INTERFACES ACTUALIZADAS ---

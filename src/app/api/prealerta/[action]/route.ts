@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrealertaBackendService } from "@/modules/prealerta/services/prealerta.service";
+import { PrealertaBackendService } from "@/app/services/prealerta.service";
 
 export async function GET(
   request: Request,

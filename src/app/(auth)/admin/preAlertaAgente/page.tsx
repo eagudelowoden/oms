@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import styles from "./prealerta.module.css";
+import styles from "./css/prealerta.module.css";
 import { usePrealerta } from "./hooks/usePrealerta";
 import PrealertaHeader from "./components/PrealertaEncabezado";
 import PrealertaTabla from "./components/PrealertaTablaDetalle";
+
 import PrealertaAcciones, {
   CajaItem,
   SerialEmpacado,

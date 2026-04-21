@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import styles from "../registroSeries.module.css";
-import preStyles from "../prealerta.module.css";
+import styles from "../css/registroSeries.module.css";
+
 import { SerialItem } from "../hooks/usePrealerta";
 
 const FAMILIAS = [
@@ -40,8 +40,8 @@ export default function RegistroSeries({
   };
   return (
     <div className={styles.registroCard}>
-      <div className={preStyles.cardInnerHeader}>
-        <span className={preStyles.cardInnerTitle}>Registro Accesorios</span>
+      <div className={styles.cardInnerHeader}>
+        <span className={styles.cardInnerTitle}>Registro Accesorios</span>
       </div>
 
       <div className={styles.registroBody}>
