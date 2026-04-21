@@ -14,7 +14,6 @@ export interface PrealertaItem {
   origenId?: number;
 }
 
-// ← nuevo: cada serial sabe de dónde vino
 export interface SerialItem {
   codigo: string;
   origen: "manual" | "api";
@@ -22,8 +21,8 @@ export interface SerialItem {
   tipo?: "Serializable" | "No-serializable";
   mac?: string;
   caja?: number;
-  cantidad?: number; // ← NUEVA
-  descripcion?: string; // ← NUEVA (para mostrar nombre del accesorio)
+  cantidad?: number;
+  descripcion?: string;
   codigo_sap?: string;
 }
 
@@ -36,12 +35,8 @@ interface UsuarioSesion {
   correo?: string;
 }
 
-// ── Constantes API WFSM ──
-// ── Constantes API WFSM ──
 const WFSM_LOGIN_URL = "https://wfsapi.tcpip.tech/api/usuarios/login";
 const WFSM_CONSULTA_URL = "https://wfsapi.tcpip.tech/api/consultas/seriales";
-const WFSM_CONSULTA_ACCESORIOS_URL =
-  "https://wfsapi.tcpip.tech/api/consultas/seriales/accesorios";
 const WFSM_AUTH_BASIC = "Basic bXB1bGlkb0B3b2Rlbi5jb20uY286TTFjaDQzbDIwMjAq";
 
 export function usePrealerta() {
@@ -52,7 +47,7 @@ export function usePrealerta() {
   const [sortAsc, setSortAsc] = useState(true);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [sincronizandoAccesorios, setSincronizandoAccesorios] = useState(false);
-  const [serialesEscaneados, setSerialEscaneados] = useState<SerialItem[]>([]); // ← cambiado a SerialItem[]
+  const [serialesEscaneados, setSerialEscaneados] = useState<SerialItem[]>([]);
   const [confirmItem, setConfirmItem] = useState<PrealertaItem | null>(null);
   const [preAlertaSeleccionada, setPreAlertaSeleccionada] =
     useState<PrealertaItem | null>(null);
@@ -79,7 +74,6 @@ export function usePrealerta() {
     const cargar = async () => {
       try {
         const res = await fetch("/api/prealerta/list");
-
         if (!res.ok) throw new Error("Error al obtener datos");
         setPrealertas(await res.json());
       } catch (e) {
@@ -90,6 +84,33 @@ export function usePrealerta() {
     };
     cargar();
   }, []);
+
+  /* ── CARGAR SERIALES DE PREALERTA ── */
+  useEffect(() => {
+    if (!preAlertaSeleccionada?.id) {
+      setSerialEscaneados([]);
+      return;
+    }
+
+    const fetchSeriales = async () => {
+      setCargandoSeriales(true);
+      try {
+        const res = await fetch(
+          `/api/prealerta/seriales?prealertaId=${preAlertaSeleccionada.id}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setSerialEscaneados(data);
+        }
+      } catch {
+        showToast("Error al cargar seriales", "error");
+      } finally {
+        setCargandoSeriales(false);
+      }
+    };
+
+    fetchSeriales();
+  }, [preAlertaSeleccionada?.id]);
 
   /* ── FILTRO + ORDEN ── */
   const filteredAndSorted = useMemo(() => {
@@ -113,12 +134,12 @@ export function usePrealerta() {
       setSortAsc(true);
     }
   };
+
   const handleAgregarSerial = (item: SerialItem) => {
-    console.log("➕ serial agregado:", item); // ← agrega
     setSerialEscaneados((prev) => [...prev, item]);
   };
+
   /* ── CREAR PREALERTA ── */
-  // Cambia la firma para recibir los datos de sede
   const handleCrearPrealerta = async (sedeId: number, sedeNombre: string) => {
     const usuarioRaw = localStorage.getItem("usuario");
     const usuario: UsuarioSesion | null = usuarioRaw
@@ -130,14 +151,12 @@ export function usePrealerta() {
       return;
     }
 
-    const ahora = new Date();
-
     try {
       const res = await fetch("/api/prealerta/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nombre: `${usuario.nombres} ${usuario.apellidos} - CODIGO - ${sedeNombre}`, // SP reemplaza CODIGO por el ID
+          nombre: `${usuario.nombres} ${usuario.apellidos} - CODIGO - ${sedeNombre}`,
           tipoOrigenId: 13,
           origenId: sedeId,
           guia: `GUIA-${Math.floor(Math.random() * 1000)}`,
@@ -154,10 +173,8 @@ export function usePrealerta() {
 
       const created = await res.json();
       const idCreado = created?.id;
-
-      // ✅ Nombre con ID real para mostrar en pantalla
       const nombreAuto = `${usuario.nombres} ${usuario.apellidos} - ${idCreado} - ${sedeNombre}`;
-
+      const ahora = new Date();
       const fechaFormateada = ahora.toLocaleDateString("es-CO", {
         day: "2-digit",
         month: "2-digit",
@@ -165,7 +182,6 @@ export function usePrealerta() {
         timeZone: "America/Bogota",
       });
 
-      console.log("✅ created:", created);
       setPrealertas((prev) => [
         {
           id: idCreado,
@@ -187,13 +203,13 @@ export function usePrealerta() {
     }
   };
 
+  /* ── DESEMPACAR ── */
   const handleDesempacar = async () => {
     if (!preAlertaSeleccionada) {
       showToast("Selecciona una prealerta primero", "error");
       return;
     }
 
-    // Solo desempacar los seleccionados que estén empacados
     const serialesADesempacar =
       seleccionados.size > 0
         ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
@@ -234,8 +250,6 @@ export function usePrealerta() {
 
       if (res.ok && data.eliminados > 0) {
         const codigosDesempacados = new Set(soloEmpacados.map((s) => s.codigo));
-
-        // En lugar de filtrar, actualiza caja a 0 y estado a Pendiente
         setSerialEscaneados((prev) =>
           prev.map((s) =>
             codigosDesempacados.has(s.codigo)
@@ -244,7 +258,6 @@ export function usePrealerta() {
           ),
         );
         setSeleccionados(new Set());
-
         showToast(
           `✓ ${data.eliminados} serial${data.eliminados !== 1 ? "es" : ""} desempacado${data.eliminados !== 1 ? "s" : ""}`,
         );
@@ -255,33 +268,6 @@ export function usePrealerta() {
       showToast("Error al desempacar", "error");
     }
   };
-
-  // usePrealerta.ts — reemplaza o agrega este efecto
-  useEffect(() => {
-    if (!preAlertaSeleccionada?.id) {
-      setSerialEscaneados([]);
-      return;
-    }
-
-    const fetchSeriales = async () => {
-      setCargandoSeriales(true); // ← inicio
-      try {
-        const res = await fetch(
-          `/api/prealerta/seriales?prealertaId=${preAlertaSeleccionada.id}`,
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setSerialEscaneados(data);
-        }
-      } catch {
-        showToast("Error al cargar seriales", "error");
-      } finally {
-        setCargandoSeriales(false); // ← fin
-      }
-    };
-
-    fetchSeriales();
-  }, [preAlertaSeleccionada?.id]);
 
   /* ── ELIMINAR PREALERTA ── */
   const pedirConfirmacion = (item: PrealertaItem) => setConfirmItem(item);
@@ -326,7 +312,7 @@ export function usePrealerta() {
     }
   };
 
-  /* ── SERIALES manuales ── */
+  /* ── SERIALES MANUALES ── */
   const handleSerialConfirm = (seriales: string[]) => {
     const nuevos: SerialItem[] = seriales.map((codigo) => ({
       codigo,
@@ -338,13 +324,11 @@ export function usePrealerta() {
   const handleRemoveSerial = async (idx: number) => {
     const serial = serialesEscaneados[idx];
 
-    // Sin prealerta → solo quitar de la vista
     if (!preAlertaSeleccionada?.id) {
       setSerialEscaneados((prev) => prev.filter((_, i) => i !== idx));
       return;
     }
 
-    // Siempre eliminar de BD
     try {
       const res = await fetch("/api/prealerta/eliminarSerial", {
         method: "POST",
@@ -367,7 +351,8 @@ export function usePrealerta() {
       showToast("Error al eliminar", "error");
     }
   };
-  /* ── SELECCIÓN DE SERIALES ── */
+
+  /* ── SELECCIÓN ── */
   const handleToggleSerial = (idx: number) => {
     setSeleccionados((prev) => {
       const next = new Set(prev);
@@ -379,9 +364,9 @@ export function usePrealerta() {
 
   const handleToggleAll = () => {
     if (seleccionados.size === serialesEscaneados.length) {
-      setSeleccionados(new Set()); // deseleccionar todos
+      setSeleccionados(new Set());
     } else {
-      setSeleccionados(new Set(serialesEscaneados.map((_, i) => i))); // seleccionar todos
+      setSeleccionados(new Set(serialesEscaneados.map((_, i) => i)));
     }
   };
 
@@ -392,7 +377,6 @@ export function usePrealerta() {
   ) => {
     setSincronizando(true);
     try {
-      // 1. Login
       const loginRes = await fetch(WFSM_LOGIN_URL, {
         method: "POST",
         headers: {
@@ -405,16 +389,13 @@ export function usePrealerta() {
       const { token } = await loginRes.json();
       if (!token) throw new Error("Token no recibido");
 
-      // 2. Construir rango — la API espera hora Colombia directa (no UTC)
       const hoyCol = new Date().toLocaleDateString("en-CA", {
         timeZone: "America/Bogota",
       });
       const fecha = fechaProceso ?? hoyCol;
-      // Dia completo en hora Colombia: 00:00:00 a 23:59:59
       const minRecepcion = `${fecha}T00:00:00.000Z`;
       const maxRecepcion = `${fecha}T23:59:59.000Z`;
 
-      // 3. Consulta
       const params = new URLSearchParams({
         "visita/min_recepcion": minRecepcion,
         "visita/max_recepcion": maxRecepcion,
@@ -439,16 +420,13 @@ export function usePrealerta() {
 
       const data = await consultaRes.json();
       const registros: Array<Record<string, unknown>> = data?.registros ?? [];
-
-      // 4. Filtrar por documento_identidad si se proporcionó
-      const registrosFiltradosPorProyecto = aplicarFiltros(registros, 1); // ← ID del proyecto
-
+      const registrosFiltradosPorProyecto = aplicarFiltros(registros, 1);
       const registrosFiltrados = documento
         ? registrosFiltradosPorProyecto.filter(
             (r) => String(r.documento_identidad ?? "") === documento.trim(),
           )
         : registrosFiltradosPorProyecto;
-      // 5. Extraer seriales únicos (no nulos, no ya presentes)
+
       const codigosExistentes = new Set(
         serialesEscaneados.map((s) => s.codigo),
       );
@@ -460,7 +438,7 @@ export function usePrealerta() {
         })
         .map((r) => ({
           codigo: r.serial as string,
-          codigo_sap: r.codigo_sap as string | undefined, // ← mapear aquí
+          codigo_sap: r.codigo_sap as string | undefined,
           origen: "api" as const,
         }));
 
@@ -480,6 +458,7 @@ export function usePrealerta() {
     }
   };
 
+  /* ── ACCESORIOS ── */
   const empacarAccesoriosAgrupados = async (
     accesorios: Array<{
       codigoAccesorio: string;
@@ -523,31 +502,7 @@ export function usePrealerta() {
     );
   };
 
-  // Cuando seleccionas una prealerta, obtén la última caja usada
-  useEffect(() => {
-    if (!preAlertaSeleccionada?.id) return;
-
-    const fetchUltimaCaja = async () => {
-      try {
-        const res = await fetch(
-          `/api/prealerta/ultimaCaja?prealertaId=${preAlertaSeleccionada.id}`,
-        );
-        if (res.ok) {
-          const data = await res.json();
-          // Si ya tiene cajas usadas, la siguiente es ultimaCaja + 1
-          // Si no tiene ninguna, empieza en 1
-          setCajaActual((data.ultimaCaja ?? 0) + 1);
-        }
-      } catch {
-        setCajaActual(1);
-      }
-    };
-
-    fetchUltimaCaja();
-  }, [preAlertaSeleccionada?.id]);
-
   /* ── EMPACAR ── */
-
   const handleEmpacar = async () => {
     if (!preAlertaSeleccionada) {
       showToast("Selecciona una prealerta primero", "error");
@@ -625,12 +580,8 @@ export function usePrealerta() {
         setSeleccionados(new Set());
       }
 
-      // Auto-incrementar caja solo si hubo al menos un insertado nuevo
       if (exitosos > 0) {
         setCajaActual((prev) => prev + 1);
-      }
-
-      if (exitosos > 0) {
         showToast(
           `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaParaEsteEmpacar}`,
         );
@@ -654,8 +605,8 @@ export function usePrealerta() {
       setProgreso(0);
     }
   };
+
   return {
-    // estado
     prealertas,
     isLoading,
     query,
@@ -677,7 +628,6 @@ export function usePrealerta() {
     sincronizando,
     modalSincronizar,
     setModalSincronizar,
-    // acciones
     handleSort,
     handleCrearPrealerta,
     pedirConfirmacion,

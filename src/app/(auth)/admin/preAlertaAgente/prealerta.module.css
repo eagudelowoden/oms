@@ -1039,3 +1039,33 @@
   outline: none;
   border-color: #2563eb;
 }
+.selectWrapper {
+  position: relative;
+}
+
+.cajaSelect {
+  width: 100%;
+  padding: 8px 32px 8px 10px;
+  appearance: none;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.cajaSelect:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selectChevron {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  width: 14px;
+  color: var(--text-secondary);
+}

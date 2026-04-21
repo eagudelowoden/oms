@@ -1,21 +1,25 @@
 "use client";
 
-import React, { useState } from "react"; // ← agregar useState
+import React, { useState, useEffect } from "react";
 import styles from "./prealerta.module.css";
-
 import { usePrealerta } from "./hooks/usePrealerta";
 import PrealertaHeader from "./components/PrealertaEncabezado";
 import PrealertaTabla from "./components/PrealertaTablaDetalle";
-import PrealertaAcciones from "./components/PrealertaAcciones";
+import PrealertaAcciones, {
+  CajaItem,
+  SerialEmpacado,
+} from "./components/PrealertaAcciones";
 import RegistroSeries from "./components/RegistroSeries";
 import { PrealertaSeriales } from "./components/PrealertaListado";
 import { ConfirmModal, Toast } from "./components/PrealertaModales";
 import ScannerModal from "@/modules/auth/components/scanner/scannerModal";
 import SincronizarModal from "./components/ModalSincronizar";
-import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios"; // ← NUEVA
+import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios";
 
 export default function PreAlertaAgentePage() {
-  const [modalAccesorios, setModalAccesorios] = useState(false); // ← NUEVA
+  const [modalAccesorios, setModalAccesorios] = useState(false);
+  const [cajas, setCajas] = useState<CajaItem[]>([]);
+  const [serialesDeCaja, setSerialesdeCaja] = useState<SerialEmpacado[]>([]);
 
   const {
     isLoading,
@@ -45,7 +49,7 @@ export default function PreAlertaAgentePage() {
     sincronizando,
     sincronizarDesdeAPI,
     sincronizandoAccesorios,
-    empacarAccesoriosAgrupados, // ← NUEVA
+    empacarAccesoriosAgrupados,
     seleccionados,
     handleToggleSerial,
     handleToggleAll,
@@ -58,6 +62,98 @@ export default function PreAlertaAgentePage() {
     handleDesempacar,
     cargandoSeriales,
   } = usePrealerta();
+
+  // ── Carga cajas cuando cambia la prealerta seleccionada ──
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchCajas = async () => {
+      if (!preAlertaSeleccionada?.id) {
+        if (!cancelled) {
+          setCajas([]);
+          setCajaActual(1);
+          setSerialesdeCaja([]);
+        }
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `/api/prealerta/cajas?prealertaId=${preAlertaSeleccionada.id}`,
+        );
+        if (res.ok && !cancelled) {
+          const data: { cajas: CajaItem[] } = await res.json();
+          setCajas(data.cajas);
+          setCajaActual((data.cajas.at(-1)?.numero ?? 0) + 1);
+          setSerialesdeCaja([]);
+        }
+      } catch {
+        if (!cancelled) {
+          setCajas([]);
+          setCajaActual(1);
+        }
+      }
+    };
+
+    fetchCajas();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [preAlertaSeleccionada?.id]);
+
+  // ── Carga seriales cuando se selecciona una caja existente ──
+  useEffect(() => {
+    if (!preAlertaSeleccionada?.id) return;
+
+    const esCajaExistente = cajas.some((c) => c.numero === cajaActual);
+
+    let cancelled = false;
+
+    const fetchSeriales = async () => {
+      if (!esCajaExistente) {
+        setSerialesdeCaja([]);
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `/api/prealerta/serialesPorCaja?prealertaId=${preAlertaSeleccionada.id}&caja=${cajaActual}`,
+        );
+        if (res.ok && !cancelled) {
+          const data: SerialEmpacado[] = await res.json();
+          setSerialesdeCaja(data);
+        }
+      } catch {
+        if (!cancelled) setSerialesdeCaja([]);
+      }
+    };
+
+    fetchSeriales();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cajaActual, preAlertaSeleccionada?.id]);
+
+  // ── Refresca cajas tras empacar ──
+  const refreshCajas = async () => {
+    if (!preAlertaSeleccionada?.id) return;
+    try {
+      const res = await fetch(
+        `/api/prealerta/cajas?prealertaId=${preAlertaSeleccionada.id}`,
+      );
+      if (res.ok) {
+        const data: { cajas: CajaItem[] } = await res.json();
+        setCajas(data.cajas);
+      }
+    } catch {}
+  };
+
+  const handleEmpacarConRefresh = async () => {
+    await handleEmpacar();
+    await refreshCajas();
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -83,14 +179,16 @@ export default function PreAlertaAgentePage() {
         onShowToast={showToast}
         onSincronizar={() => setModalSincronizar(true)}
         sincronizando={sincronizando}
-        onEmpacar={handleEmpacar}
+        onEmpacar={handleEmpacarConRefresh}
         empacando={empacando}
         progreso={progreso}
         cajaActual={cajaActual}
         onCajaChange={setCajaActual}
         onDesempacar={handleDesempacar}
-        onSincronizarAccesorios={() => setModalAccesorios(true)} // ← NUEVA
+        onSincronizarAccesorios={() => setModalAccesorios(true)}
         sincronizandoAccesorios={sincronizandoAccesorios}
+        cajas={cajas}
+        serialesDeCaja={serialesDeCaja}
       />
 
       <ScannerModal
@@ -131,7 +229,6 @@ export default function PreAlertaAgentePage() {
         onConfirm={(fecha, documento) => sincronizarDesdeAPI(fecha, documento)}
       />
 
-      {/* ← NUEVA */}
       <SincronizarAccesoriosModal
         isOpen={modalAccesorios}
         onClose={() => setModalAccesorios(false)}

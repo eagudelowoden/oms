@@ -2,7 +2,6 @@ import sql from "mssql";
 import { getDBConnection } from "@/lib/db";
 
 export const PrealertaBackendService = {
-  // Consume pa_InsertPrealert
   async insertPrealert(data: {
     nombre: string;
     tipoOrigenId: number;
@@ -28,6 +27,7 @@ export const PrealertaBackendService = {
     const id = result.recordset?.[0]?.Id ?? null;
     return { success: true, id };
   },
+
   async insertPrealertSerialBatch(data: {
     prealertaId: number;
     caja: number;
@@ -38,7 +38,6 @@ export const PrealertaBackendService = {
       yaExistian = 0,
       fallidos = 0;
 
-    // Ejecutar en paralelo con Promise.all (o en lotes de 10)
     const LOTE = 10;
     for (let i = 0; i < data.seriales.length; i += LOTE) {
       const lote = data.seriales.slice(i, i + LOTE);
@@ -82,16 +81,17 @@ export const PrealertaBackendService = {
       origen: "api";
       estado: "Empacado";
       tipo: string;
+      caja: number;
     }[]
   > {
     const pool = await getDBConnection();
     const result = await pool
       .request()
       .input("PrealertaId", sql.Int, prealertaId).query(`
-      SELECT Serial AS codigo, Caja AS caja, Tipo AS tipo
-      FROM PrealertaSerial
-      WHERE PrealertaId = @PrealertaId
-    `);
+        SELECT Serial AS codigo, Caja AS caja, Tipo AS tipo
+        FROM PrealertaSerial
+        WHERE PrealertaId = @PrealertaId
+      `);
     return result.recordset.map((r) => ({
       codigo: r.codigo,
       origen: "api" as const,
@@ -100,6 +100,60 @@ export const PrealertaBackendService = {
       caja: r.caja,
     }));
   },
+
+  // ── NUEVO: cajas agrupadas con conteo ──
+  async getCajasByPrealerta(
+    prealertaId: number,
+  ): Promise<
+    { numero: number; totalSeriales: number; estado: "abierta" | "cerrada" }[]
+  > {
+    const pool = await getDBConnection();
+    const result = await pool
+      .request()
+      .input("PrealertaId", sql.Int, prealertaId).query(`
+      SELECT
+        Caja         AS numero,
+        COUNT(*)     AS totalSeriales
+      FROM PrealertaSerial
+      WHERE PrealertaId = @PrealertaId
+      GROUP BY Caja
+      ORDER BY Caja ASC
+    `);
+
+    return result.recordset.map((r, i, arr) => ({
+      numero: r.numero,
+      totalSeriales: r.totalSeriales,
+      estado: i === arr.length - 1 ? "abierta" : "cerrada",
+    }));
+  },
+
+  // ── NUEVO: seriales de una caja específica ──
+  async getSerialsPorCaja(
+    prealertaId: number,
+    caja: number,
+  ): Promise<{ serial: string; mac: string; tipo: string }[]> {
+    const pool = await getDBConnection();
+    const result = await pool
+      .request()
+      .input("PrealertaId", sql.Int, prealertaId)
+      .input("Caja", sql.Int, caja).query(`
+        SELECT
+          Serial  AS serial,
+          Mac     AS mac,
+          Tipo    AS tipo
+        FROM PrealertaSerial
+        WHERE PrealertaId = @PrealertaId
+          AND Caja = @Caja
+        ORDER BY Serial ASC
+      `);
+
+    return result.recordset.map((r) => ({
+      serial: r.serial,
+      mac: r.mac ?? "",
+      tipo: r.tipo ?? "Serializable",
+    }));
+  },
+
   async desempacarSeriales(
     prealertaId: number,
     seriales: string[],
@@ -111,7 +165,7 @@ export const PrealertaBackendService = {
       .input("Seriales", sql.NVarChar(sql.MAX), JSON.stringify(seriales))
       .execute("pa_DesempacarSerialesOms");
 
-    return result.recordset[0]?.actualizados ?? 0; // ← eliminados → actualizados
+    return result.recordset[0]?.actualizados ?? 0;
   },
 
   async eliminarSerial(prealertaId: number, serial: string): Promise<number> {
@@ -125,7 +179,6 @@ export const PrealertaBackendService = {
     return result.recordset[0]?.eliminados ?? 0;
   },
 
-  // Consume pa_GetListPrealert
   async getListPrealert(): Promise<
     { id: number; nombre: string; fecha?: string; estado?: string }[]
   > {
@@ -150,7 +203,6 @@ export const PrealertaBackendService = {
     }
   },
 
-  // Consume pa_GetIdPrealert
   async getIdPrealert(nombre: string): Promise<number | null> {
     const pool = await getDBConnection();
     const result = await pool
@@ -159,19 +211,19 @@ export const PrealertaBackendService = {
       .execute("pa_GetIdPrealert");
     return result.recordset[0]?.Id || result.recordset[0]?.id || null;
   },
+
   async getUltimaCaja(prealertaId: number): Promise<number> {
     const pool = await getDBConnection();
     const result = await pool
       .request()
       .input("PrealertaId", sql.Int, prealertaId).query(`
-      SELECT ISNULL(MAX(Caja), 0) AS ultimaCaja
-      FROM PrealertaSerial
-      WHERE PrealertaId = @PrealertaId
-    `);
+        SELECT ISNULL(MAX(Caja), 0) AS ultimaCaja
+        FROM PrealertaSerial
+        WHERE PrealertaId = @PrealertaId
+      `);
     return result.recordset[0].ultimaCaja;
   },
 
-  // Consume pa_DeletePrealert
   async deletePrealert(id: number): Promise<{ success: boolean }> {
     const pool = await getDBConnection();
     await pool.request().input("Id", sql.Int, id).execute("pa_DeletePrealert");

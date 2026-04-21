@@ -2,6 +2,18 @@ import React, { useRef } from "react";
 import styles from "../prealerta.module.css";
 import { PrealertaItem } from "../hooks/usePrealerta";
 
+export interface CajaItem {
+  numero: number;
+  totalSeriales: number;
+  estado: "abierta" | "cerrada";
+}
+
+export interface SerialEmpacado {
+  serial: string;
+  mac: string;
+  tipo: string;
+}
+
 interface Props {
   seleccionada: PrealertaItem | null;
   onClearSeleccion: () => void;
@@ -9,14 +21,16 @@ interface Props {
   onShowToast: (msg: string, type?: "ok" | "error") => void;
   onSincronizar: (fecha: string) => void;
   sincronizando: boolean;
-  onSincronizarAccesorios: (fecha?: string) => void; // ← NUEVA
-  sincronizandoAccesorios: boolean; // ← NUEVA
+  onSincronizarAccesorios: (fecha?: string) => void;
+  sincronizandoAccesorios: boolean;
   onEmpacar: () => void;
   empacando: boolean;
   progreso: number;
   cajaActual: number;
   onCajaChange: (caja: number) => void;
   onDesempacar: () => void;
+  cajas: CajaItem[];
+  serialesDeCaja: SerialEmpacado[];
 }
 
 export default function PrealertaAcciones({
@@ -34,6 +48,8 @@ export default function PrealertaAcciones({
   onDesempacar,
   onSincronizarAccesorios,
   sincronizandoAccesorios,
+  cajas,
+  serialesDeCaja,
 }: Props) {
   const fechaRef = useRef<HTMLInputElement>(null);
 
@@ -45,10 +61,14 @@ export default function PrealertaAcciones({
     }
     onSincronizar(fecha);
   };
+
   const handleSincronizarAccesorios = () => {
     const fecha = fechaRef.current?.value;
     onSincronizarAccesorios(fecha ?? undefined);
   };
+
+  const siguienteNumero = (cajas.at(-1)?.numero ?? 0) + 1;
+  const esCajaExistente = cajas.some((c) => c.numero === cajaActual);
 
   return (
     <>
@@ -66,8 +86,9 @@ export default function PrealertaAcciones({
             defaultValue={new Date().toISOString().slice(0, 10)}
           />
         </div>
+
         <div className={styles.uploadGroup}>
-          {/* ── Sincronizar ── */}
+          {/* ── Sincronizar seriales ── */}
           <button
             type="button"
             className={styles.btnUpload}
@@ -109,6 +130,8 @@ export default function PrealertaAcciones({
             )}
             {sincronizando ? "Sincronizando…" : "Sincronizar Seriales"}
           </button>
+
+          {/* ── Sincronizar accesorios ── */}
           <button
             type="button"
             className={styles.btnUpload}
@@ -152,7 +175,8 @@ export default function PrealertaAcciones({
               ? "Sincronizando…"
               : "Sincronizar Accesorios"}
           </button>
-          {/* ── Carga manual ── */}
+
+          {/* ── Escanear ── */}
           <button
             type="button"
             className={`${styles.btnManual} ${!seleccionada ? styles.btnManualDisabled : ""}`}
@@ -181,18 +205,44 @@ export default function PrealertaAcciones({
             {seleccionada ? "Escanear" : "Carga manual"}
           </button>
 
+          {/* ── Selector de caja ── */}
           <div className={styles.cajaWrapper}>
             <label className={styles.cajaLabel}>Caja</label>
-            <input
-              type="number"
-              min={1}
-              className={styles.cajaInput}
-              value={cajaActual}
-              onChange={(e) => onCajaChange(Number(e.target.value))}
-              disabled={empacando}
-            />
+            <div className={styles.selectWrapper}>
+              <select
+                className={styles.cajaSelect}
+                value={cajaActual}
+                onChange={(e) => onCajaChange(Number(e.target.value))}
+                disabled={empacando}
+              >
+                <option value={siguienteNumero}>
+                  Crear caja {siguienteNumero}
+                </option>
+                {cajas.map((c) => (
+                  <option key={c.numero} value={c.numero}>
+                    Caja {c.numero}
+                  </option>
+                ))}
+              </select>
+              <svg
+                className={styles.selectChevron}
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+              >
+                <path
+                  d="M2 4l4 4 4-4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           </div>
 
+          {/* ── Empacar ── */}
           <button
             type="button"
             className={styles.btnEmpacar}
@@ -203,7 +253,6 @@ export default function PrealertaAcciones({
           </button>
 
           {/* ── Desempacar ── */}
-
           <button
             type="button"
             className={styles.btnDesempacar}
