@@ -5,12 +5,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id } = await params; // 👈 await aquí
+    const { id } = await params;
     const { searchParams } = new URL(request.url);
     const clienteNombre = searchParams.get("clienteNombre");
     const usuarioId = parseInt(id);
 
-    console.log("📥 Params recibidos:", { usuarioId, clienteNombre }); // 👈 agrega esto
+    console.log("📥 Params recibidos:", { usuarioId, clienteNombre });
 
     if (!clienteNombre || !usuarioId) {
       return NextResponse.json(
