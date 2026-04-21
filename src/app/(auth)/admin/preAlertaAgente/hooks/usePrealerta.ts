@@ -468,29 +468,23 @@ export function usePrealerta() {
   ) => {
     setSincronizandoAccesorios(true);
     try {
-      const codigosExistentes = new Set(
-        serialesEscaneados.map((s) => s.codigo),
+      // Reemplaza los No-serializable existentes por los nuevos
+      const sinAccesorios = serialesEscaneados.filter(
+        (s) => s.tipo !== "No-serializable",
       );
 
-      const nuevos: SerialItem[] = accesorios
-        .filter((a) => !codigosExistentes.has(a.codigoAccesorio))
-        .map((a) => ({
-          codigo: a.codigoAccesorio,
-          descripcion: a.accesorio,
-          cantidad: a.cantidad,
-          origen: "api" as const,
-          tipo: "No-serializable" as const,
-        }));
+      const nuevos: SerialItem[] = accesorios.map((a) => ({
+        codigo: a.codigoAccesorio,
+        descripcion: a.accesorio,
+        cantidad: a.cantidad,
+        origen: "api" as const,
+        tipo: "No-serializable" as const,
+      }));
 
-      if (nuevos.length === 0) {
-        showToast("Todos los accesorios ya están cargados");
-      } else {
-        setSerialEscaneados((prev) => [...prev, ...nuevos]);
-        const total = nuevos.reduce((s, a) => s + (a.cantidad ?? 1), 0);
-        showToast(
-          `✓ ${nuevos.length} material(es) · ${total} unidades importadas`,
-        );
-      }
+      setSerialEscaneados([...sinAccesorios, ...nuevos]);
+
+      const total = nuevos.reduce((s, a) => s + (a.cantidad ?? 1), 0);
+      showToast(`✓ ${nuevos.length} material(es) · ${total} unidades cargadas`);
     } finally {
       setSincronizandoAccesorios(false);
     }
@@ -548,11 +542,14 @@ export function usePrealerta() {
         body: JSON.stringify({
           prealertaId: idPrealerta,
           caja: cajaParaEsteEmpacar,
-          seriales: serialesSinDuplicados.map(({ codigo, tipo, mac }) => ({
-            serial: codigo,
-            mac: mac ?? "",
-            tipo: tipo ?? "Serializable",
-          })),
+          seriales: serialesSinDuplicados.map(
+            ({ codigo, tipo, mac, cantidad }) => ({
+              serial: codigo,
+              mac: mac ?? "",
+              tipo: tipo ?? "Serializable",
+              cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
+            }),
+          ),
         }),
       });
 

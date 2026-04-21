@@ -31,7 +31,12 @@ export const PrealertaBackendService = {
   async insertPrealertSerialBatch(data: {
     prealertaId: number;
     caja: number;
-    seriales: { serial: string; mac: string; tipo: string }[];
+    seriales: {
+      serial: string;
+      mac: string;
+      tipo: string;
+      cantidad?: number;
+    }[];
   }) {
     const pool = await getDBConnection();
     let exitosos = 0,
@@ -42,7 +47,7 @@ export const PrealertaBackendService = {
     for (let i = 0; i < data.seriales.length; i += LOTE) {
       const lote = data.seriales.slice(i, i + LOTE);
       await Promise.all(
-        lote.map(async ({ serial, mac, tipo }) => {
+        lote.map(async ({ serial, mac, tipo, cantidad }) => {
           try {
             const result = await pool
               .request()
@@ -51,7 +56,7 @@ export const PrealertaBackendService = {
               .input("Mac", sql.VarChar(50), mac)
               .input("CodigoSap", sql.VarChar(20), "")
               .input("Descripcion", sql.VarChar(150), "")
-              .input("Cantidad", sql.Int, 1)
+              .input("Cantidad", sql.Int, cantidad ?? 1) // ← antes era hardcoded 1
               .input("Caja", sql.Int, data.caja)
               .input("Falla", sql.VarChar(100), "")
               .input("TecnicoCliente", sql.VarChar(50), "")

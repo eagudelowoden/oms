@@ -108,7 +108,7 @@ export default function SincronizarAccesoriosModal({
       const registros: Array<Record<string, unknown>> = data?.registros ?? [];
 
       const filtrados = registros.filter(
-        (r) => String(r.documentoIdentidad ?? "").trim() === cedula.trim(),
+        (r) => String(r.documento_identidad ?? "").trim() === cedula.trim(),
       );
 
       if (filtrados.length === 0) {
@@ -119,7 +119,7 @@ export default function SincronizarAccesoriosModal({
 
       const mapa = new Map<string, AccesorioAgrupado>();
       for (const r of filtrados) {
-        const codigo = String(r.codigoAccesorio ?? "").trim();
+        const codigo = String(r.codigo_accesorio ?? "").trim();
         const nombre = String(r.accesorio ?? "").trim();
         if (!codigo) continue;
         const key = `${codigo}||${nombre}`;
@@ -146,10 +146,9 @@ export default function SincronizarAccesoriosModal({
 
   const handleConfirmar = () => {
     if (accesorios.length === 0) return;
-    onConfirm(accesorios);
+    onConfirm(accesorios); // ← pasa los nuevos al padre
     onClose();
   };
-
   const total = accesorios.reduce((s, a) => s + a.cantidad, 0);
 
   return (
