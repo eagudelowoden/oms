@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { UsuarioPerfilService } from "../../../_modulos/auth/services/usuarioPerfil.service";
-
+import { UsuarioPerfilService } from "@/modules/auth/services/usuarioPerfil.service";
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
