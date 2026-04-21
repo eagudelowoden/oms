@@ -56,7 +56,7 @@ export const PrealertaBackendService = {
               .input("Mac", sql.VarChar(50), mac)
               .input("CodigoSap", sql.VarChar(20), "")
               .input("Descripcion", sql.VarChar(150), "")
-              .input("Cantidad", sql.Int, cantidad ?? 1) // ← antes era hardcoded 1
+              .input("Cantidad", sql.Int, cantidad ?? 1)
               .input("Caja", sql.Int, data.caja)
               .input("Falla", sql.VarChar(100), "")
               .input("TecnicoCliente", sql.VarChar(50), "")
