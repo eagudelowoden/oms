@@ -4,15 +4,15 @@ import React, { useState } from "react"; // ← agregar useState
 import styles from "./prealerta.module.css";
 
 import { usePrealerta } from "./hooks/usePrealerta";
-import PrealertaHeader from "./components/PrealertaHeader";
-import PrealertaTabla from "./components/PrealertaTabla";
+import PrealertaHeader from "./components/PrealertaEncabezado";
+import PrealertaTabla from "./components/PrealertaTablaDetalle";
 import PrealertaAcciones from "./components/PrealertaAcciones";
 import RegistroSeries from "./components/RegistroSeries";
-import { PrealertaSeriales } from "./components/PrealertaGrid";
-import { ConfirmModal, Toast } from "./components/PrealertaModals";
+import { PrealertaSeriales } from "./components/PrealertaListado";
+import { ConfirmModal, Toast } from "./components/PrealertaModales";
 import ScannerModal from "@/modules/auth/components/scanner/scannerModal";
-import SincronizarModal from "./components/SincronizarModal";
-import SincronizarAccesoriosModal from "./components/SincronizarAccesoriosModal"; // ← NUEVA
+import SincronizarModal from "./components/ModalSincronizar";
+import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios"; // ← NUEVA
 
 export default function PreAlertaAgentePage() {
   const [modalAccesorios, setModalAccesorios] = useState(false); // ← NUEVA
