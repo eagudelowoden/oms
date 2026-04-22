@@ -1,0 +1,239 @@
+/* ── Overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* ── Caja principal ── */
+.box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Ícono ── */
+.icon {
+  color: #2563eb;
+  margin-bottom: 4px;
+}
+
+/* ── Títulos ── */
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0 0 4px;
+  text-align: center;
+}
+
+/* ── Campos ── */
+.fieldGroup {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+}
+
+.input {
+  width: 100%;
+  margin-top: 4px;
+  padding: 7px 10px;
+  border: 0.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  outline: none;
+  box-sizing: border-box;
+  color: #1e293b;
+  background: #f8fafc;
+}
+
+.inputActive {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+
+/* ── Error ── */
+.error {
+  color: #e53e3e;
+  font-size: 11px;
+  margin-top: 6px;
+  align-self: flex-start;
+}
+
+/* ── Botón buscar ── */
+.btnBuscar {
+  margin-top: 12px;
+  width: 100%;
+  padding: 8px 0;
+  border-radius: 8px;
+  border: none;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+
+.btnBuscar:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Tabla resultados ── */
+.resultados {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.vacio {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.thMaterial {
+  text-align: left;
+  padding: 5px 6px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.thCantidad {
+  text-align: center;
+  padding: 5px 6px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.trBody {
+  border-bottom: 1px solid #f8fafc;
+}
+
+.tdMaterial {
+  padding: 5px 6px;
+  color: #1e293b;
+}
+
+.codigo {
+  font-weight: 700;
+  font-family: "Courier New", monospace;
+}
+
+.nombre {
+  color: #64748b;
+  margin-left: 6px;
+}
+
+.tdCantidad {
+  text-align: center;
+  padding: 5px 6px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.tfootTd {
+  padding: 5px 6px;
+  font-weight: 600;
+  color: #475569;
+  font-size: 11px;
+}
+
+.tfootTotal {
+  text-align: center;
+  padding: 5px 6px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* ── Botones acción ── */
+.btns {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.btnCancelar {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnCancelar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnCargar {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 8px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnCargar:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
