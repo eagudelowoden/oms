@@ -147,6 +147,7 @@ export const AgentesBackendService = {
       serial: r.serial,
       mac: r.mac ?? "",
       tipo: r.tipo ?? "Serializable",
+      cantidad: r.cantidad ?? "",
     }));
   },
 
