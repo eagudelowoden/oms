@@ -1,15 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import styles from "./css/prealerta.module.css";
-import { usePrealerta } from "./hooks/usePrealerta";
+import { usePrealerta } from "./hooks/useAgente";
 import PrealertaHeader from "./components/PrealertaEncabezado";
 import PrealertaTabla from "./components/PrealertaTablaDetalle";
-import {
-  CajaItem,
-  SerialEmpacado,
-  SerialItem,
-} from "@/app/models/seriales.models";
 import PrealertaAcciones from "./components/PrealertaAcciones";
 import { PrealertaSeriales } from "./components/PrealertaListado";
 import { ConfirmModal, Toast } from "./components/PrealertaModales";
@@ -19,10 +14,6 @@ import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios"
 import RegistroSeries from "./components/RegistroSeries";
 
 export default function PreAlertaAgentePage() {
-  const [modalAccesorios, setModalAccesorios] = useState(false);
-  const [cajas, setCajas] = useState<CajaItem[]>([]);
-  const [serialesDeCaja, setSerialesdeCaja] = useState<SerialEmpacado[]>([]);
-
   const {
     isLoading,
     query,
@@ -32,7 +23,7 @@ export default function PreAlertaAgentePage() {
     filteredAndSorted,
     scannerOpen,
     setScannerOpen,
-    serialesEscaneados,
+    serialesMostrados,
     handleRemoveSerial,
     confirmItem,
     setConfirmItem,
@@ -57,115 +48,17 @@ export default function PreAlertaAgentePage() {
     handleToggleAll,
     modalSincronizar,
     setModalSincronizar,
+    modalAccesorios,
+    setModalAccesorios,
     handleAgregarSerial,
     handleActualizarTipo,
     cajaActual,
     setCajaActual,
     handleDesempacar,
     cargandoSeriales,
+    cajas,
+    serialesDeCaja,
   } = usePrealerta();
-
-  // ── Carga cajas cuando cambia la prealerta seleccionada ──
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchCajas = async () => {
-      if (!preAlertaSeleccionada?.id) {
-        if (!cancelled) {
-          setCajas([]);
-          setCajaActual(1);
-          setSerialesdeCaja([]);
-        }
-        return;
-      }
-
-      try {
-        const res = await fetch(
-          `/api/prealerta/cajas?prealertaId=${preAlertaSeleccionada.id}`,
-        );
-        if (res.ok && !cancelled) {
-          const data: { cajas: CajaItem[] } = await res.json();
-          setCajas(data.cajas);
-          setCajaActual((data.cajas.at(-1)?.numero ?? 0) + 1);
-          setSerialesdeCaja([]);
-        }
-      } catch {
-        if (!cancelled) {
-          setCajas([]);
-          setCajaActual(1);
-        }
-      }
-    };
-
-    fetchCajas();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [preAlertaSeleccionada?.id]);
-
-  const esCajaExistente = cajas.some((c) => c.numero === cajaActual);
-  const serialesMostrados: SerialItem[] = esCajaExistente
-    ? serialesDeCaja.map((s) => ({
-        codigo: s.serial,
-        origen: "api" as const,
-        estado: "Empacado" as const,
-        tipo: s.tipo as "Serializable" | "No-serializable",
-        cantidad: s.cantidad,
-        caja: cajaActual,
-      }))
-    : serialesEscaneados;
-
-  // ── Carga seriales cuando se selecciona una caja existente ──
-  useEffect(() => {
-    if (!preAlertaSeleccionada?.id) return;
-
-    let cancelled = false;
-
-    const fetchSeriales = async () => {
-      if (!esCajaExistente) {
-        setSerialesdeCaja([]);
-        return;
-      }
-
-      try {
-        const res = await fetch(
-          `/api/prealerta/serialesPorCaja?prealertaId=${preAlertaSeleccionada.id}&caja=${cajaActual}`,
-        );
-        if (res.ok && !cancelled) {
-          const data: SerialEmpacado[] = await res.json();
-          setSerialesdeCaja(data);
-        }
-      } catch {
-        if (!cancelled) setSerialesdeCaja([]);
-      }
-    };
-
-    fetchSeriales();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [cajaActual, preAlertaSeleccionada?.id]);
-
-  // ── Refresca cajas tras empacar ──
-  const refreshCajas = async () => {
-    if (!preAlertaSeleccionada?.id) return;
-    try {
-      const res = await fetch(
-        `/api/prealerta/cajas?prealertaId=${preAlertaSeleccionada.id}`,
-      );
-      if (res.ok) {
-        const data: { cajas: CajaItem[] } = await res.json();
-        setCajas(data.cajas);
-      }
-    } catch {}
-  };
-
-  const handleEmpacarConRefresh = async () => {
-    await handleEmpacar();
-    await refreshCajas();
-  };
 
   return (
     <div className={styles.wrapper}>
@@ -191,7 +84,7 @@ export default function PreAlertaAgentePage() {
         onShowToast={showToast}
         onSincronizar={() => setModalSincronizar(true)}
         sincronizando={sincronizando}
-        onEmpacar={handleEmpacarConRefresh}
+        onEmpacar={handleEmpacar}
         empacando={empacando}
         progreso={progreso}
         cajaActual={cajaActual}
@@ -201,12 +94,6 @@ export default function PreAlertaAgentePage() {
         sincronizandoAccesorios={sincronizandoAccesorios}
         cajas={cajas}
         serialesDeCaja={serialesDeCaja}
-      />
-
-      <ScannerModal
-        isOpen={scannerOpen}
-        onClose={() => setScannerOpen(false)}
-        onConfirm={handleSerialConfirm}
       />
 
       <PrealertaSeriales
@@ -224,13 +111,11 @@ export default function PreAlertaAgentePage() {
         onShowToast={showToast}
       />
 
-      <ConfirmModal
-        item={confirmItem}
-        onCancel={() => setConfirmItem(null)}
-        onConfirm={handleEliminar}
+      <ScannerModal
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onConfirm={handleSerialConfirm}
       />
-
-      <Toast toast={toast} />
 
       <SincronizarModal
         isOpen={modalSincronizar}
@@ -250,6 +135,14 @@ export default function PreAlertaAgentePage() {
           setModalAccesorios(false);
         }}
       />
+
+      <ConfirmModal
+        item={confirmItem}
+        onCancel={() => setConfirmItem(null)}
+        onConfirm={handleEliminar}
+      />
+
+      <Toast toast={toast} />
     </div>
   );
 }

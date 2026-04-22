@@ -1,13 +1,13 @@
 import React from "react";
 import styles from "../css/prealerta.module.css";
-import { SerialItem } from "../hooks/usePrealerta";
+import type { SerialItem } from "@/app/models/seriales.models";
 
 interface SerialesProps {
   seriales: SerialItem[];
   seleccionados: Set<number>;
   onToggle: (idx: number) => void;
   onToggleAll: () => void;
-  cargandoSeriales?: boolean; // ← nuevo
+  cargandoSeriales?: boolean;
   onRemove: (idx: number) => Promise<void>;
 }
 

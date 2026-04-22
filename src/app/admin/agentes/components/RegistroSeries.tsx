@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import styles from "../css/registroSeries.module.css";
 
-import { SerialItem } from "../hooks/usePrealerta";
-
 const FAMILIAS = [
   { value: "", label: "Ninguna..." },
   { value: "equipos", label: "Equipos" },

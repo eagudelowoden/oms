@@ -6,6 +6,7 @@ import Link from "next/link";
 import styles from "../admin/agentes/css/admin.module.css";
 import ModalElegirCliente from "@/modules/auth/components/ModalElegirCliente/ModalElegirCliente";
 import { useMenu } from "@/modules/auth/hooks/useMenu";
+import { Providers } from "@/app/providers";
 
 interface Usuario {
   id: number;
@@ -35,13 +36,9 @@ export default function AdminLayout({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const { menu, loadingMenu } = useMenu(usuario?.perfilId);
-  console.log("🎯 perfilId para menú:", usuario?.perfilId);
-  console.log("📋 menu cargado:", menu);
-
   const router = useRouter();
   const pathname = usePathname();
 
-  // EFECTO 1: Solo carga el usuario base del localStorage al arrancar
   useEffect(() => {
     const userStr = localStorage.getItem("usuario");
     if (!userStr) {
@@ -49,42 +46,27 @@ export default function AdminLayout({
       return;
     }
     const localData = JSON.parse(userStr) as Usuario;
-    console.log("👤 Usuario desde localStorage:", localData);
-    console.log("🏢 clienteNombre:", localData.clienteNombre);
-    console.log("🆔 id:", localData.id);
     setUsuario(localData);
     setCargando(false);
   }, [router]);
 
-  // EFECTO 2: Reacciona al cambio de cliente y pide el perfil (El "SwitchMap" de Angular)
   useEffect(() => {
     const fetchPerfilData = async () => {
       if (usuario?.id && usuario?.clienteNombre && !usuario.perfilNombre) {
         try {
           const url = `/api/perfil/${usuario.id}?clienteNombre=${encodeURIComponent(usuario.clienteNombre)}`;
-
-          console.log(
-            "📡 Disparando petición de perfil para:",
-            usuario.clienteNombre,
-          );
-
           const response = await fetch(url);
           if (response.ok) {
             const data = await response.json();
-            console.log("📦 data recibida del perfil:", data); // 👈 agrega esto
-
-            // Actualizamos estado con perfilNombre Y perfilId
             setUsuario((prev) =>
               prev
                 ? {
                     ...prev,
                     perfilNombre: data.perfilNombre,
-                    perfilId: data.perfilId, // 👈
+                    perfilId: data.perfilId,
                   }
                 : null,
             );
-
-            // Guardamos en localStorage también
             const userStr = localStorage.getItem("usuario");
             if (userStr) {
               const user = JSON.parse(userStr);
@@ -93,7 +75,7 @@ export default function AdminLayout({
                 JSON.stringify({
                   ...user,
                   perfilNombre: data.perfilNombre,
-                  perfilId: data.perfilId, // 👈
+                  perfilId: data.perfilId,
                 }),
               );
             }
@@ -103,7 +85,6 @@ export default function AdminLayout({
         }
       }
     };
-
     fetchPerfilData();
   }, [usuario?.id, usuario?.clienteNombre, usuario?.perfilNombre]);
 
@@ -123,20 +104,17 @@ export default function AdminLayout({
   };
 
   const handleClientSwitchSuccess = (result: ClientSwitchResult) => {
-    console.log("🔄 result completo:", result);
     if (usuario) {
       const updatedUser = {
         ...usuario,
-        clienteNombre: result.clientDb, // El nombre que viene del modal
-        perfilNombre: undefined, // 👈 IMPORTANTE: Limpiar para que el useEffect se dispare
+        clienteNombre: result.clientDb,
+        perfilNombre: undefined,
       };
-
       localStorage.setItem("usuario", JSON.stringify(updatedUser));
       setUsuario(updatedUser);
     }
     setShowChangeClient(false);
     setIsUserMenuOpen(false);
-    // router.refresh(); // Opcional, con setUsuario(updatedUser) debería bastar
   };
 
   if (cargando || !usuario)
@@ -149,7 +127,6 @@ export default function AdminLayout({
   const linkClass = (path: string) =>
     `${styles.navItem} ${pathname === path ? styles.active : ""}`;
 
-  // --- COMPONENTE DE MENÚ ---
   const UserMenuComponent = () => (
     <div className={styles.userMenuWrapper}>
       {isUserMenuOpen && (
@@ -195,108 +172,107 @@ export default function AdminLayout({
   );
 
   return (
-    <div className={styles.adminWrapper}>
-      <div
-        className={`${styles.mobileOverlay} ${isSidebarOpen ? styles.showOverlay : ""}`}
-        onClick={() => setIsSidebarOpen(false)}
-      />
+    <Providers>
+      {" "}
+      {/* ← Providers envuelve TODO el contenido */}
+      <div className={styles.adminWrapper}>
+        <div
+          className={`${styles.mobileOverlay} ${isSidebarOpen ? styles.showOverlay : ""}`}
+          onClick={() => setIsSidebarOpen(false)}
+        />
 
-      <aside
-        className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ""}`}
-      >
-        <div className={styles.sidebarHeader}>
-          <div className={styles.logoGroup}>
-            <div className={styles.logoBadge}>
-              <span className="material-symbols-rounded">warehouse</span>
-            </div>
-            <span className={styles.logoText}>OMS</span>
-          </div>
-          <button
-            className={styles.closeMenuMobile}
-            onClick={() => setIsSidebarOpen(false)}
-          >
-            <span className="material-symbols-rounded">close</span>
-          </button>
-        </div>
-
-        {/* INFO SESIÓN MINIMALISTA */}
-        <div className={styles.currentClientBadge}>
-          <div className={styles.sessionInfoGroup}>
-            <div className={styles.infoRow}>
-              <span className="material-symbols-rounded">domain</span>
-              <div className={styles.infoText}>
-                <p className={styles.clientName}>
-                  {usuario.clienteNombre || "Sin seleccionar"}
-                </p>
+        <aside
+          className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ""}`}
+        >
+          <div className={styles.sidebarHeader}>
+            <div className={styles.logoGroup}>
+              <div className={styles.logoBadge}>
+                <span className="material-symbols-rounded">warehouse</span>
               </div>
+              <span className={styles.logoText}>OMS</span>
             </div>
-            <div className={styles.infoRow}>
-              <span className="material-symbols-rounded">person</span>
-              <div className={styles.infoText}>
-                <p className={styles.userName}>
-                  {`${usuario.nombres} ${usuario.apellidos}` || "Usuario"}
-                  <span className={styles.roleTag}>
-                    {usuario.perfilNombre || "Cargando..."}
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <nav className={styles.navMenu}>
-          <p className={styles.navSectionTitle}>Módulos</p>
-          {/* <Link href="/admin" className={linkClass("/admin")}>
-            <span className="material-symbols-rounded">dashboard</span>
-            <span>Dashboard</span>
-          </Link> */}
-          <Link href="/admin/agentes" className={linkClass("/admin/agentes")}>
-            <span className="material-symbols-rounded">pending_actions</span>
-            <span>Agentes</span>
-          </Link>
-          {usuario.perfilId === 1 && (
-            <Link
-              href="/admin/usuarios"
-              className={linkClass("/admin/usuarios")}
-            >
-              <span className="material-symbols-rounded">group</span>
-              <span>Usuarios</span>
-            </Link>
-          )}
-        </nav>
-
-        <div className={styles.sidebarFooterDesktop}>
-          <UserMenuComponent />
-        </div>
-      </aside>
-
-      <main className={styles.mainContent}>
-        <header className={styles.topHeader}>
-          <div className={styles.headerLeft}>
             <button
-              className={styles.hamburger}
-              onClick={() => setIsSidebarOpen(true)}
+              className={styles.closeMenuMobile}
+              onClick={() => setIsSidebarOpen(false)}
             >
-              <span className="material-symbols-rounded">menu</span>
+              <span className="material-symbols-rounded">close</span>
             </button>
-            <div className={styles.headerBreadcrumb}>
-              OMS System / {pathname.split("/").pop()}
+          </div>
+
+          <div className={styles.currentClientBadge}>
+            <div className={styles.sessionInfoGroup}>
+              <div className={styles.infoRow}>
+                <span className="material-symbols-rounded">domain</span>
+                <div className={styles.infoText}>
+                  <p className={styles.clientName}>
+                    {usuario.clienteNombre || "Sin seleccionar"}
+                  </p>
+                </div>
+              </div>
+              <div className={styles.infoRow}>
+                <span className="material-symbols-rounded">person</span>
+                <div className={styles.infoText}>
+                  <p className={styles.userName}>
+                    {`${usuario.nombres} ${usuario.apellidos}` || "Usuario"}
+                    <span className={styles.roleTag}>
+                      {usuario.perfilNombre || "Cargando..."}
+                    </span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className={styles.headerUserMobile}>
+
+          <nav className={styles.navMenu}>
+            <p className={styles.navSectionTitle}>Módulos</p>
+            <Link href="/admin/agentes" className={linkClass("/admin/agentes")}>
+              <span className="material-symbols-rounded">pending_actions</span>
+              <span>Agentes</span>
+            </Link>
+            {usuario.perfilId === 1 && (
+              <Link
+                href="/admin/usuarios"
+                className={linkClass("/admin/usuarios")}
+              >
+                <span className="material-symbols-rounded">group</span>
+                <span>Usuarios</span>
+              </Link>
+            )}
+          </nav>
+
+          <div className={styles.sidebarFooterDesktop}>
             <UserMenuComponent />
           </div>
-        </header>
-        <div className={styles.pageContainer}>{children}</div>
-      </main>
+        </aside>
 
-      {showChangeClient && (
-        <ModalElegirCliente
-          usuarioId={usuario.id}
-          onSuccess={handleClientSwitchSuccess}
-          onCancel={() => setShowChangeClient(false)}
-        />
-      )}
-    </div>
+        <main className={styles.mainContent}>
+          <header className={styles.topHeader}>
+            <div className={styles.headerLeft}>
+              <button
+                className={styles.hamburger}
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <span className="material-symbols-rounded">menu</span>
+              </button>
+              <div className={styles.headerBreadcrumb}>
+                OMS System / {pathname.split("/").pop()}
+              </div>
+            </div>
+            <div className={styles.headerUserMobile}>
+              <UserMenuComponent />
+            </div>
+          </header>
+          <div className={styles.pageContainer}>{children}</div>
+        </main>
+
+        {showChangeClient && (
+          <ModalElegirCliente
+            usuarioId={usuario.id}
+            onSuccess={handleClientSwitchSuccess}
+            onCancel={() => setShowChangeClient(false)}
+          />
+        )}
+      </div>
+    </Providers>
   );
 }
