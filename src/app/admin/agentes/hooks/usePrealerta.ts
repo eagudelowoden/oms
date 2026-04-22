@@ -10,8 +10,8 @@ import { UsuarioSesion } from "@/app/models/UsuarioSesion";
 
 
 
-const WFSM_LOGIN_URL = "https://wfsapi.tcpip.tech/api/usuarios/login";
-const WFSM_CONSULTA_URL = "https://wfsapi.tcpip.tech/api/consultas/seriales";
+const WFSM_LOGIN_URL = "https://wfsroutes.tcpip.tech/routes/usuarios/login";
+const WFSM_CONSULTA_URL = "https://wfsroutes.tcpip.tech/routes/consultas/seriales";
 const WFSM_AUTH_BASIC = "Basic bXB1bGlkb0B3b2Rlbi5jb20uY286TTFjaDQzbDIwMjAq";
 
 export function usePrealerta() {
@@ -48,7 +48,7 @@ export function usePrealerta() {
   useEffect(() => {
     const cargar = async () => {
       try {
-        const res = await fetch("/api/prealerta/list");
+        const res = await fetch("/routes/prealerta/list");
         if (!res.ok) throw new Error("Error al obtener datos");
         setPrealertas(await res.json());
       } catch (e) {
@@ -71,7 +71,7 @@ export function usePrealerta() {
       setCargandoSeriales(true);
       try {
         const res = await fetch(
-          `/api/prealerta/seriales?prealertaId=${preAlertaSeleccionada.id}`,
+          `/routes/prealerta/seriales?prealertaId=${preAlertaSeleccionada.id}`,
         );
         if (res.ok) {
           const data = await res.json();
@@ -127,7 +127,7 @@ export function usePrealerta() {
     }
 
     try {
-      const res = await fetch("/api/prealerta/create", {
+      const res = await fetch("/routes/prealerta/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -202,7 +202,7 @@ export function usePrealerta() {
     let idPrealerta = preAlertaSeleccionada.id;
     if (!idPrealerta) {
       const resId = await fetch(
-        `/api/prealerta/getId?nombre=${encodeURIComponent(preAlertaSeleccionada.nombre)}`,
+        `/routes/prealerta/getId?nombre=${encodeURIComponent(preAlertaSeleccionada.nombre)}`,
       );
       if (resId.ok) idPrealerta = await resId.json();
     }
@@ -212,7 +212,7 @@ export function usePrealerta() {
     }
 
     try {
-      const res = await fetch("/api/prealerta/desempacar", {
+      const res = await fetch("/routes/prealerta/desempacar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -256,7 +256,7 @@ export function usePrealerta() {
       let idAEliminar = item.id;
       if (!idAEliminar) {
         const resId = await fetch(
-          `/api/prealerta/getId?nombre=${encodeURIComponent(item.nombre)}`,
+          `/routes/prealerta/getId?nombre=${encodeURIComponent(item.nombre)}`,
         );
         if (!resId.ok) {
           showToast("No se pudo obtener el Id", "error");
@@ -269,7 +269,7 @@ export function usePrealerta() {
         return;
       }
 
-      const res = await fetch("/api/prealerta/delete", {
+      const res = await fetch("/routes/prealerta/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: idAEliminar }),
@@ -305,7 +305,7 @@ export function usePrealerta() {
     }
 
     try {
-      const res = await fetch("/api/prealerta/eliminarSerial", {
+      const res = await fetch("/routes/prealerta/eliminarSerial", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -345,8 +345,8 @@ export function usePrealerta() {
     }
   };
 
-  /* ── SINCRONIZAR DESDE API WFSM ── */
-  const sincronizarDesdeAPI = async (
+  /* ── SINCRONIZAR DESDE routes WFSM ── */
+  const sincronizarDesderoutes = async (
     fechaProceso?: string,
     documento?: string,
   ) => {
@@ -414,7 +414,7 @@ export function usePrealerta() {
         .map((r) => ({
           codigo: r.serial as string,
           codigo_sap: r.codigo_sap as string | undefined,
-          origen: "api" as const,
+          origen: "routes" as const,
         }));
 
       if (nuevos.length === 0) {
@@ -422,12 +422,12 @@ export function usePrealerta() {
       } else {
         setSerialEscaneados((prev) => [...prev, ...nuevos]);
         showToast(
-          `✓ ${nuevos.length} serial${nuevos.length !== 1 ? "es" : ""} importado${nuevos.length !== 1 ? "s" : ""} desde API`,
+          `✓ ${nuevos.length} serial${nuevos.length !== 1 ? "es" : ""} importado${nuevos.length !== 1 ? "s" : ""} desde routes`,
         );
       }
     } catch (err) {
-      console.error("Error sincronizando API:", err);
-      showToast("Error al sincronizar con la API", "error");
+      console.error("Error sincronizando routes:", err);
+      showToast("Error al sincronizar con la routes", "error");
     } finally {
       setSincronizando(false);
     }
@@ -452,7 +452,7 @@ export function usePrealerta() {
         codigo: a.codigoAccesorio,
         descripcion: a.accesorio,
         cantidad: a.cantidad,
-        origen: "api" as const,
+        origen: "routes" as const,
         tipo: "No-serializable" as const,
       }));
 
@@ -496,7 +496,7 @@ export function usePrealerta() {
     let idPrealerta = preAlertaSeleccionada.id;
     if (!idPrealerta) {
       const resId = await fetch(
-        `/api/prealerta/getId?nombre=${encodeURIComponent(preAlertaSeleccionada.nombre)}`,
+        `/routes/prealerta/getId?nombre=${encodeURIComponent(preAlertaSeleccionada.nombre)}`,
       );
       if (resId.ok) idPrealerta = await resId.json();
     }
@@ -511,7 +511,7 @@ export function usePrealerta() {
     const cajaParaEsteEmpacar = cajaActual;
 
     try {
-      const res = await fetch("/api/prealerta/insertSerialBatch", {
+      const res = await fetch("/routes/prealerta/insertSerialBatch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -608,7 +608,7 @@ export function usePrealerta() {
     handleRemoveSerial,
     handleEmpacar,
     showToast,
-    sincronizarDesdeAPI,
+    sincronizarDesderoutes,
     seleccionados,
     handleToggleSerial,
     handleToggleAll,

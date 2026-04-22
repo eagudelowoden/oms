@@ -16,7 +16,7 @@ export default function PrealertaHeader({ onCrear }: Props) {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch("/api/prealerta/sedes")
+    fetch("/routes/prealerta/sedes")
       .then((r) => r.json())
       .then((data) => {
         setSedes(data);

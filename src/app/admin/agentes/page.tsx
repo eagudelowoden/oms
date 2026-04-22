@@ -81,7 +81,7 @@ export default function PreAlertaAgentePage() {
 
       try {
         const res = await fetch(
-          `/api/prealerta/cajas?prealertaId=${preAlertaSeleccionada.id}`,
+          `/routes/prealerta/cajas?prealertaId=${preAlertaSeleccionada.id}`,
         );
         if (res.ok && !cancelled) {
           const data: { cajas: CajaItem[] } = await res.json();
@@ -130,7 +130,7 @@ export default function PreAlertaAgentePage() {
 
       try {
         const res = await fetch(
-          `/api/prealerta/serialesPorCaja?prealertaId=${preAlertaSeleccionada.id}&caja=${cajaActual}`,
+          `/routes/prealerta/serialesPorCaja?prealertaId=${preAlertaSeleccionada.id}&caja=${cajaActual}`,
         );
         if (res.ok && !cancelled) {
           const data: SerialEmpacado[] = await res.json();
@@ -153,7 +153,7 @@ export default function PreAlertaAgentePage() {
     if (!preAlertaSeleccionada?.id) return;
     try {
       const res = await fetch(
-        `/api/prealerta/cajas?prealertaId=${preAlertaSeleccionada.id}`,
+        `/routes/prealerta/cajas?prealertaId=${preAlertaSeleccionada.id}`,
       );
       if (res.ok) {
         const data: { cajas: CajaItem[] } = await res.json();

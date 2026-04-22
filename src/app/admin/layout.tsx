@@ -61,7 +61,7 @@ export default function AdminLayout({
     const fetchPerfilData = async () => {
       if (usuario?.id && usuario?.clienteNombre && !usuario.perfilNombre) {
         try {
-          const url = `/api/perfil/${usuario.id}?clienteNombre=${encodeURIComponent(usuario.clienteNombre)}`;
+          const url = `/routes/perfil/${usuario.id}?clienteNombre=${encodeURIComponent(usuario.clienteNombre)}`;
 
           console.log(
             "📡 Disparando petición de perfil para:",
@@ -114,7 +114,7 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/routes/auth/logout", { method: "POST" });
     } finally {
       localStorage.clear();
       router.push("/login");
