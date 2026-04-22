@@ -1,76 +1,75 @@
 import sql from "mssql";
 import { getDBConnection } from "@/lib/db";
+import { execProc } from "@/lib/exec-proc";
+import { execQuery } from "@/lib/db-helpers";
+import {
+  SedeTable,
+  PrealertaTable,
+  PrealertaSerialTable,
+  CajaRow,
+} from "@/lib/types";
 
 export const AgentesBackendService = {
-  async insertPrealert(data: {
-    nombre: string;
-    tipoOrigenId: number;
-    origenId: number;
-    guia: string;
-    usuarioId: number;
-    idResponsable: number;
-    estado: string;
-  }) {
-    const pool = await getDBConnection();
-    const result = await pool
-      .request()
-      .input("Nombre", sql.VarChar(50), data.nombre)
-      .input("TipoOrigenId", sql.Int, data.tipoOrigenId)
-      .input("OrigenId", sql.Int, data.origenId)
-      .input("Guia", sql.VarChar(30), data.guia)
-      .input("UsuarioId", sql.Int, data.usuarioId)
-      .input("Fecha", sql.DateTime, new Date())
-      .input("IdResponsable", sql.Int, data.idResponsable)
-      .input("Estado", sql.VarChar(20), data.estado)
-      .execute("pa_InsertPrealertOms");
+  async insertPrealert(data: Omit<PrealertaTable, "Id" | "Fecha" | "Activo">) {
+    const [result] = await execProc<{ Id: number }>("pa_InsertPrealertOms", {
+      Nombre: { type: sql.VarChar(50), value: data.Nombre },
+      TipoOrigenId: { type: sql.Int, value: data.TipoOrigenId },
+      OrigenId: { type: sql.Int, value: data.OrigenId },
+      Guia: { type: sql.VarChar(30), value: data.Guia },
+      UsuarioId: { type: sql.Int, value: data.UsuarioId },
+      Fecha: { type: sql.DateTime, value: new Date() },
+      IdResponsable: { type: sql.Int, value: data.IdResponsable },
+      Estado: { type: sql.VarChar(20), value: data.Estado },
+    });
 
-    const id = result.recordset?.[0]?.Id ?? null;
-    return { success: true, id };
+    return {
+      success: !!result?.Id,
+      id: result?.Id ?? null,
+    };
   },
 
   async insertPrealertSerialBatch(data: {
     prealertaId: number;
     caja: number;
-    seriales: {
-      serial: string;
-      mac: string;
-      tipo: string;
-      cantidad?: number;
-    }[];
+    seriales: Partial<PrealertaSerialTable>[];
   }) {
-    const pool = await getDBConnection();
     let exitosos = 0,
       yaExistian = 0,
       fallidos = 0;
-
     const LOTE = 10;
+
     for (let i = 0; i < data.seriales.length; i += LOTE) {
       const lote = data.seriales.slice(i, i + LOTE);
-      await Promise.all(
-        lote.map(async ({ serial, mac, tipo, cantidad }) => {
-          try {
-            const result = await pool
-              .request()
-              .input("PrealertaId", sql.Int, data.prealertaId)
-              .input("Serial", sql.VarChar(50), serial)
-              .input("Mac", sql.VarChar(50), mac)
-              .input("CodigoSap", sql.VarChar(20), "")
-              .input("Descripcion", sql.VarChar(150), "")
-              .input("Cantidad", sql.Int, cantidad ?? 1)
-              .input("Caja", sql.Int, data.caja)
-              .input("Falla", sql.VarChar(100), "")
-              .input("TecnicoCliente", sql.VarChar(50), "")
-              .input("Pedido", sql.VarChar(30), "")
-              .input("Tramite", sql.VarChar(30), "")
-              .input("Novedad", sql.VarChar(30), "")
-              .input("Garantia", sql.Int, 0)
-              .input("Tipo", sql.VarChar(30), tipo)
-              .execute("pa_InsertPrealertSerialOms");
 
-            const row = result.recordset?.[0];
+      await Promise.all(
+        lote.map(async (item) => {
+          try {
+            const { Serial, Mac, Tipo, Cantidad } = item;
+            const [row] = await execProc<{ estado: string }>(
+              "pa_InsertPrealertSerialOms",
+              {
+                PrealertaId: { type: sql.Int, value: data.prealertaId },
+                Serial: { type: sql.VarChar(50), value: Serial },
+                Mac: { type: sql.VarChar(50), value: Mac ?? "" },
+                CodigoSap: { type: sql.VarChar(20), value: "" },
+                Descripcion: { type: sql.VarChar(150), value: "" },
+                Cantidad: { type: sql.Int, value: Cantidad ?? 1 },
+                Caja: { type: sql.Int, value: data.caja },
+                Falla: { type: sql.VarChar(100), value: "" },
+                TecnicoCliente: { type: sql.VarChar(50), value: "" },
+                Pedido: { type: sql.VarChar(30), value: "" },
+                Tramite: { type: sql.VarChar(30), value: "" },
+                Novedad: { type: sql.VarChar(30), value: "" },
+                Garantia: { type: sql.Int, value: 0 },
+                Tipo: { type: sql.VarChar(30), value: Tipo ?? "" },
+              },
+            );
+
             if (row?.estado === "YA_EXISTE") yaExistian++;
             else exitosos++;
-          } catch {
+          } catch (error) {
+            // Usamos item.Serial para el log por seguridad
+            console.error("Error insertando serial:", item.Serial, error);
             fallidos++;
           }
         }),
@@ -80,57 +79,56 @@ export const AgentesBackendService = {
     return { success: true, exitosos, yaExistian, fallidos };
   },
 
-  async getSerialsByPrealerta(prealertaId: number): Promise<
-    {
-      codigo: string;
-      origen: "api";
-      estado: "Empacado";
-      tipo: string;
-      cantidad: number;
-      caja: number;
-    }[]
-  > {
-    const pool = await getDBConnection();
-    const result = await pool
-      .request()
-      .input("PrealertaId", sql.Int, prealertaId).query(`
-        SELECT Serial AS codigo, cantidad as Cantidad,Caja AS caja, Tipo AS tipo
-        FROM PrealertaSerial
-        WHERE PrealertaId = @PrealertaId
-      `);
-    return result.recordset.map((r) => ({
-      codigo: r.codigo,
+  async getSerialsByPrealerta(prealertaId: number) {
+    // 1. Usamos alias en el SQL para que coincidan con tu interfaz de salida
+    // 2. Traemos solo lo necesario de PrealertaSerialTable
+    const rows = await execQuery<PrealertaSerialTable>(
+      `SELECT 
+        Serial AS Id, -- Si necesitas el serial como identificador
+        Serial AS codigo, 
+        Cantidad AS cantidad, 
+        Caja AS caja, 
+        Tipo AS tipo
+     FROM PrealertaSerial
+     WHERE PrealertaId = @id`,
+      { id: prealertaId },
+    );
+
+    // 3. El map ahora es mucho más limpio
+    return rows.map((r) => ({
+      codigo: r.CodigoSap,
       origen: "api" as const,
       estado: "Empacado" as const,
-      tipo: r.tipo ?? "Serializable",
-      cantidad: r.cantidad,
-      caja: r.caja,
+      tipo: r.Tipo ?? "Serializable",
+      cantidad: r.Cantidad,
+      caja: r.Caja,
     }));
   },
 
   // ── NUEVO: cajas agrupadas con conteo ──
-  async getCajasByPrealerta(
-    prealertaId: number,
-  ): Promise<
-    { numero: number; totalSeriales: number; estado: "abierta" | "cerrada" }[]
-  > {
-    const pool = await getDBConnection();
-    const result = await pool
-      .request()
-      .input("PrealertaId", sql.Int, prealertaId).query(`
-      SELECT
-        Caja         AS numero,
-        COUNT(*)     AS totalSeriales
-      FROM PrealertaSerial
-      WHERE PrealertaId = @PrealertaId
-      GROUP BY Caja
-      ORDER BY Caja ASC
-    `);
+  async getCajasByPrealerta(prealertaId: number) {
+    // 1. Definimos la forma de la fila que devuelve el SELECT
 
-    return result.recordset.map((r, i, arr) => ({
+    // 2. Ejecutamos la consulta usando el helper y alias en SQL
+    const rows = await execQuery<CajaRow>(
+      `SELECT
+        Caja          AS numero,
+        COUNT(*)      AS totalSeriales
+     FROM PrealertaSerial
+     WHERE PrealertaId = @id
+     GROUP BY Caja
+     ORDER BY Caja ASC`,
+      { id: prealertaId },
+    );
+
+    // 3. Mapeamos para agregar la lógica del estado
+    return rows.map((r, i, arr) => ({
       numero: r.numero,
       totalSeriales: r.totalSeriales,
-      estado: i === arr.length - 1 ? "abierta" : "cerrada",
+      // La última caja del arreglo se considera "abierta"
+      estado: (i === arr.length - 1 ? "abierta" : "cerrada") as
+        | "abierta"
+        | "cerrada",
     }));
   },
 
@@ -239,15 +237,12 @@ export const AgentesBackendService = {
   },
 
   async getSedes(): Promise<{ id: number; nombre: string }[]> {
-    const pool = await getDBConnection();
-    const result = await pool
-      .request()
-      .query("SELECT Id, Nombre FROM WmsWdGeneral.dbo.Sede");
-
-    if (!result.recordset) return [];
-    return result.recordset.map((r) => ({
-      id: r.Id || r.id,
-      nombre: r.Nombre || r.nombre || "Sin nombre",
+    const result = await execQuery<SedeTable>(
+      "SELECT Id, Nombre FROM WmsWdGeneral.dbo.Sede",
+    );
+    return result.map((r) => ({
+      id: r.Id,
+      nombre: r.Nombre,
     }));
   },
 };
