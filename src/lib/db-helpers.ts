@@ -36,17 +36,15 @@ export async function execProc<T = unknown>(
 }
 export async function execQuery<T = unknown>(
   query: string,
-  inputs: Record<string, InputSpec | unknown> = {},
+  inputs: Record<string, InputSpec | unknown> = {}, // Cambiado de any a unknown
 ): Promise<T[]> {
   const pool = await getDBConnection();
   const request = pool.request();
 
   for (const [key, val] of Object.entries(inputs)) {
+    // Verificamos si es un InputSpec de forma segura (Type Guarding)
     if (val !== null && typeof val === "object" && "value" in val) {
       const spec = val as InputSpec;
-
-      // LA CORRECCIÓN:
-      // Si existe el tipo, lo pasamos. Si no, solo pasamos el valor.
       if (spec.type) {
         request.input(key, spec.type, spec.value);
       } else {

@@ -84,10 +84,15 @@ export async function GET(
 
     return NextResponse.json({ error: "Acción no válida" }, { status: 404 });
   } catch (error) {
-    return NextResponse.json({ error: "Error en servidor" }, { status: 500 });
+    console.error(`❌ GET /api/agente/${action} error:`, error);
+    const detail = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    return NextResponse.json(
+      { error: "Error en servidor", action, detail, stack },
+      { status: 500 },
+    );
   }
 }
-
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ action: string }> },

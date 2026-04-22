@@ -3,7 +3,9 @@ export interface DB {
   Prealerta: PrealertaTable;
   PrealertaSerial: PrealertaSerialTable;
   Cajas: CajaRow;
+  SerialCaja: SerialCaja;
   Sede: SedeTable;
+  PrealertaListRow: PrealertaListRow;
   UsuarioSys: UsuarioSysTable;
 }
 
@@ -50,4 +52,21 @@ export interface SedeTable {
 export interface UsuarioSysTable {
   Id: number;
   nombres: string;
+}
+
+export interface SerialCaja {
+  serial: string;
+  mac: string | null;
+  tipo: string | null;
+}
+
+export interface PrealertaListRow {
+  Id: number;
+  Nombre: string | null;
+  Fecha: Date | string | null;
+  Estado: string | null;
+  UsuarioId: number | null;
+  TipoOrigenId: number | null;
+  OrigenId: number | null;
+  UsuarioNombre: string | null;
 }

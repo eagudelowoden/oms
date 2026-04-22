@@ -7,6 +7,8 @@ import {
   PrealertaTable,
   PrealertaSerialTable,
   CajaRow,
+  SerialCaja,
+  PrealertaListRow,
 } from "@/lib/types";
 
 export const AgentesBackendService = {
@@ -68,7 +70,6 @@ export const AgentesBackendService = {
             if (row?.estado === "YA_EXISTE") yaExistian++;
             else exitosos++;
           } catch (error) {
-            // Usamos item.Serial para el log por seguridad
             console.error("Error insertando serial:", item.Serial, error);
             fallidos++;
           }
@@ -80,11 +81,9 @@ export const AgentesBackendService = {
   },
 
   async getSerialsByPrealerta(prealertaId: number) {
-    // 1. Usamos alias en el SQL para que coincidan con tu interfaz de salida
-    // 2. Traemos solo lo necesario de PrealertaSerialTable
     const rows = await execQuery<PrealertaSerialTable>(
       `SELECT 
-        Serial AS Id, -- Si necesitas el serial como identificador
+        Serial AS Id,
         Serial AS codigo, 
         Cantidad AS cantidad, 
         Caja AS caja, 
@@ -105,11 +104,7 @@ export const AgentesBackendService = {
     }));
   },
 
-  // ── NUEVO: cajas agrupadas con conteo ──
   async getCajasByPrealerta(prealertaId: number) {
-    // 1. Definimos la forma de la fila que devuelve el SELECT
-
-    // 2. Ejecutamos la consulta usando el helper y alias en SQL
     const rows = await execQuery<CajaRow>(
       `SELECT
         Caja          AS numero,
@@ -120,8 +115,6 @@ export const AgentesBackendService = {
      ORDER BY Caja ASC`,
       { id: prealertaId },
     );
-
-    // 3. Mapeamos para agregar la lógica del estado
     return rows.map((r, i, arr) => ({
       numero: r.numero,
       totalSeriales: r.totalSeriales,
@@ -133,27 +126,23 @@ export const AgentesBackendService = {
   },
 
   // ── NUEVO: seriales de una caja específica ──
-  async getSerialsPorCaja(
-    prealertaId: number,
-    caja: number,
-  ): Promise<{ serial: string; mac: string; tipo: string }[]> {
-    const pool = await getDBConnection();
-    const result = await pool
-      .request()
-      .input("PrealertaId", sql.Int, prealertaId)
-      .input("Caja", sql.Int, caja).query(`
-        SELECT
-          Serial  AS serial,
-          Mac     AS mac,
-          Tipo    AS tipo,
-          Cantidad as cantidad
-        FROM PrealertaSerial
-        WHERE PrealertaId = @PrealertaId
-          AND Caja = @Caja
-        ORDER BY Serial ASC
-      `);
+  async getSerialsPorCaja(prealertaId: number, caja: number) {
+    const rows = await execQuery<SerialCaja>(
+      `SELECT
+        Serial   AS serial,
+        Mac      AS mac,
+        Tipo     AS tipo
+     FROM PrealertaSerial
+     WHERE PrealertaId = @prealertaId
+       AND Caja = @caja
+     ORDER BY Serial ASC`,
+      {
+        prealertaId,
+        caja,
+      },
+    );
 
-    return result.recordset.map((r) => ({
+    return rows.map((r) => ({
       serial: r.serial,
       mac: r.mac ?? "",
       tipo: r.tipo ?? "Serializable",
@@ -164,51 +153,46 @@ export const AgentesBackendService = {
     prealertaId: number,
     seriales: string[],
   ): Promise<number> {
-    const pool = await getDBConnection();
-    const result = await pool
-      .request()
-      .input("PrealertaId", sql.Int, prealertaId)
-      .input("Seriales", sql.NVarChar(sql.MAX), JSON.stringify(seriales))
-      .execute("pa_DesempacarSerialesOms");
+    const [row] = await execProc<{ actualizados: number }>(
+      "pa_DesempacarSerialesOms",
+      {
+        PrealertaId: { type: sql.Int, value: prealertaId },
+        Seriales: {
+          type: sql.NVarChar(sql.MAX),
+          value: JSON.stringify(seriales),
+        },
+      },
+    );
 
-    return result.recordset[0]?.actualizados ?? 0;
+    return row?.actualizados ?? 0;
   },
 
   async eliminarSerial(prealertaId: number, serial: string): Promise<number> {
-    const pool = await getDBConnection();
-    const result = await pool
-      .request()
-      .input("PrealertaId", sql.Int, prealertaId)
-      .input("Serial", sql.NVarChar(50), serial)
-      .execute("pa_EliminarSerialOms");
+    const [row] = await execProc<{ eliminados: number }>(
+      "pa_EliminarSerialOms",
+      {
+        PrealertaId: { type: sql.Int, value: prealertaId },
+        Serial: { type: sql.VarChar(50), value: serial },
+      },
+    );
 
-    return result.recordset[0]?.eliminados ?? 0;
+    return row?.eliminados ?? 0;
   },
 
-  async getListPrealert(): Promise<
-    { id: number; nombre: string; fecha?: string; estado?: string }[]
-  > {
-    try {
-      const pool = await getDBConnection();
-      const result = await pool.request().execute("pa_GetListPrealertOms");
-      if (!result.recordset) return [];
+  async getListPrealert() {
+    const rows = await execProc<PrealertaListRow>("pa_GetListPrealertOms");
 
-      return result.recordset.map((r) => ({
-        id: r.Id || r.id,
-        nombre: r.Nombre || r.nombre || "Sin Nombre",
-        fecha: r.Fecha || r.fecha,
-        estado: r.Estado || r.estado,
-        usuarioId: r.UsuarioId || r.usuarioId,
-        usuarioNombre: r.UsuarioNombre || r.usuarioNombre,
-        tipoOrigenId: r.TipoOrigenId || r.tipoOrigenId,
-        origenId: r.OrigenId || r.origenId,
-      }));
-    } catch (error) {
-      console.error("Error en getListPrealert:", error);
-      throw error;
-    }
+    return rows.map((r) => ({
+      id: r.Id,
+      nombre: r.Nombre ?? "Sin Nombre",
+      fecha: r.Fecha ? new Date(r.Fecha).toISOString() : null,
+      estado: r.Estado ?? "Pendiente",
+      usuarioId: r.UsuarioId,
+      usuarioNombre: r.UsuarioNombre ?? "Desconocido",
+      tipoOrigenId: r.TipoOrigenId,
+      origenId: r.OrigenId,
+    }));
   },
-
   async getIdPrealert(nombre: string): Promise<number | null> {
     const pool = await getDBConnection();
     const result = await pool
@@ -217,25 +201,25 @@ export const AgentesBackendService = {
       .execute("pa_GetIdPrealert");
     return result.recordset[0]?.Id || result.recordset[0]?.id || null;
   },
-
   async getUltimaCaja(prealertaId: number): Promise<number> {
-    const pool = await getDBConnection();
-    const result = await pool
-      .request()
-      .input("PrealertaId", sql.Int, prealertaId).query(`
-        SELECT ISNULL(MAX(Caja), 0) AS ultimaCaja
-        FROM PrealertaSerial
-        WHERE PrealertaId = @PrealertaId
-      `);
-    return result.recordset[0].ultimaCaja;
+    const [row] = await execQuery<{ ultimaCaja: number }>(
+      `SELECT ISNULL(MAX(Caja), 0) AS ultimaCaja
+     FROM PrealertaSerial
+     WHERE PrealertaId = @id`,
+      { id: prealertaId },
+    );
+    return row?.ultimaCaja ?? 0;
   },
 
   async deletePrealert(id: number): Promise<{ success: boolean }> {
-    const pool = await getDBConnection();
-    await pool.request().input("Id", sql.Int, id).execute("pa_DeletePrealert");
+    // Usamos execProc para ejecutar el procedimiento de borrado
+    // No necesitamos el resultado, así que solo esperamos la ejecución
+    await execProc("pa_DeletePrealert", {
+      Id: { type: sql.Int, value: id },
+    });
+
     return { success: true };
   },
-
   async getSedes(): Promise<{ id: number; nombre: string }[]> {
     const result = await execQuery<SedeTable>(
       "SELECT Id, Nombre FROM WmsWdGeneral.dbo.Sede",
