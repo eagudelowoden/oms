@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import styles from "../admin/preAlertaAgente/css/admin.module.css";
+import styles from "../admin/agentes/css/admin.module.css";
 import ModalElegirCliente from "@/modules/auth/components/ModalElegirCliente/ModalElegirCliente";
 import { useMenu } from "@/modules/auth/hooks/useMenu";
 
@@ -250,12 +250,9 @@ export default function AdminLayout({
             <span className="material-symbols-rounded">dashboard</span>
             <span>Dashboard</span>
           </Link> */}
-          <Link
-            href="/admin/preAlertaAgente"
-            className={linkClass("/admin/preAlertaAgente")}
-          >
+          <Link href="/admin/agentes" className={linkClass("/admin/agentes")}>
             <span className="material-symbols-rounded">pending_actions</span>
-            <span>Pre-Alerta</span>
+            <span>Agentes</span>
           </Link>
           {usuario.perfilId === 1 && (
             <Link

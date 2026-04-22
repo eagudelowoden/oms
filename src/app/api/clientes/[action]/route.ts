@@ -59,7 +59,7 @@ export async function POST(
 
       const { clientId, clienteNombre, dbNameReal } = body;
 
-      // VALIDACIÓN: Si no hay dbNameReal de la base de datos, no procedemos
+      // VALIDACIÓN: Si no hay nombre  de la base de datos, no procedemos
       if (!dbNameReal) {
         console.error(
           "❌ Intento de switch sin dbNameReal para:",

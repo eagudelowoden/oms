@@ -93,7 +93,7 @@ export default function LoginPage() {
         "usuario",
         JSON.stringify({
           ...tempUserData,
-          clienteNombre: clientData.clientDbName, // 👈 línea nueva
+          clienteNombre: clientData.clientDbName,
         }),
       );
     }
