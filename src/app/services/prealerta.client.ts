@@ -21,6 +21,7 @@ export const prealertaQueries = {
         const data = await res.json();
         return data.cajas;
     },
+    //refactorizar con la tabla
 
     serialesPorCaja: async (prealertaId: number, caja: number): Promise<SerialEmpacado[]> => {
         const res = await fetch(`/api/prealerta/serialesPorCaja?prealertaId=${prealertaId}&caja=${caja}`);
