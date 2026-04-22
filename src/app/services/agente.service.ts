@@ -1,7 +1,7 @@
 import sql from "mssql";
 import { getDBConnection } from "@/lib/db";
 
-export const PrealertaBackendService = {
+export const AgentesBackendService = {
   async insertPrealert(data: {
     nombre: string;
     tipoOrigenId: number;

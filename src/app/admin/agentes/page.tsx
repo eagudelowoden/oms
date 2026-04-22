@@ -3,17 +3,17 @@
 import React from "react";
 import styles from "./css/prealerta.module.css";
 import { usePrealerta } from "./hooks/useAgente";
-import PrealertaHeader from "./components/PrealertaEncabezado";
-import PrealertaTabla from "./components/PrealertaTablaDetalle";
-import PrealertaAcciones from "./components/PrealertaAcciones";
-import { PrealertaSeriales } from "./components/PrealertaListado";
-import { ConfirmModal, Toast } from "./components/PrealertaModales";
+import PrealertaHeader from "./components/Agentecabezado";
+import PrealertaTabla from "./components/TablaDetalle";
+import PrealertaAcciones from "./components/AgenteAcciones";
+import { PrealertaSeriales } from "./components/SerialesListado";
+import { ConfirmModal, Toast } from "./components/ModalEliminar";
 import ScannerModal from "@/modules/auth/components/scanner/scannerModal";
 import SincronizarModal from "./components/ModalSincronizarSeriales";
 import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios";
-import RegistroSeries from "./components/RegistroSeries";
+import RegistroSeries from "./components/RegistroAccesorios";
 
-export default function PreAlertaAgentePage() {
+export default function AgentePage() {
   const {
     isLoading,
     query,

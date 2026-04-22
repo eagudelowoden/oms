@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { prealertaQueries, prealertaMutations } from "@/app/services/prealerta.client";
+import {
+  prealertaQueries,
+  prealertaMutations,
+} from "@/app/services/agente.client";
 import { PrealertaItem } from "@/app/models/Prealerta.models";
 import { SerialItem } from "@/app/models/seriales.models";
 import { UsuarioSesion } from "@/app/models/UsuarioSesion";
@@ -18,8 +21,12 @@ export function usePrealerta() {
   const [scannerOpen, setScannerOpen] = useState(false);
   const [serialesEscaneados, setSerialEscaneados] = useState<SerialItem[]>([]);
   const [confirmItem, setConfirmItem] = useState<PrealertaItem | null>(null);
-  const [preAlertaSeleccionada, setPreAlertaSeleccionada] = useState<PrealertaItem | null>(null);
-  const [toast, setToast] = useState<{ msg: string; type: "ok" | "error" } | null>(null);
+  const [preAlertaSeleccionada, setPreAlertaSeleccionada] =
+    useState<PrealertaItem | null>(null);
+  const [toast, setToast] = useState<{
+    msg: string;
+    type: "ok" | "error";
+  } | null>(null);
   const [empacando, setEmpacando] = useState(false);
   const [progreso, setProgreso] = useState(0);
   const [seleccionados, setSeleccionados] = useState<Set<number>>(new Set());
@@ -56,20 +63,21 @@ export function usePrealerta() {
 
   const { data: serialesDeCaja = [] } = useQuery({
     queryKey: ["serialesPorCaja", preAlertaSeleccionada?.id, cajaActual],
-    queryFn: () => prealertaQueries.serialesPorCaja(preAlertaSeleccionada!.id!, cajaActual),
+    queryFn: () =>
+      prealertaQueries.serialesPorCaja(preAlertaSeleccionada!.id!, cajaActual),
     enabled: !!preAlertaSeleccionada?.id && esCajaExistente,
   });
 
   /* ── SERIALES MOSTRADOS ── */
   const serialesMostrados: SerialItem[] = esCajaExistente
     ? serialesDeCaja.map((s) => ({
-      codigo: s.serial,
-      origen: "api" as const,
-      estado: "Empacado" as const,
-      tipo: s.tipo as "Serializable" | "No-serializable",
-      cantidad: s.cantidad,
-      caja: cajaActual,
-    }))
+        codigo: s.serial,
+        origen: "api" as const,
+        estado: "Empacado" as const,
+        tipo: s.tipo as "Serializable" | "No-serializable",
+        cantidad: s.cantidad,
+        caja: cajaActual,
+      }))
     : serialesEscaneados;
 
   /* ── SINCRONIZAR API ── */
@@ -96,13 +104,20 @@ export function usePrealerta() {
 
   const handleSort = (col: "nombre" | "fecha") => {
     if (sortCol === col) setSortAsc((p) => !p);
-    else { setSortCol(col); setSortAsc(true); }
+    else {
+      setSortCol(col);
+      setSortAsc(true);
+    }
   };
 
   /* ── HELPER ID ── */
-  const resolverIdPrealerta = async (item: PrealertaItem): Promise<number | null> => {
+  const resolverIdPrealerta = async (
+    item: PrealertaItem,
+  ): Promise<number | null> => {
     if (item.id) return item.id;
-    const res = await fetch(`/api/prealerta/getId?nombre=${encodeURIComponent(item.nombre)}`);
+    const res = await fetch(
+      `/api/prealerta/getId?nombre=${encodeURIComponent(item.nombre)}`,
+    );
     if (!res.ok) return null;
     return res.json();
   };
@@ -110,43 +125,70 @@ export function usePrealerta() {
   /* ── MUTATIONS ── */
   const crearMutation = useMutation({
     mutationFn: prealertaMutations.create,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["prealertas"] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["prealertas"] }),
   });
 
   const eliminarMutation = useMutation({
     mutationFn: prealertaMutations.delete,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["prealertas"] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["prealertas"] }),
   });
 
   const empacarMutation = useMutation({
     mutationFn: prealertaMutations.empacar,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cajas", preAlertaSeleccionada?.id] });
-      queryClient.invalidateQueries({ queryKey: ["seriales", preAlertaSeleccionada?.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["cajas", preAlertaSeleccionada?.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["seriales", preAlertaSeleccionada?.id],
+      });
     },
   });
 
   const desempacarMutation = useMutation({
-    mutationFn: ({ prealertaId, seriales }: { prealertaId: number; seriales: string[] }) =>
-      prealertaMutations.desempacar(prealertaId, seriales),
+    mutationFn: ({
+      prealertaId,
+      seriales,
+    }: {
+      prealertaId: number;
+      seriales: string[];
+    }) => prealertaMutations.desempacar(prealertaId, seriales),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cajas", preAlertaSeleccionada?.id] });
-      queryClient.invalidateQueries({ queryKey: ["seriales", preAlertaSeleccionada?.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["cajas", preAlertaSeleccionada?.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["seriales", preAlertaSeleccionada?.id],
+      });
     },
   });
 
   const eliminarSerialMutation = useMutation({
-    mutationFn: ({ prealertaId, serial }: { prealertaId: number; serial: string }) =>
-      prealertaMutations.eliminarSerial(prealertaId, serial),
+    mutationFn: ({
+      prealertaId,
+      serial,
+    }: {
+      prealertaId: number;
+      serial: string;
+    }) => prealertaMutations.eliminarSerial(prealertaId, serial),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["seriales", preAlertaSeleccionada?.id] }),
+      queryClient.invalidateQueries({
+        queryKey: ["seriales", preAlertaSeleccionada?.id],
+      }),
   });
 
   /* ── HANDLERS ── */
   const handleCrearPrealerta = async (sedeId: number, sedeNombre: string) => {
     const usuarioRaw = localStorage.getItem("usuario");
-    const usuario: UsuarioSesion | null = usuarioRaw ? JSON.parse(usuarioRaw) : null;
-    if (!usuario?.id) { showToast("No hay sesión activa", "error"); return; }
+    const usuario: UsuarioSesion | null = usuarioRaw
+      ? JSON.parse(usuarioRaw)
+      : null;
+    if (!usuario?.id) {
+      showToast("No hay sesión activa", "error");
+      return;
+    }
 
     try {
       await crearMutation.mutateAsync({
@@ -169,7 +211,10 @@ export function usePrealerta() {
     const item = confirmItem;
     setConfirmItem(null);
     const id = await resolverIdPrealerta(item);
-    if (!id) { showToast("No se pudo obtener el Id", "error"); return; }
+    if (!id) {
+      showToast("No se pudo obtener el Id", "error");
+      return;
+    }
     try {
       await eliminarMutation.mutateAsync(id);
       showToast("✓ Prealerta eliminada");
@@ -179,45 +224,60 @@ export function usePrealerta() {
   };
 
   const handleEmpacar = async () => {
-    if (!preAlertaSeleccionada) { showToast("Selecciona una prealerta primero", "error"); return; }
+    if (!preAlertaSeleccionada) {
+      showToast("Selecciona una prealerta primero", "error");
+      return;
+    }
 
-    const serialesAEmpacar = seleccionados.size > 0
-      ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
-      : serialesEscaneados;
+    const serialesAEmpacar =
+      seleccionados.size > 0
+        ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
+        : serialesEscaneados;
 
     const sinDuplicados = serialesAEmpacar.filter(
       (s, i, self) => i === self.findIndex((x) => x.codigo === s.codigo),
     );
 
-    if (sinDuplicados.length === 0) { showToast("No hay seriales para empacar", "error"); return; }
+    if (sinDuplicados.length === 0) {
+      showToast("No hay seriales para empacar", "error");
+      return;
+    }
 
     const idPrealerta = await resolverIdPrealerta(preAlertaSeleccionada);
-    if (!idPrealerta) { showToast("No se pudo obtener el Id", "error"); return; }
+    if (!idPrealerta) {
+      showToast("No se pudo obtener el Id", "error");
+      return;
+    }
 
     setEmpacando(true);
     setProgreso(0);
 
     try {
-      const { exitosos, yaExistian, fallidos } = await empacarMutation.mutateAsync({
-        prealertaId: idPrealerta,
-        caja: cajaActual,
-        seriales: sinDuplicados.map(({ codigo, tipo, mac, cantidad }) => ({
-          serial: codigo,
-          mac: mac ?? "",
-          tipo: tipo ?? "Serializable",
-          cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
-        })),
-      });
+      const { exitosos, yaExistian, fallidos } =
+        await empacarMutation.mutateAsync({
+          prealertaId: idPrealerta,
+          caja: cajaActual,
+          seriales: sinDuplicados.map(({ codigo, tipo, mac, cantidad }) => ({
+            serial: codigo,
+            mac: mac ?? "",
+            tipo: tipo ?? "Serializable",
+            cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
+          })),
+        });
 
       setProgreso(100);
       setSeleccionados(new Set());
 
       if (exitosos > 0) {
         setCajaActual((prev) => prev + 1);
-        showToast(`✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaActual}`);
+        showToast(
+          `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaActual}`,
+        );
       }
-      if (yaExistian > 0) showToast(`⚠ ${yaExistian} ya estaban empacados`, "error");
-      if (fallidos > 0) showToast(`✗ ${fallidos} no se pudieron insertar`, "error");
+      if (yaExistian > 0)
+        showToast(`⚠ ${yaExistian} ya estaban empacados`, "error");
+      if (fallidos > 0)
+        showToast(`✗ ${fallidos} no se pudieron insertar`, "error");
     } catch {
       showToast("Error inesperado al empacar", "error");
     } finally {
@@ -227,17 +287,27 @@ export function usePrealerta() {
   };
 
   const handleDesempacar = async () => {
-    if (!preAlertaSeleccionada) { showToast("Selecciona una prealerta primero", "error"); return; }
+    if (!preAlertaSeleccionada) {
+      showToast("Selecciona una prealerta primero", "error");
+      return;
+    }
 
-    const aDesempacar = seleccionados.size > 0
-      ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
-      : serialesEscaneados.filter((s) => s.estado === "Empacado");
+    const aDesempacar =
+      seleccionados.size > 0
+        ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
+        : serialesEscaneados.filter((s) => s.estado === "Empacado");
 
     const soloEmpacados = aDesempacar.filter((s) => s.estado === "Empacado");
-    if (soloEmpacados.length === 0) { showToast("No hay seriales empacados", "error"); return; }
+    if (soloEmpacados.length === 0) {
+      showToast("No hay seriales empacados", "error");
+      return;
+    }
 
     const idPrealerta = await resolverIdPrealerta(preAlertaSeleccionada);
-    if (!idPrealerta) { showToast("No se pudo obtener el Id", "error"); return; }
+    if (!idPrealerta) {
+      showToast("No se pudo obtener el Id", "error");
+      return;
+    }
 
     try {
       const data = await desempacarMutation.mutateAsync({
@@ -246,7 +316,9 @@ export function usePrealerta() {
       });
       if (data.eliminados > 0) {
         setSeleccionados(new Set());
-        showToast(`✓ ${data.eliminados} serial${data.eliminados !== 1 ? "es" : ""} desempacado${data.eliminados !== 1 ? "s" : ""}`);
+        showToast(
+          `✓ ${data.eliminados} serial${data.eliminados !== 1 ? "es" : ""} desempacado${data.eliminados !== 1 ? "s" : ""}`,
+        );
       } else {
         showToast("No se eliminaron seriales", "error");
       }
@@ -293,7 +365,8 @@ export function usePrealerta() {
   };
 
   const handleToggleAll = () => {
-    if (seleccionados.size === serialesEscaneados.length) setSeleccionados(new Set());
+    if (seleccionados.size === serialesEscaneados.length)
+      setSeleccionados(new Set());
     else setSeleccionados(new Set(serialesEscaneados.map((_, i) => i)));
   };
 
@@ -304,11 +377,17 @@ export function usePrealerta() {
   };
 
   const empacarAccesoriosAgrupados = async (
-    accesorios: Array<{ codigoAccesorio: string; accesorio: string; cantidad: number }>,
+    accesorios: Array<{
+      codigoAccesorio: string;
+      accesorio: string;
+      cantidad: number;
+    }>,
   ) => {
     setSincronizandoAccesorios(true);
     try {
-      const sinAccesorios = serialesEscaneados.filter((s) => s.tipo !== "No-serializable");
+      const sinAccesorios = serialesEscaneados.filter(
+        (s) => s.tipo !== "No-serializable",
+      );
       const nuevos: SerialItem[] = accesorios.map((a) => ({
         codigo: a.codigoAccesorio,
         descripcion: a.accesorio,
@@ -326,26 +405,50 @@ export function usePrealerta() {
 
   return {
     // Estado
-    isLoading, query, setQuery, sortCol, sortAsc,
-    filteredAndSorted, scannerOpen, setScannerOpen,
-    serialesEscaneados, serialesMostrados,
-    confirmItem, setConfirmItem,
-    preAlertaSeleccionada, setPreAlertaSeleccionada,
-    toast, empacando, progreso, sincronizando,
-    seleccionados, modalSincronizar, setModalSincronizar,
-    modalAccesorios, setModalAccesorios,
-    cajaActual, setCajaActual,
+    isLoading,
+    query,
+    setQuery,
+    sortCol,
+    sortAsc,
+    filteredAndSorted,
+    scannerOpen,
+    setScannerOpen,
+    serialesEscaneados,
+    serialesMostrados,
+    confirmItem,
+    setConfirmItem,
+    preAlertaSeleccionada,
+    setPreAlertaSeleccionada,
+    toast,
+    empacando,
+    progreso,
+    sincronizando,
+    seleccionados,
+    modalSincronizar,
+    setModalSincronizar,
+    modalAccesorios,
+    setModalAccesorios,
+    cajaActual,
+    setCajaActual,
     cargandoSeriales: false,
     sincronizandoAccesorios,
-    cajas, serialesDeCaja,
+    cajas,
+    serialesDeCaja,
     // Handlers
-    handleSort, handleCrearPrealerta,
+    handleSort,
+    handleCrearPrealerta,
     pedirConfirmacion: (item: PrealertaItem) => setConfirmItem(item),
-    handleEliminar, handleSerialConfirm,
-    handleRemoveSerial, handleEmpacar,
-    handleDesempacar, showToast,
-    sincronizarDesdeAPI, handleAgregarSerial,
-    handleToggleSerial, handleToggleAll,
-    handleActualizarTipo, empacarAccesoriosAgrupados,
+    handleEliminar,
+    handleSerialConfirm,
+    handleRemoveSerial,
+    handleEmpacar,
+    handleDesempacar,
+    showToast,
+    sincronizarDesdeAPI,
+    handleAgregarSerial,
+    handleToggleSerial,
+    handleToggleAll,
+    handleActualizarTipo,
+    empacarAccesoriosAgrupados,
   };
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrealertaBackendService } from "@/app/services/prealerta.service";
+import { AgentesBackendService } from "@/app/services/agente.service";
 
 export async function GET(
   request: Request,
@@ -10,7 +10,7 @@ export async function GET(
 
   try {
     if (action === "list") {
-      const data = await PrealertaBackendService.getListPrealert();
+      const data = await AgentesBackendService.getListPrealert();
       return NextResponse.json(data);
     }
 
@@ -21,12 +21,12 @@ export async function GET(
           { error: "Nombre requerido" },
           { status: 400 },
         );
-      const id = await PrealertaBackendService.getIdPrealert(nombre);
+      const id = await AgentesBackendService.getIdPrealert(nombre);
       return NextResponse.json(id);
     }
 
     if (action === "sedes") {
-      const data = await PrealertaBackendService.getSedes();
+      const data = await AgentesBackendService.getSedes();
       return NextResponse.json(data);
     }
 
@@ -38,7 +38,7 @@ export async function GET(
           { status: 400 },
         );
       const data =
-        await PrealertaBackendService.getSerialsByPrealerta(prealertaId);
+        await AgentesBackendService.getSerialsByPrealerta(prealertaId);
       return NextResponse.json(data);
     }
 
@@ -49,8 +49,7 @@ export async function GET(
           { error: "prealertaId requerido" },
           { status: 400 },
         );
-      const ultimaCaja =
-        await PrealertaBackendService.getUltimaCaja(prealertaId);
+      const ultimaCaja = await AgentesBackendService.getUltimaCaja(prealertaId);
       return NextResponse.json({ ultimaCaja });
     }
 
@@ -63,7 +62,7 @@ export async function GET(
           { status: 400 },
         );
       const cajas =
-        await PrealertaBackendService.getCajasByPrealerta(prealertaId);
+        await AgentesBackendService.getCajasByPrealerta(prealertaId);
       return NextResponse.json({ cajas });
     }
 
@@ -76,7 +75,7 @@ export async function GET(
           { error: "prealertaId y caja son requeridos" },
           { status: 400 },
         );
-      const seriales = await PrealertaBackendService.getSerialsPorCaja(
+      const seriales = await AgentesBackendService.getSerialsPorCaja(
         prealertaId,
         caja,
       );
@@ -98,7 +97,7 @@ export async function POST(
   if (action === "create") {
     try {
       const body = await request.json();
-      const result = await PrealertaBackendService.insertPrealert(body);
+      const result = await AgentesBackendService.insertPrealert(body);
       return NextResponse.json(result);
     } catch (error) {
       return NextResponse.json({ error: "Error al insertar" }, { status: 500 });
@@ -109,7 +108,7 @@ export async function POST(
     try {
       const body = await request.json();
       const result =
-        await PrealertaBackendService.insertPrealertSerialBatch(body);
+        await AgentesBackendService.insertPrealertSerialBatch(body);
       return NextResponse.json(result);
     } catch (error) {
       console.error("Error al insertar serial:", error);
@@ -130,7 +129,7 @@ export async function POST(
           { status: 400 },
         );
       }
-      const eliminados = await PrealertaBackendService.desempacarSeriales(
+      const eliminados = await AgentesBackendService.desempacarSeriales(
         prealertaId,
         seriales,
       );
@@ -154,7 +153,7 @@ export async function POST(
           { status: 400 },
         );
       }
-      const eliminados = await PrealertaBackendService.eliminarSerial(
+      const eliminados = await AgentesBackendService.eliminarSerial(
         prealertaId,
         serial,
       );
@@ -175,7 +174,7 @@ export async function DELETE(req: NextRequest) {
     const { id } = await req.json();
     if (!id)
       return NextResponse.json({ error: "Id requerido" }, { status: 400 });
-    await PrealertaBackendService.deletePrealert(Number(id));
+    await AgentesBackendService.deletePrealert(Number(id));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error al eliminar prealerta:", error);
