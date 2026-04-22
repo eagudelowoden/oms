@@ -1,30 +1,20 @@
 import React, { useState, useEffect } from "react";
 import styles from "../css/prealerta.module.css";
+import {
+  AccesorioAgrupado,
+  PropsSincronizarAccesorios,
+} from "@/app/models/Accesorios.models";
 
-interface AccesorioAgrupado {
-  codigoAccesorio: string;
-  accesorio: string;
-  cantidad: number;
-}
-
-interface Props {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: (accesorios: AccesorioAgrupado[]) => void;
-  sincronizando: boolean;
-}
-
-const WFSM_LOGIN_URL = "https://wfsapi.tcpip.tech/api/usuarios/login";
-const WFSM_CONSULTA_ACCESORIOS_URL =
-  "https://wfsapi.tcpip.tech/api/consultas/seriales/accesorios";
-const WFSM_AUTH_BASIC = "Basic bXB1bGlkb0B3b2Rlbi5jb20uY286TTFjaDQzbDIwMjAq";
+const WFSM_LOGIN_URL = process.env.WFSM_LOGIN_URL!;
+const WFSM_CONSULTA_ACCESORIOS_URL = process.env.WFSM_CONSULTA_ACCESORIOS_URL!;
+const WFSM_AUTH_BASIC = process.env.WFSM_AUTH_BASIC!;
 
 export default function SincronizarAccesoriosModal({
   isOpen,
   onClose,
   onConfirm,
   sincronizando,
-}: Props) {
+}: PropsSincronizarAccesorios) {
   const hoy = new Date().toLocaleDateString("en-CA", {
     timeZone: "America/Bogota",
   });
@@ -35,8 +25,6 @@ export default function SincronizarAccesoriosModal({
   const [accesorios, setAccesorios] = useState<AccesorioAgrupado[]>([]);
   const [buscado, setBuscado] = useState(false);
   const [error, setError] = useState("");
-
-  // Pre-llenar cédula desde sesión
   useEffect(() => {
     if (!isOpen) return;
     setFecha(hoy);

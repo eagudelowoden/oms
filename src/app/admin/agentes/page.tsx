@@ -2,20 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import styles from "./css/prealerta.module.css";
-import { usePrealerta, SerialItem } from "./hooks/usePrealerta";
+import { usePrealerta } from "./hooks/usePrealerta";
 import PrealertaHeader from "./components/PrealertaEncabezado";
 import PrealertaTabla from "./components/PrealertaTablaDetalle";
-
-import PrealertaAcciones, {
+import {
   CajaItem,
   SerialEmpacado,
-} from "./components/PrealertaAcciones";
-import RegistroSeries from "./components/RegistroSeries";
+  SerialItem,
+} from "@/app/models/seriales.models";
+import PrealertaAcciones from "./components/PrealertaAcciones";
 import { PrealertaSeriales } from "./components/PrealertaListado";
 import { ConfirmModal, Toast } from "./components/PrealertaModales";
 import ScannerModal from "@/modules/auth/components/scanner/scannerModal";
 import SincronizarModal from "./components/ModalSincronizarSeriales";
 import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios";
+import RegistroSeries from "./components/RegistroSeries";
 
 export default function PreAlertaAgentePage() {
   const [modalAccesorios, setModalAccesorios] = useState(false);

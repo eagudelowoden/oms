@@ -2,38 +2,13 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { aplicarFiltros } from "../config/sincronizarFiltros.config";
+import { PrealertaItem } from "@/app/models/Prealerta.models";
+import { SerialItem } from "@/app/models/seriales.models";
+import { UsuarioSesion } from "@/app/models/UsuarioSesion";
 
-export interface PrealertaItem {
-  id?: number;
-  nombre: string;
-  fecha?: string;
-  estado?: string;
-  usuarioId?: number;
-  usuarioNombre?: string;
-  tipoOrigenId?: number;
-  origenId?: number;
-}
 
-export interface SerialItem {
-  codigo: string;
-  origen: "manual" | "api";
-  estado?: "Pendiente" | "Empacado";
-  tipo?: "Serializable" | "No-serializable";
-  mac?: string;
-  caja?: number;
-  cantidad?: number;
-  descripcion?: string;
-  codigo_sap?: string;
-}
 
-interface UsuarioSesion {
-  id: number;
-  nombres: string;
-  apellidos: string;
-  nombreusuario: string;
-  cargo?: string;
-  correo?: string;
-}
+
 
 const WFSM_LOGIN_URL = "https://wfsapi.tcpip.tech/api/usuarios/login";
 const WFSM_CONSULTA_URL = "https://wfsapi.tcpip.tech/api/consultas/seriales";
@@ -423,8 +398,8 @@ export function usePrealerta() {
       const registrosFiltradosPorProyecto = aplicarFiltros(registros, 1);
       const registrosFiltrados = documento
         ? registrosFiltradosPorProyecto.filter(
-            (r) => String(r.documento_identidad ?? "") === documento.trim(),
-          )
+          (r) => String(r.documento_identidad ?? "") === documento.trim(),
+        )
         : registrosFiltradosPorProyecto;
 
       const codigosExistentes = new Set(

@@ -1,19 +1,7 @@
 import React, { useRef } from "react";
 import styles from "../css/prealerta.module.css";
-import { PrealertaItem } from "../hooks/usePrealerta";
-
-export interface CajaItem {
-  numero: number;
-  totalSeriales: number;
-  estado: "abierta" | "cerrada";
-}
-
-export interface SerialEmpacado {
-  serial: string;
-  mac: string;
-  tipo: string;
-  cantidad: number;
-}
+import { PrealertaItem } from "@/app/models/Prealerta.models";
+import { CajaItem, SerialEmpacado } from "@/app/models/seriales.models";
 
 interface Props {
   seleccionada: PrealertaItem | null;

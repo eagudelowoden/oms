@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "../css/prealerta.module.css";
-
-interface Props {
-  isOpen: boolean;
-  fecha: string;
-  onClose: () => void;
-  onConfirm: (fecha: string, documento: string) => void;
-}
+import { PropsSincronizarSeriales } from "@/app/models/apiSeriales.models";
 
 // Función auxiliar para leer el documento del usuario desde localStorage
 function getDocumentoFromStorage(): string {
@@ -31,7 +25,7 @@ export default function SincronizarModal({
   fecha,
   onClose,
   onConfirm,
-}: Props) {
+}: PropsSincronizarSeriales) {
   // Inicialización lazy: se ejecuta solo una vez al montar
   const [documento, setDocumento] = useState<string>(() =>
     getDocumentoFromStorage(),
