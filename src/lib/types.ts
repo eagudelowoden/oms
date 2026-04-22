@@ -38,6 +38,7 @@ export interface PrealertaSerialTable {
   Novedad: string | null;
   Garantia: number | null;
   Tipo: string | null;
+  codigo: string | null;
 }
 export interface CajaRow {
   numero: number;

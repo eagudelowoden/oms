@@ -95,7 +95,7 @@ export const AgentesBackendService = {
 
     // 3. El map ahora es mucho más limpio
     return rows.map((r) => ({
-      codigo: r.CodigoSap,
+      codigo: r.codigo,
       origen: "api" as const,
       estado: "Empacado" as const,
       tipo: r.Tipo ?? "Serializable",

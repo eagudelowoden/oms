@@ -116,7 +116,7 @@ export function usePrealerta() {
   ): Promise<number | null> => {
     if (item.id) return item.id;
     const res = await fetch(
-      `/api/prealerta/getId?nombre=${encodeURIComponent(item.nombre)}`,
+      `/api/agente/getId?nombre=${encodeURIComponent(item.nombre)}`,
     );
     if (!res.ok) return null;
     return res.json();
@@ -294,10 +294,13 @@ export function usePrealerta() {
 
     const aDesempacar =
       seleccionados.size > 0
-        ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
-        : serialesEscaneados.filter((s) => s.estado === "Empacado");
+        ? serialesDeDB.filter((_, i) => seleccionados.has(i)) // ← cambio
+        : serialesDeDB; // ← cambio
 
-    const soloEmpacados = aDesempacar.filter((s) => s.estado === "Empacado");
+    const soloEmpacados = aDesempacar.filter(
+      (s) => s.estado?.trim().toUpperCase() === "EMPACADO", // ← OJO: toUpperCase → compara EN MAYÚSCULAS
+    );
+
     if (soloEmpacados.length === 0) {
       showToast("No hay seriales empacados", "error");
       return;
