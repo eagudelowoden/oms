@@ -21,7 +21,7 @@ export default function RegistroSeries({
 }: Props) {
   const [familia, setFamilia] = useState("");
   const [serial, setSerial] = useState("");
-  const [mac, setMac] = useState(""); // ← nuevo
+  const [mac, setMac] = useState("");
   const [tipo, setTipo] = useState<"Serializable" | "No-serializable">(
     "Serializable",
   );
@@ -29,13 +29,13 @@ export default function RegistroSeries({
 
   const esSerialiable = tipo === "Serializable";
   const familiaSeleccionada = familia !== "";
-  // En handleGuardar:
+
   const handleGuardar = () => {
     if (seleccionados.size === 0) {
       onShowToast("Selecciona seriales en la tabla primero", "error");
       return;
     }
-    onActualizarTipo(tipo); // ← nuevo: actualiza tipo de los seleccionados
+    onActualizarTipo(tipo);
     onShowToast(`✓ Tipo "${tipo}" asignado a ${seleccionados.size} serial(es)`);
   };
   return (

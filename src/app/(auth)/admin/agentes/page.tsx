@@ -14,7 +14,7 @@ import RegistroSeries from "./components/RegistroSeries";
 import { PrealertaSeriales } from "./components/PrealertaListado";
 import { ConfirmModal, Toast } from "./components/PrealertaModales";
 import ScannerModal from "@/modules/auth/components/scanner/scannerModal";
-import SincronizarModal from "./components/ModalSincronizar";
+import SincronizarModal from "./components/ModalSincronizarSeriales";
 import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios";
 
 export default function PreAlertaAgentePage() {

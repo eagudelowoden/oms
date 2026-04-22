@@ -6,13 +6,13 @@ import Link from "next/link";
 import styles from "../admin/preAlertaAgente/css/admin.module.css";
 import ModalElegirCliente from "@/modules/auth/components/ModalElegirCliente/ModalElegirCliente";
 import { useMenu } from "@/modules/auth/hooks/useMenu";
-// --- INTERFACES ACTUALIZADAS ---
+
 interface Usuario {
   id: number;
   nombres: string;
   apellidos: string;
   perfilId: number;
-  perfilNombre?: string; // Aquí guardaremos lo que traiga el SP
+  perfilNombre?: string;
   nombreUsuario: string;
   clienteNombre?: string;
 }
