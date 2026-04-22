@@ -131,7 +131,8 @@ export const AgentesBackendService = {
       `SELECT
         Serial   AS serial,
         Mac      AS mac,
-        Tipo     AS tipo
+        Tipo     AS tipo,
+        Cantidad as cantidad
      FROM PrealertaSerial
      WHERE PrealertaId = @prealertaId
        AND Caja = @caja

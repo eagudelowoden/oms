@@ -1,6 +1,6 @@
 import "server-only";
 import sql from "mssql";
-import { getDBConnection } from "./index";
+import { getDBConnection } from "./db";
 
 type ProcInput = {
   type: sql.ISqlType | (() => sql.ISqlType);

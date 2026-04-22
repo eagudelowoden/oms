@@ -1,7 +1,7 @@
 // src/lib/db.ts
-import sql from 'mssql';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
+import sql from "mssql";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
 interface JWTPayload {
   dbName?: string;
@@ -9,13 +9,18 @@ interface JWTPayload {
 
 const pools = new Map<string, sql.ConnectionPool>();
 
-export const getDBConnection = async (forceGeneral: boolean = false): Promise<sql.ConnectionPool> => {
+export const getDBConnection = async (
+  forceGeneral: boolean = false,
+): Promise<sql.ConnectionPool> => {
+  console.log("🔧 DB_PORT del env:", process.env.DB_PORT);
+  console.log("🔧 DB_SERVER del env:", process.env.DB_SERVER);
+  console.log("🔧 DB_USER del env:", process.env.DB_USER);
   let dbName = "WmsWdGeneral";
 
   if (!forceGeneral) {
     try {
       const cookieStore = await cookies();
-      const token = cookieStore.get('token')?.value;
+      const token = cookieStore.get("token")?.value;
       if (token) {
         const decoded = jwt.decode(token) as JWTPayload;
         if (decoded?.dbName) dbName = decoded.dbName;
@@ -35,20 +40,20 @@ export const getDBConnection = async (forceGeneral: boolean = false): Promise<sq
   const config: sql.config = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    server: process.env.DB_SERVER || '',
+    server: process.env.DB_SERVER || "",
     database: dbName,
-    port: Number(process.env.DB_PORT) || 1433,
+    port: Number(process.env.DB_PORT) || 14331,
     options: {
       encrypt: true,
       trustServerCertificate: true,
       enableArithAbort: true,
-      connectTimeout: 15000
+      connectTimeout: 15000,
     },
     pool: {
       max: 10,
       min: 0,
-      idleTimeoutMillis: 30000
-    }
+      idleTimeoutMillis: 30000,
+    },
   };
 
   try {
