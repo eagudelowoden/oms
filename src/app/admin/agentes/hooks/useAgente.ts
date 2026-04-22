@@ -156,12 +156,10 @@ export function usePrealerta() {
       seriales: string[];
     }) => prealertaMutations.desempacar(prealertaId, seriales),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["cajas", preAlertaSeleccionada?.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["seriales", preAlertaSeleccionada?.id],
-      });
+      const id = preAlertaSeleccionada?.id;
+      queryClient.invalidateQueries({ queryKey: ["cajas", id] });
+      queryClient.invalidateQueries({ queryKey: ["seriales", id] });
+      queryClient.removeQueries({ queryKey: ["serialesPorCaja"] });
     },
   });
 
