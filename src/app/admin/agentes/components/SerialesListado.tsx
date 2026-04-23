@@ -118,6 +118,7 @@ export function PrealertaSeriales({
               <tr>
                 <th style={{ width: 28 }}></th>
                 <th>Material</th>
+                <th>SAP</th>
                 <th>Serial</th>
                 <th>Caja</th>
                 <th>Estado</th>
@@ -153,36 +154,25 @@ export function PrealertaSeriales({
                       />
                     </td>
 
-                    {/* Familia */}
-                    {/* Material / codigo_sap */}
+                    {/* Material */}
                     <td>
                       {item.origen === "api" ? (
-                        <span
-                          className={styles.serialRowCode}
-                          style={{ fontSize: 11 }}
-                        >
-                          {item.codigo_sap ?? "—"}
+                        <span className={styles.serialRowCode} style={{ fontSize: 11 }}>
+                          {item.descripcion || item.codigo_sap || "—"}
                         </span>
                       ) : (
                         <span className={styles.badgeManual}>Manual</span>
                       )}
                     </td>
 
+                    {/* SAP */}
+                    <td className={styles.tdMuted} style={{ fontSize: 11 }}>
+                      {item.codigo_sap ?? "—"}
+                    </td>
+
                     {/* Serial */}
                     <td className={styles.serialRowCode}>
-                      {item.codigo}
-                      {item.descripcion && (
-                        <span
-                          style={{
-                            color: "#94a3b8",
-                            fontSize: 11,
-                            marginLeft: 6,
-                            fontWeight: 400,
-                          }}
-                        >
-                          {item.descripcion}
-                        </span>
-                      )}
+                      {item.tipo === "No-serializable" ? "—" : item.codigo}
                     </td>
 
                     {/* Caja */}

@@ -277,12 +277,14 @@ export function usePrealerta() {
         await empacarMutation.mutateAsync({
           prealertaId: idPrealerta,
           caja: cajaActual,
-          seriales: sinDuplicados.map(({ codigo, tipo, mac, cantidad, tramite }) => ({
+          seriales: sinDuplicados.map(({ codigo, tipo, mac, cantidad, tramite, codigo_sap, descripcion }) => ({
             Serial: codigo,
             Mac: mac ?? "",
             Tipo: tipo ?? "Serializable",
             Cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
             Tramite: tramite ?? "Manual",
+            CodigoSap: codigo_sap ?? "",
+            Descripcion: descripcion ?? "",
           })),
         });
 
@@ -466,6 +468,7 @@ export function usePrealerta() {
       const nuevos: SerialItem[] = accesorios.map((a) => ({
         codigo: a.codigoAccesorio,
         descripcion: a.accesorio,
+        codigo_sap: a.codigoAccesorio,
         cantidad: a.cantidad,
         origen: "api" as const,
         tipo: "No-serializable" as const,
