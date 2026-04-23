@@ -82,12 +82,12 @@ export const AgentesBackendService = {
 
   async getSerialsByPrealerta(prealertaId: number) {
     const rows = await execQuery<PrealertaSerialTable>(
-      `SELECT 
+      `SELECT
       Serial AS Id,
-      Serial AS codigo, 
-      Cantidad AS cantidad, 
-      Caja AS caja, 
-      Tipo AS tipo
+      Serial AS codigo,
+      Cantidad AS Cantidad,
+      Caja AS Caja,
+      Tipo AS Tipo
     FROM PrealertaSerial
     WHERE PrealertaId = @id`,
       { id: prealertaId },
