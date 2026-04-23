@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   prealertaQueries,
@@ -51,13 +51,22 @@ export function usePrealerta() {
     queryKey: ["seriales", preAlertaSeleccionada?.id],
     queryFn: () => prealertaQueries.seriales(preAlertaSeleccionada!.id!),
     enabled: !!preAlertaSeleccionada?.id,
+    staleTime: 0,
   });
 
   const { data: cajas = [] } = useQuery({
     queryKey: ["cajas", preAlertaSeleccionada?.id],
     queryFn: () => prealertaQueries.cajas(preAlertaSeleccionada!.id!),
     enabled: !!preAlertaSeleccionada?.id,
+    staleTime: 0,
   });
+
+  useEffect(() => {
+    if (!preAlertaSeleccionada) return;
+    const maxCaja =
+      cajas.length > 0 ? Math.max(...cajas.map((c) => c.numero)) : 0;
+    setCajaActual(maxCaja + 1);
+  }, [preAlertaSeleccionada?.id, cajas.length]);
 
   const esCajaExistente = cajas.some((c) => c.numero === cajaActual);
 
@@ -66,6 +75,7 @@ export function usePrealerta() {
     queryFn: () =>
       prealertaQueries.serialesPorCaja(preAlertaSeleccionada!.id!, cajaActual),
     enabled: !!preAlertaSeleccionada?.id && esCajaExistente,
+    staleTime: 0,
   });
 
   /* ── SERIALES MOSTRADOS ── */
@@ -289,6 +299,10 @@ export function usePrealerta() {
           queryKey: ["cajas", preAlertaSeleccionada?.id],
           exact: false,
         });
+        queryClient.removeQueries({
+          queryKey: ["serialesPorCaja"],
+          exact: false,
+        });
         showToast(
           `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaActual}`,
         );
@@ -313,11 +327,11 @@ export function usePrealerta() {
 
     const aDesempacar =
       seleccionados.size > 0
-        ? serialesDeDB.filter((_, i) => seleccionados.has(i)) // ← cambio
-        : serialesDeDB; // ← cambio
+        ? serialesMostrados.filter((_, i) => seleccionados.has(i))
+        : serialesMostrados;
 
     const soloEmpacados = aDesempacar.filter(
-      (s) => s.estado?.trim().toUpperCase() === "EMPACADO", // ← OJO: toUpperCase → compara EN MAYÚSCULAS
+      (s) => s.estado?.trim().toUpperCase() === "EMPACADO",
     );
 
     if (soloEmpacados.length === 0) {

@@ -110,6 +110,7 @@ export const AgentesBackendService = {
         COUNT(*)      AS totalSeriales
      FROM PrealertaSerial
      WHERE PrealertaId = @id
+       AND Caja > 0
      GROUP BY Caja
      ORDER BY Caja ASC`,
       { id: prealertaId },
