@@ -197,9 +197,18 @@ export async function POST(
   if (action === "create") {
     try {
       const body = await request.json();
-      const result = await AgentesBackendService.insertPrealert(body);
+      const result = await AgentesBackendService.insertPrealert({
+        Nombre: body.nombre,
+        TipoOrigenId: body.tipoOrigenId,
+        OrigenId: body.origenId,
+        Guia: body.guia,
+        UsuarioId: body.usuarioId,
+        IdResponsable: body.idResponsable,
+        Estado: body.estado,
+      });
       return NextResponse.json(result);
     } catch (error) {
+      console.error("Error al crear prealerta:", error);
       return NextResponse.json({ error: "Error al insertar" }, { status: 500 });
     }
   }
