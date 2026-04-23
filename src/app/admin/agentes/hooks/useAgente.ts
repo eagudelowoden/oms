@@ -468,6 +468,7 @@ export function usePrealerta() {
         cantidad: a.cantidad,
         origen: "api" as const,
         tipo: "No-serializable" as const,
+        tramite: "Sincronizado",
       }));
       setSerialEscaneados([...sinAccesorios, ...nuevos]);
       const total = nuevos.reduce((s, a) => s + (a.cantidad ?? 1), 0);

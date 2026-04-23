@@ -213,7 +213,7 @@ export function PrealertaSeriales({
                     <td className={styles.tdMuted}>—</td>
 
                     {/* Trámite */}
-                    <td className={styles.tdMuted}>—</td>
+                    <td className={styles.tdMuted}>{item.tramite ?? "—"}</td>
 
                     {/* Eliminar */}
                     <td onClick={(e) => e.stopPropagation()}>
