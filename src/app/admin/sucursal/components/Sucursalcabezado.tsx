@@ -34,7 +34,7 @@ export default function PrealertaHeader({ onCrear }: Props) {
 
   return (
     <div className={styles.header}>
-      <h2 className={styles.headerTitle}>Historial Pre-Alerta Agente</h2>
+      <h2 className={styles.headerTitle}>Sucursal</h2>
 
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <select

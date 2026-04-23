@@ -46,7 +46,7 @@ export function PrealertaSeriales({
               }}
             />
           )}
-          <span className={styles.cardInnerTitle}>Seriales escaneados</span>
+          <span className={styles.cardInnerTitle}>Materiales</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {seleccionados.size > 0 && (
@@ -62,7 +62,15 @@ export function PrealertaSeriales({
                   onClick={onRemoveSeleccionados}
                   style={{ width: 24, height: 24 }}
                 >
-                  <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  >
                     <polyline points="2.5,4 11.5,4" />
                     <path d="M5 4V3h4v1" />
                     <path d="M4 4l.6 7.5h4.8L10 4" />
@@ -157,7 +165,10 @@ export function PrealertaSeriales({
                     {/* Material */}
                     <td>
                       {item.origen === "api" ? (
-                        <span className={styles.serialRowCode} style={{ fontSize: 11 }}>
+                        <span
+                          className={styles.serialRowCode}
+                          style={{ fontSize: 11 }}
+                        >
                           {item.descripcion || item.codigo_sap || "—"}
                         </span>
                       ) : (
