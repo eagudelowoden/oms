@@ -88,6 +88,7 @@ export function usePrealerta() {
         tipo: s.tipo as "Serializable" | "No-serializable",
         cantidad: s.cantidad,
         caja: cajaActual,
+        tramite: s.tramite,
       }))
     : [
         ...serialesEscaneados,

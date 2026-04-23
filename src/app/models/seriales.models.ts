@@ -22,4 +22,5 @@ export interface SerialEmpacado {
     mac: string;
     tipo: string;
     cantidad: number;
+    tramite?: string;
 }

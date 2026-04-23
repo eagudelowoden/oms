@@ -60,6 +60,7 @@ export interface SerialCaja {
   mac: string | null;
   tipo: string | null;
   cantidad: number | null;
+  tramite: string | null;
 }
 
 export interface PrealertaListRow {

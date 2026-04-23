@@ -97,7 +97,8 @@ export const AgentesBackendService = {
     return rows.map((r) => ({
       codigo: r.codigo,
       origen: "api" as const,
-      estado: r.Caja && r.Caja > 0 ? ("Empacado" as const) : ("Disponible" as const),
+      estado:
+        r.Caja && r.Caja > 0 ? ("Empacado" as const) : ("Disponible" as const),
       tipo: r.Tipo ?? "Serializable",
       cantidad: r.Cantidad,
       caja: r.Caja,
@@ -134,7 +135,8 @@ export const AgentesBackendService = {
         Serial   AS serial,
         Mac      AS mac,
         Tipo     AS tipo,
-        Cantidad as cantidad
+        Cantidad as cantidad,
+        Tramite as tramite
      FROM PrealertaSerial
      WHERE PrealertaId = @prealertaId
        AND Caja = @caja
@@ -150,6 +152,7 @@ export const AgentesBackendService = {
       mac: r.mac ?? "",
       tipo: r.tipo ?? "Serializable",
       cantidad: r.cantidad ?? "",
+      tramite: r.tramite,
     }));
   },
 
