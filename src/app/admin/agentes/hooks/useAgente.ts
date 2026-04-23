@@ -156,16 +156,16 @@ export function usePrealerta() {
       queryClient.invalidateQueries({ queryKey: ["prealertas"] }),
   });
 
+  const invalidarCachePrealerta = (id: number | undefined) => {
+    if (!id) return;
+    queryClient.invalidateQueries({ queryKey: ["seriales", id] });
+    queryClient.invalidateQueries({ queryKey: ["cajas", id] });
+    queryClient.invalidateQueries({ queryKey: ["serialesPorCaja", id] });
+  };
+
   const empacarMutation = useMutation({
     mutationFn: prealertaMutations.empacar,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["cajas", preAlertaSeleccionada?.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["seriales", preAlertaSeleccionada?.id],
-      });
-    },
+    onSuccess: () => invalidarCachePrealerta(preAlertaSeleccionada?.id),
   });
 
   const desempacarMutation = useMutation({
@@ -176,15 +176,7 @@ export function usePrealerta() {
       prealertaId: number;
       seriales: string[];
     }) => prealertaMutations.desempacar(prealertaId, seriales),
-    onSuccess: () => {
-      const id = preAlertaSeleccionada?.id;
-      queryClient.removeQueries({ queryKey: ["cajas", id], exact: false });
-      queryClient.removeQueries({ queryKey: ["seriales", id], exact: false });
-      queryClient.removeQueries({
-        queryKey: ["serialesPorCaja"],
-        exact: false,
-      });
-    },
+    onSuccess: () => invalidarCachePrealerta(preAlertaSeleccionada?.id),
   });
 
   const eliminarSerialMutation = useMutation({
@@ -195,10 +187,7 @@ export function usePrealerta() {
       prealertaId: number;
       serial: string;
     }) => prealertaMutations.eliminarSerial(prealertaId, serial),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: ["seriales", preAlertaSeleccionada?.id],
-      }),
+    onSuccess: () => invalidarCachePrealerta(preAlertaSeleccionada?.id),
   });
 
   /* ── HANDLERS ── */
@@ -304,21 +293,9 @@ export function usePrealerta() {
       setSeleccionados(new Set());
 
       if (exitosos > 0) {
-        setSerialEscaneados([]); // ← limpia escaneados
+        setSerialEscaneados([]);
         setSeleccionados(new Set());
         setCajaActual((prev) => prev + 1);
-        queryClient.removeQueries({
-          queryKey: ["seriales", preAlertaSeleccionada?.id],
-          exact: false,
-        });
-        queryClient.removeQueries({
-          queryKey: ["cajas", preAlertaSeleccionada?.id],
-          exact: false,
-        });
-        queryClient.removeQueries({
-          queryKey: ["serialesPorCaja"],
-          exact: false,
-        });
         showToast(
           `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaActual}`,
         );
