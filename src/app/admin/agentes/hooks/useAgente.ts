@@ -47,7 +47,7 @@ export function usePrealerta() {
     queryFn: prealertaQueries.list,
   });
 
-  const { data: serialesDeDB = [] } = useQuery({
+  const { data: serialesDeDB = [], isFetching: cargandoSeriales } = useQuery({
     queryKey: ["seriales", preAlertaSeleccionada?.id],
     queryFn: () => prealertaQueries.seriales(preAlertaSeleccionada!.id!),
     enabled: !!preAlertaSeleccionada?.id,
@@ -70,7 +70,7 @@ export function usePrealerta() {
 
   const esCajaExistente = cajas.some((c) => c.numero === cajaActual);
 
-  const { data: serialesDeCaja = [] } = useQuery({
+  const { data: serialesDeCaja = [], isFetching: cargandoCaja } = useQuery({
     queryKey: ["serialesPorCaja", preAlertaSeleccionada?.id, cajaActual],
     queryFn: () =>
       prealertaQueries.serialesPorCaja(preAlertaSeleccionada!.id!, cajaActual),
@@ -466,7 +466,7 @@ export function usePrealerta() {
     setModalAccesorios,
     cajaActual,
     setCajaActual,
-    cargandoSeriales: false,
+    cargandoSeriales: cargandoSeriales || cargandoCaja,
     sincronizandoAccesorios,
     cajas,
     serialesDeCaja,
