@@ -107,7 +107,7 @@ export default function AdminLayout({
     if (usuario) {
       const updatedUser = {
         ...usuario,
-        clienteNombre: result.clientDb,
+        clienteNombre: result.clientDbName,
         perfilNombre: undefined,
       };
       localStorage.setItem("usuario", JSON.stringify(updatedUser));
@@ -172,9 +172,9 @@ export default function AdminLayout({
   );
 
   return (
-    <Providers>
+    <Providers key={usuario.clienteNombre ?? "default"}>
       {" "}
-      {/* ← Providers envuelve TODO el contenido */}
+      {/* ← key fuerza recrear QueryClient al cambiar cliente */}
       <div className={styles.adminWrapper}>
         <div
           className={`${styles.mobileOverlay} ${isSidebarOpen ? styles.showOverlay : ""}`}
