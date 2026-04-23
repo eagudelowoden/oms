@@ -79,6 +79,7 @@ export function useSincronizarAPI({
                     codigo: r.serial as string,
                     codigo_sap: typeof r.codigo_sap === "string" ? r.codigo_sap : undefined,
                     origen: "api" as const,
+                    tramite: "Sincronizado",
                 }));
 
             if (nuevos.length === 0) {

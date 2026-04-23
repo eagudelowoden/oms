@@ -9,6 +9,7 @@ interface SerialesProps {
   onToggleAll: () => void;
   cargandoSeriales?: boolean;
   onRemove: (idx: number) => Promise<void>;
+  onRemoveSeleccionados?: () => void;
 }
 
 export function PrealertaSeriales({
@@ -17,6 +18,7 @@ export function PrealertaSeriales({
   onToggle,
   onToggleAll,
   onRemove,
+  onRemoveSeleccionados,
   cargandoSeriales,
 }: SerialesProps) {
   const todosSeleccionados =
@@ -48,9 +50,26 @@ export function PrealertaSeriales({
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {seleccionados.size > 0 && (
-            <span className={styles.countPillSelected}>
-              {seleccionados.size} selec.
-            </span>
+            <>
+              <span className={styles.countPillSelected}>
+                {seleccionados.size} selec.
+              </span>
+              {onRemoveSeleccionados && (
+                <button
+                  type="button"
+                  className={styles.btnDel}
+                  title="Eliminar seleccionados"
+                  onClick={onRemoveSeleccionados}
+                  style={{ width: 24, height: 24 }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
+                    <polyline points="2.5,4 11.5,4" />
+                    <path d="M5 4V3h4v1" />
+                    <path d="M4 4l.6 7.5h4.8L10 4" />
+                  </svg>
+                </button>
+              )}
+            </>
           )}
           {seriales.length > 0 && (
             <span className={styles.countPill}>{seriales.length}</span>

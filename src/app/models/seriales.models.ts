@@ -8,6 +8,7 @@ export interface SerialItem {
     cantidad?: number;
     descripcion?: string;
     codigo_sap?: string;
+    tramite?: string;
 }
 
 export interface CajaItem {

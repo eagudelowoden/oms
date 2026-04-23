@@ -46,7 +46,7 @@ export const AgentesBackendService = {
       await Promise.all(
         lote.map(async (item) => {
           try {
-            const { Serial, Mac, Tipo, Cantidad } = item;
+            const { Serial, Mac, Tipo, Cantidad, Tramite } = item;
             const [row] = await execProc<{ estado: string }>(
               "pa_InsertPrealertSerialOms",
               {
@@ -60,7 +60,7 @@ export const AgentesBackendService = {
                 Falla: { type: sql.VarChar(100), value: "" },
                 TecnicoCliente: { type: sql.VarChar(50), value: "" },
                 Pedido: { type: sql.VarChar(30), value: "" },
-                Tramite: { type: sql.VarChar(30), value: "" },
+                Tramite: { type: sql.VarChar(30), value: Tramite ?? "Manual" },
                 Novedad: { type: sql.VarChar(30), value: "" },
                 Garantia: { type: sql.Int, value: 0 },
                 Tipo: { type: sql.VarChar(30), value: Tipo ?? "" },
@@ -87,7 +87,8 @@ export const AgentesBackendService = {
       Serial AS codigo,
       Cantidad AS Cantidad,
       Caja AS Caja,
-      Tipo AS Tipo
+      Tipo AS Tipo,
+      Tramite AS Tramite
     FROM PrealertaSerial
     WHERE PrealertaId = @id`,
       { id: prealertaId },
@@ -100,6 +101,7 @@ export const AgentesBackendService = {
       tipo: r.Tipo ?? "Serializable",
       cantidad: r.Cantidad,
       caja: r.Caja,
+      tramite: r.Tramite ?? "",
     }));
   },
 

@@ -276,11 +276,12 @@ export function usePrealerta() {
         await empacarMutation.mutateAsync({
           prealertaId: idPrealerta,
           caja: cajaActual,
-          seriales: sinDuplicados.map(({ codigo, tipo, mac, cantidad }) => ({
+          seriales: sinDuplicados.map(({ codigo, tipo, mac, cantidad, tramite }) => ({
             Serial: codigo,
             Mac: mac ?? "",
             Tipo: tipo ?? "Serializable",
             Cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
+            Tramite: tramite ?? "Manual",
           })),
         });
 
@@ -364,9 +365,11 @@ export function usePrealerta() {
   };
 
   const handleRemoveSerial = async (idx: number) => {
-    const serial = serialesEscaneados[idx];
-    if (!preAlertaSeleccionada?.id) {
-      setSerialEscaneados((prev) => prev.filter((_, i) => i !== idx));
+    const serial = serialesMostrados[idx];
+    if (!serial) return;
+    const enEscaneados = serialesEscaneados.some((s) => s.codigo === serial.codigo);
+    if (enEscaneados || !preAlertaSeleccionada?.id) {
+      setSerialEscaneados((prev) => prev.filter((s) => s.codigo !== serial.codigo));
       return;
     }
     try {
@@ -381,10 +384,45 @@ export function usePrealerta() {
     }
   };
 
+  const handleRemoveSeleccionados = async () => {
+    const items = serialesMostrados.filter((_, i) => seleccionados.has(i));
+    if (items.length === 0) return;
+
+    const enEscaneados = items.filter((s) =>
+      serialesEscaneados.some((e) => e.codigo === s.codigo),
+    );
+    const enDB = items.filter(
+      (s) => !serialesEscaneados.some((e) => e.codigo === s.codigo),
+    );
+
+    if (enEscaneados.length > 0) {
+      const codigos = new Set(enEscaneados.map((s) => s.codigo));
+      setSerialEscaneados((prev) => prev.filter((s) => !codigos.has(s.codigo)));
+    }
+
+    if (enDB.length > 0 && preAlertaSeleccionada?.id) {
+      try {
+        await Promise.all(
+          enDB.map((s) =>
+            eliminarSerialMutation.mutateAsync({
+              prealertaId: preAlertaSeleccionada.id!,
+              serial: s.codigo,
+            }),
+          ),
+        );
+        showToast(`✓ ${enDB.length} serial${enDB.length !== 1 ? "es" : ""} eliminado${enDB.length !== 1 ? "s" : ""}`);
+      } catch {
+        showToast("Error al eliminar", "error");
+      }
+    }
+
+    setSeleccionados(new Set());
+  };
+
   const handleSerialConfirm = (seriales: string[]) => {
     setSerialEscaneados((prev) => [
       ...prev,
-      ...seriales.map((codigo) => ({ codigo, origen: "manual" as const })),
+      ...seriales.map((codigo) => ({ codigo, origen: "manual" as const, tramite: "Manual" })),
     ]);
   };
 
@@ -401,9 +439,9 @@ export function usePrealerta() {
   };
 
   const handleToggleAll = () => {
-    if (seleccionados.size === serialesEscaneados.length)
+    if (seleccionados.size === serialesMostrados.length)
       setSeleccionados(new Set());
-    else setSeleccionados(new Set(serialesEscaneados.map((_, i) => i)));
+    else setSeleccionados(new Set(serialesMostrados.map((_, i) => i)));
   };
 
   const handleActualizarTipo = (tipo: "Serializable" | "No-serializable") => {
@@ -477,6 +515,7 @@ export function usePrealerta() {
     handleEliminar,
     handleSerialConfirm,
     handleRemoveSerial,
+    handleRemoveSeleccionados,
     handleEmpacar,
     handleDesempacar,
     showToast,

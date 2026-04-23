@@ -25,6 +25,7 @@ export default function AgentePage() {
     setScannerOpen,
     serialesMostrados,
     handleRemoveSerial,
+    handleRemoveSeleccionados,
     confirmItem,
     setConfirmItem,
     preAlertaSeleccionada,
@@ -102,6 +103,7 @@ export default function AgentePage() {
         onToggle={handleToggleSerial}
         onToggleAll={handleToggleAll}
         onRemove={handleRemoveSerial}
+        onRemoveSeleccionados={handleRemoveSeleccionados}
         cargandoSeriales={cargandoSeriales}
       />
 
