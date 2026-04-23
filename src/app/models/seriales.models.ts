@@ -1,7 +1,7 @@
 export interface SerialItem {
     codigo: string;
     origen: "manual" | "api";
-    estado?: "Pendiente" | "Empacado";
+    estado?: "Empacado" | "Pendiente" | "Disponible";
     tipo?: "Serializable" | "No-serializable";
     mac?: string;
     caja?: number;

@@ -83,21 +83,20 @@ export const AgentesBackendService = {
   async getSerialsByPrealerta(prealertaId: number) {
     const rows = await execQuery<PrealertaSerialTable>(
       `SELECT 
-        Serial AS Id,
-        Serial AS codigo, 
-        Cantidad AS cantidad, 
-        Caja AS caja, 
-        Tipo AS tipo
-     FROM PrealertaSerial
-     WHERE PrealertaId = @id`,
+      Serial AS Id,
+      Serial AS codigo, 
+      Cantidad AS cantidad, 
+      Caja AS caja, 
+      Tipo AS tipo
+    FROM PrealertaSerial
+    WHERE PrealertaId = @id`,
       { id: prealertaId },
     );
 
-    // 3. El map ahora es mucho más limpio
     return rows.map((r) => ({
       codigo: r.codigo,
       origen: "api" as const,
-      estado: "Empacado" as const,
+      estado: r.Caja && r.Caja > 0 ? ("Empacado" as const) : ("Disponible" as const),
       tipo: r.Tipo ?? "Serializable",
       cantidad: r.Cantidad,
       caja: r.Caja,

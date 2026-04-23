@@ -69,16 +69,24 @@ export function usePrealerta() {
   });
 
   /* ── SERIALES MOSTRADOS ── */
+  // serialesMostrados muestra TODOS (escaneados + DB disponibles sin duplicados)
   const serialesMostrados: SerialItem[] = esCajaExistente
     ? serialesDeCaja.map((s) => ({
-        codigo: s.serial,
-        origen: "api" as const,
-        estado: "Empacado" as const,
-        tipo: s.tipo as "Serializable" | "No-serializable",
-        cantidad: s.cantidad,
-        caja: cajaActual,
-      }))
-    : serialesEscaneados;
+      codigo: s.serial,
+      origen: "api" as const,
+      estado: "Empacado" as const,
+      tipo: s.tipo as "Serializable" | "No-serializable",
+      cantidad: s.cantidad,
+      caja: cajaActual,
+    }))
+    : [
+      ...serialesEscaneados,
+      ...serialesDeDB.filter(
+        (d) =>
+          d.estado === "Disponible" &&
+          !serialesEscaneados.some((e) => e.codigo === d.codigo), // sin duplicados
+      ),
+    ];
 
   /* ── SINCRONIZAR API ── */
   const { sincronizando, sincronizarDesdeAPI } = useSincronizarAPI({
@@ -157,9 +165,9 @@ export function usePrealerta() {
     }) => prealertaMutations.desempacar(prealertaId, seriales),
     onSuccess: () => {
       const id = preAlertaSeleccionada?.id;
-      queryClient.invalidateQueries({ queryKey: ["cajas", id] });
-      queryClient.invalidateQueries({ queryKey: ["seriales", id] });
-      queryClient.removeQueries({ queryKey: ["serialesPorCaja"] });
+      queryClient.removeQueries({ queryKey: ["cajas", id], exact: false });
+      queryClient.removeQueries({ queryKey: ["seriales", id], exact: false });
+      queryClient.removeQueries({ queryKey: ["serialesPorCaja"], exact: false });
     },
   });
 
@@ -229,8 +237,8 @@ export function usePrealerta() {
 
     const serialesAEmpacar =
       seleccionados.size > 0
-        ? serialesEscaneados.filter((_, i) => seleccionados.has(i))
-        : serialesEscaneados;
+        ? serialesMostrados.filter((_, i) => seleccionados.has(i))
+        : serialesMostrados;
 
     const sinDuplicados = serialesAEmpacar.filter(
       (s, i, self) => i === self.findIndex((x) => x.codigo === s.codigo),
@@ -267,10 +275,12 @@ export function usePrealerta() {
       setSeleccionados(new Set());
 
       if (exitosos > 0) {
+        setSerialEscaneados([]); // ← limpia escaneados
+        setSeleccionados(new Set());
         setCajaActual((prev) => prev + 1);
-        showToast(
-          `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaActual}`,
-        );
+        queryClient.removeQueries({ queryKey: ["seriales", preAlertaSeleccionada?.id], exact: false });
+        queryClient.removeQueries({ queryKey: ["cajas", preAlertaSeleccionada?.id], exact: false });
+        showToast(`✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaActual}`);
       }
       if (yaExistian > 0)
         showToast(`⚠ ${yaExistian} ya estaban empacados`, "error");
