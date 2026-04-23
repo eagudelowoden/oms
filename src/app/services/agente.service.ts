@@ -253,6 +253,13 @@ export const AgentesBackendService = {
     return new Map(rows.map((r) => [r.codigo, r.Descripcion ?? ""]));
   },
 
+  async getCodigosSapList(): Promise<{ codigo: string; descripcion: string }[]> {
+    const rows = await execQuery<{ codigo: string; Descripcion: string }>(
+      "SELECT codigo, Descripcion FROM CodigoSap ORDER BY codigo ASC",
+    );
+    return rows.map((r) => ({ codigo: r.codigo, descripcion: r.Descripcion ?? "" }));
+  },
+
   async getSedes(): Promise<{ id: number; nombre: string }[]> {
     const result = await execQuery<SedeTable>(
       "SELECT Id, Nombre FROM WmsWdGeneral.dbo.Sede",

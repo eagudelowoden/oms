@@ -30,6 +30,11 @@ export async function GET(
       return NextResponse.json(data);
     }
 
+    if (action === "codigosSap") {
+      const data = await AgentesBackendService.getCodigosSapList();
+      return NextResponse.json(data);
+    }
+
     if (action === "seriales") {
       const prealertaId = parseInt(searchParams.get("prealertaId") ?? "0");
       if (!prealertaId)

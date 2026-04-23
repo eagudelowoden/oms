@@ -1,4 +1,17 @@
 /* ── REGISTRO SERIES ── */
+.cardInnerHeader {
+  padding: 10px 14px;
+  border-bottom: 0.5px solid #f1f5f9;
+}
+
+.cardInnerTitle {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #64748b;
+}
+
 .registroCard {
   --c-border: #e2e8f0;
   --c-bg: #f8fafc;
@@ -95,6 +108,72 @@
   font-size: 10px;
   color: var(--c-hint);
   font-style: italic;
+}
+
+/* ── COMBO BUSCADOR ── */
+.comboWrap {
+  position: relative;
+  flex: 1;
+  max-width: 340px;
+}
+
+.comboDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 0.5px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.comboDropdown::-webkit-scrollbar {
+  width: 3px;
+}
+.comboDropdown::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 99px;
+}
+
+.comboOption {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 0.5px solid #f8fafc;
+}
+
+.comboOption:last-child {
+  border-bottom: none;
+}
+
+.comboOption:hover {
+  background: #f1f5f9;
+}
+
+.comboCodigo {
+  font-size: 11px;
+  font-weight: 600;
+  color: #2563eb;
+  font-family: "Courier New", monospace;
+}
+
+.comboDesc {
+  font-size: 11px;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btnGuardar {

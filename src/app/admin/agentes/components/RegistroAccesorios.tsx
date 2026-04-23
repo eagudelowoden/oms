@@ -1,41 +1,73 @@
-import React, { useState } from "react";
-import styles from "../css/registroSeries.module.css";
+"use client";
 
-const FAMILIAS = [
-  { value: "", label: "Ninguna..." },
-  { value: "equipos", label: "Equipos" },
-  { value: "accesorios", label: "Accesorios" },
-];
+import React, { useState, useRef, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import styles from "../css/registroSeries.module.css";
+import { prealertaQueries } from "@/app/services/agente.client";
+import { SerialItem } from "@/app/models/seriales.models";
+
 interface Props {
-  seleccionados: Set<number>;
-  onActualizarTipo: (tipo: "Serializable" | "No-serializable") => void;
+  onAgregarAccesorio: (item: SerialItem) => void;
   onShowToast: (msg: string, type?: "ok" | "error") => void;
 }
 
-export default function RegistroSeries({
-  seleccionados,
-  onActualizarTipo,
-  onShowToast,
-}: Props) {
-  const [familia, setFamilia] = useState("");
-  const [serial, setSerial] = useState("");
-  const [mac, setMac] = useState("");
-  const [tipo, setTipo] = useState<"Serializable" | "No-serializable">(
-    "Serializable",
-  );
-  const [cant, setCant] = useState(1);
+export default function RegistroAccesorios({ onAgregarAccesorio, onShowToast }: Props) {
+  const [busqueda, setBusqueda] = useState("");
+  const [seleccionado, setSeleccionado] = useState<{ codigo: string; descripcion: string } | null>(null);
+  const [cantidad, setCantidad] = useState(1);
+  const [abierto, setAbierto] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const esSerialiable = tipo === "Serializable";
-  const familiaSeleccionada = familia !== "";
+  const { data: codigos = [] } = useQuery({
+    queryKey: ["codigosSap"],
+    queryFn: prealertaQueries.codigosSap,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const handleGuardar = () => {
-    if (seleccionados.size === 0) {
-      onShowToast("Selecciona seriales en la tabla primero", "error");
+  const filtrados = busqueda.trim()
+    ? codigos
+        .filter((c) =>
+          `${c.codigo} ${c.descripcion}`.toLowerCase().includes(busqueda.toLowerCase()),
+        )
+        .slice(0, 60)
+    : codigos.slice(0, 60);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setAbierto(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleSeleccionar = (item: { codigo: string; descripcion: string }) => {
+    setSeleccionado(item);
+    setBusqueda(`${item.codigo} – ${item.descripcion}`);
+    setAbierto(false);
+  };
+
+  const handleAgregar = () => {
+    if (!seleccionado) {
+      onShowToast("Selecciona un accesorio primero", "error");
       return;
     }
-    onActualizarTipo(tipo);
-    onShowToast(`✓ Tipo "${tipo}" asignado a ${seleccionados.size} serial(es)`);
+    onAgregarAccesorio({
+      codigo: seleccionado.codigo,
+      descripcion: seleccionado.descripcion,
+      codigo_sap: seleccionado.codigo,
+      cantidad,
+      origen: "api" as const,
+      tipo: "No-serializable" as const,
+      tramite: "Manual",
+    });
+    setSeleccionado(null);
+    setBusqueda("");
+    setCantidad(1);
+    onShowToast(`✓ ${seleccionado.codigo} agregado (x${cantidad})`);
   };
+
   return (
     <div className={styles.registroCard}>
       <div className={styles.cardInnerHeader}>
@@ -43,51 +75,55 @@ export default function RegistroSeries({
       </div>
 
       <div className={styles.registroBody}>
-        {/* Fila: Familia */}
+        {/* Familia Acc — buscador */}
         <div className={styles.registroRow}>
           <label className={styles.registroLabel}>Familia Acc</label>
-          <select
-            className={styles.registroSelect}
-            value={familia}
-            onChange={(e) => setFamilia(e.target.value)}
-          >
-            {FAMILIAS.map((f) => (
-              <option key={f.value} value={f.value}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-          {familiaSeleccionada && (
-            <span className={styles.registroHint}>
-              ⚠ Con familia no se puede serializar ni ingresar Tipo
-            </span>
-          )}
+          <div className={styles.comboWrap} ref={wrapperRef}>
+            <input
+              className={styles.registroInput}
+              placeholder="Buscar código o descripción…"
+              value={busqueda}
+              onChange={(e) => {
+                setBusqueda(e.target.value);
+                setSeleccionado(null);
+                setAbierto(true);
+              }}
+              onFocus={() => setAbierto(true)}
+              autoComplete="off"
+            />
+            {abierto && filtrados.length > 0 && (
+              <div className={styles.comboDropdown}>
+                {filtrados.map((item) => (
+                  <button
+                    key={item.codigo}
+                    type="button"
+                    className={styles.comboOption}
+                    onMouseDown={() => handleSeleccionar(item)}
+                  >
+                    <span className={styles.comboCodigo}>{item.codigo}</span>
+                    <span className={styles.comboDesc}>{item.descripcion}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Fila: Cant */}
+        {/* Cantidad */}
         <div className={styles.registroRow}>
           <label className={styles.registroLabel}>Cant</label>
           <input
             type="number"
             className={styles.registroInput}
-            value={esSerialiable ? 1 : cant}
+            value={cantidad}
             min={1}
-            onChange={(e) => setCant(Number(e.target.value))}
-            disabled={esSerialiable}
-            style={{ width: 80 }}
+            onChange={(e) => setCantidad(Math.max(1, Number(e.target.value)))}
+            style={{ width: 80, flex: "none" }}
           />
-          <span className={styles.registroHint}>
-            {esSerialiable ? "Siempre 1 para serializable" : ""}
-          </span>
         </div>
 
-        {/* Guardar */}
-        <button
-          type="button"
-          className={styles.btnGuardar}
-          onClick={handleGuardar}
-        >
-          Guardar
+        <button type="button" className={styles.btnGuardar} onClick={handleAgregar}>
+          Agregar
         </button>
       </div>
     </div>

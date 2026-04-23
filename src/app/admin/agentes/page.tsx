@@ -108,8 +108,7 @@ export default function AgentePage() {
       />
 
       <RegistroSeries
-        seleccionados={seleccionados}
-        onActualizarTipo={handleActualizarTipo}
+        onAgregarAccesorio={handleAgregarSerial}
         onShowToast={showToast}
       />
 

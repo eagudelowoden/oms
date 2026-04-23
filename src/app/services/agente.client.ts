@@ -41,6 +41,12 @@ export const prealertaQueries = {
     if (!res.ok) throw new Error("Error al obtener sedes");
     return res.json();
   },
+
+  codigosSap: async (): Promise<{ codigo: string; descripcion: string }[]> => {
+    const res = await fetch("/api/agente/codigosSap");
+    if (!res.ok) throw new Error("Error al obtener CodigoSap");
+    return res.json();
+  },
 };
 
 // ── MUTATIONS (POST/DELETE) ──
