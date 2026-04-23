@@ -99,6 +99,84 @@ export async function POST(
 ) {
   const { action } = await params;
 
+  if (action === "sincronizarSeriales") {
+    try {
+      const body = await request.json();
+      const { fecha, documento } = body as { fecha: string; documento?: string };
+
+      const LOGIN_URL = process.env.WFSM_LOGIN_URL!;
+      const AUTH_BASIC = process.env.WFSM_AUTH_BASIC!;
+      const CONSULTA_URL = process.env.WFSM_CONSULTA_SERIALES_URL!;
+
+      const loginRes = await fetch(LOGIN_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: AUTH_BASIC },
+      });
+      if (!loginRes.ok) return NextResponse.json({ error: "Login fallido" }, { status: 502 });
+      const { token } = await loginRes.json();
+      if (!token) return NextResponse.json({ error: "Token no recibido" }, { status: 502 });
+
+      const params = new URLSearchParams({
+        "visita/min_recepcion": `${fecha}T00:00:00.000Z`,
+        "visita/max_recepcion": `${fecha}T23:59:59.000Z`,
+        "conf/timezone": "300",
+        "servicio/id_proyecto": "1",
+        modelo: "EXPORTACION_SERIALES",
+      });
+      if (documento) params.set("documento_identidad", documento);
+
+      const consultaRes = await fetch(`${CONSULTA_URL}?${params.toString()}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: `Token ${token}` },
+      });
+      if (!consultaRes.ok) return NextResponse.json({ error: "Consulta fallida" }, { status: 502 });
+
+      const data = await consultaRes.json();
+      return NextResponse.json(data);
+    } catch (error) {
+      console.error("Error sincronizarSeriales:", error);
+      return NextResponse.json({ error: "Error al sincronizar seriales" }, { status: 500 });
+    }
+  }
+
+  if (action === "sincronizarAccesorios") {
+    try {
+      const body = await request.json();
+      const { fecha } = body as { fecha: string };
+
+      const LOGIN_URL = process.env.WFSM_LOGIN_URL!;
+      const AUTH_BASIC = process.env.WFSM_AUTH_BASIC!;
+      const CONSULTA_URL = process.env.WFSM_CONSULTA_ACCESORIOS_URL!;
+
+      const loginRes = await fetch(LOGIN_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: AUTH_BASIC },
+      });
+      if (!loginRes.ok) return NextResponse.json({ error: "Login fallido" }, { status: 502 });
+      const { token } = await loginRes.json();
+      if (!token) return NextResponse.json({ error: "Token no recibido" }, { status: 502 });
+
+      const params = new URLSearchParams({
+        min_fecha: `${fecha}T00:00:00.000Z`,
+        max_fecha: `${fecha}T23:59:59.000Z`,
+        "conf/timezone": "300",
+        "servicio/id_proyecto": "1",
+      });
+
+      const consultaRes = await fetch(`${CONSULTA_URL}?${params.toString()}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: `Token ${token}` },
+      });
+      if (!consultaRes.ok) return NextResponse.json({ error: "Consulta fallida" }, { status: 502 });
+
+      const data = await consultaRes.json();
+      return NextResponse.json(data);
+    } catch (error) {
+      console.error("Error sincronizarAccesorios:", error);
+      return NextResponse.json({ error: "Error al sincronizar accesorios" }, { status: 500 });
+    }
+  }
+
   if (action === "create") {
     try {
       const body = await request.json();

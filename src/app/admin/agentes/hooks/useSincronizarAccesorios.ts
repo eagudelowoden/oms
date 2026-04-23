@@ -2,9 +2,7 @@
 import { useState, useEffect } from "react";
 import { AccesorioAgrupado } from "@/app/models/Accesorios.models";
 
-const WFSM_LOGIN_URL = process.env.NEXT_PUBLIC_WFSM_LOGIN_URL!;
-const WFSM_CONSULTA_ACCESORIOS_URL = process.env.NEXT_PUBLIC_WFSM_CONSULTA_ACCESORIOS_URL!;
-const WFSM_AUTH_BASIC = process.env.NEXT_PUBLIC_WFSM_AUTH_BASIC!;
+;
 
 export function useSincronizarAccesorios(isOpen: boolean) {
     const hoy = new Date().toLocaleDateString("en-CA", {
@@ -50,40 +48,14 @@ export function useSincronizarAccesorios(isOpen: boolean) {
         setBuscado(false);
 
         try {
-            const loginRes = await fetch(WFSM_LOGIN_URL, {
+            const res = await fetch("/api/agente/sincronizarAccesorios", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    Authorization: WFSM_AUTH_BASIC,
-                },
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fecha }),
             });
-            if (!loginRes.ok) throw new Error(`Login fallido: ${loginRes.status}`);
-            const { token } = await loginRes.json();
-            if (!token) throw new Error("Token no recibido");
+            if (!res.ok) throw new Error(`Error ${res.status}`);
 
-            const params = new URLSearchParams({
-                min_fecha: `${fecha}T00:00:00.000Z`,
-                max_fecha: `${fecha}T23:59:59.000Z`,
-                "conf/timezone": "300",
-                "servicio/id_proyecto": "1",
-            });
-
-            const consultaRes = await fetch(
-                `${WFSM_CONSULTA_ACCESORIOS_URL}?${params.toString()}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `Token ${token}`,
-                    },
-                },
-            );
-            if (!consultaRes.ok)
-                throw new Error(`Consulta fallida: ${consultaRes.status}`);
-
-            const data = await consultaRes.json();
+            const data = await res.json();
             const registros: Array<Record<string, unknown>> = data?.registros ?? [];
 
             const filtrados = registros.filter(
