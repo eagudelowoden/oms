@@ -38,7 +38,7 @@ export default function ScannerModal({
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const scannerRef = useRef<any>(null);
+  const scannerRef = useRef<{ reset?: () => void; decodeFromVideoElement?: unknown } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const serialesRef = useRef<SerialItem[]>([]);
@@ -56,7 +56,7 @@ export default function ScannerModal({
     try {
       if (!audioCtxRef.current) {
         audioCtxRef.current = new (
-          window.AudioContext || (window as any).webkitAudioContext
+          window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
         )();
       }
       const ctx = audioCtxRef.current;
@@ -89,8 +89,9 @@ export default function ScannerModal({
   /* ── DETECTAR CÁMARAS TRASERAS ── */
   const detectarCamaras = useCallback(async () => {
     try {
-      // Pedir permiso primero para obtener labels
-      await navigator.mediaDevices.getUserMedia({ video: true });
+      // Pedir permiso primero para obtener labels — cerrar inmediatamente
+      const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      tempStream.getTracks().forEach((t) => t.stop());
       const devices = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = devices.filter((d) => d.kind === "videoinput");
 
@@ -219,21 +220,21 @@ export default function ScannerModal({
         scannerRef.current = codeReader;
 
         const videoEl = videoRef.current;
-        codeReader.decodeFromVideoElement(videoEl, (result: any) => {
+        codeReader.decodeFromVideoElement(videoEl, (result) => {
           if (result) agregarSerial(result.getText());
         });
-      } catch (err: any) {
-        // ← MUESTRA EL ERROR COMPLETO EN PANTALLA
-        const debugMsg = `${err?.name}: ${err?.message}${err?.constraint ? ` | constraint: ${err?.constraint}` : ""}`;
+      } catch (err: unknown) {
+        const e = err as { name?: string; message?: string; constraint?: string };
+        const debugMsg = `${e?.name}: ${e?.message}${e?.constraint ? ` | constraint: ${e?.constraint}` : ""}`;
 
         const msg =
-          err?.name === "NotAllowedError"
+          e?.name === "NotAllowedError"
             ? `Permiso denegado — ${debugMsg}`
-            : err?.name === "NotFoundError"
+            : e?.name === "NotFoundError"
               ? `Cámara no encontrada — ${debugMsg}`
-              : err?.name === "OverconstrainedError"
+              : e?.name === "OverconstrainedError"
                 ? `Configuración no soportada — ${debugMsg}`
-                : err?.name === "NotReadableError"
+                : e?.name === "NotReadableError"
                   ? `Cámara ocupada por otra app — ${debugMsg}`
                   : `Error desconocido — ${debugMsg}`;
 
@@ -259,7 +260,7 @@ export default function ScannerModal({
     if (!track) return;
     const next = !torchOn;
     try {
-      await track.applyConstraints({ advanced: [{ torch: next } as any] });
+      await track.applyConstraints({ advanced: [{ torch: next } as MediaTrackConstraintSet] });
       setTorchOn(next);
     } catch (e) {
       console.warn("Torch no soportado:", e);
