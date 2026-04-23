@@ -51,6 +51,7 @@ export function useSincronizarAPI({
                 .map((r) => ({
                     codigo: r.serial as string,
                     codigo_sap: typeof r.codigo_sap === "string" ? r.codigo_sap : undefined,
+                    descripcion: typeof r.descripcion_sap === "string" ? r.descripcion_sap : undefined,
                     origen: "api" as const,
                     tramite: "Sincronizado",
                 }));

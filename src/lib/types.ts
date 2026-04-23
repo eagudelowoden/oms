@@ -61,6 +61,8 @@ export interface SerialCaja {
   tipo: string | null;
   cantidad: number | null;
   tramite: string | null;
+  codigoSap: string | null;
+  descripcion: string | null;
 }
 
 export interface PrealertaListRow {

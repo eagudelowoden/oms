@@ -46,7 +46,15 @@ export const AgentesBackendService = {
       await Promise.all(
         lote.map(async (item) => {
           try {
-            const { Serial, Mac, Tipo, Cantidad, Tramite, CodigoSap, Descripcion } = item;
+            const {
+              Serial,
+              Mac,
+              Tipo,
+              Cantidad,
+              Tramite,
+              CodigoSap,
+              Descripcion,
+            } = item;
             const [row] = await execProc<{ estado: string }>(
               "pa_InsertPrealertSerialOms",
               {
@@ -54,7 +62,10 @@ export const AgentesBackendService = {
                 Serial: { type: sql.VarChar(50), value: Serial },
                 Mac: { type: sql.VarChar(50), value: Mac ?? "" },
                 CodigoSap: { type: sql.VarChar(20), value: CodigoSap ?? "" },
-                Descripcion: { type: sql.VarChar(150), value: Descripcion ?? "" },
+                Descripcion: {
+                  type: sql.VarChar(150),
+                  value: Descripcion ?? "",
+                },
                 Cantidad: { type: sql.Int, value: Cantidad ?? 1 },
                 Caja: { type: sql.Int, value: data.caja },
                 Falla: { type: sql.VarChar(100), value: "" },
@@ -88,7 +99,9 @@ export const AgentesBackendService = {
       Cantidad AS Cantidad,
       Caja AS Caja,
       Tipo AS Tipo,
-      Tramite AS Tramite
+      Tramite AS Tramite,
+      CodigoSap AS CodigoSap,
+      Descripcion AS Descripcion
     FROM PrealertaSerial
     WHERE PrealertaId = @id`,
       { id: prealertaId },
@@ -103,6 +116,8 @@ export const AgentesBackendService = {
       cantidad: r.Cantidad,
       caja: r.Caja,
       tramite: r.Tramite ?? "",
+      codigo_sap: r.CodigoSap ?? undefined,
+      descripcion: r.Descripcion ?? undefined,
     }));
   },
 
@@ -135,8 +150,10 @@ export const AgentesBackendService = {
         Serial   AS serial,
         Mac      AS mac,
         Tipo     AS tipo,
-        Cantidad as cantidad,
-        Tramite as tramite
+        Cantidad AS cantidad,
+        Tramite AS tramite,
+        CodigoSap AS codigoSap,
+        Descripcion AS descripcion
      FROM PrealertaSerial
      WHERE PrealertaId = @prealertaId
        AND Caja = @caja
@@ -153,6 +170,8 @@ export const AgentesBackendService = {
       tipo: r.tipo ?? "Serializable",
       cantidad: r.cantidad ?? "",
       tramite: r.tramite,
+      codigoSap: r.codigoSap,
+      descripcion: r.descripcion,
     }));
   },
 
@@ -227,6 +246,13 @@ export const AgentesBackendService = {
 
     return { success: true };
   },
+  async getCodigosSap(): Promise<Map<string, string>> {
+    const rows = await execQuery<{ codigo: string; Descripcion: string }>(
+      "SELECT codigo, Descripcion FROM CodigoSap",
+    );
+    return new Map(rows.map((r) => [r.codigo, r.Descripcion ?? ""]));
+  },
+
   async getSedes(): Promise<{ id: number; nombre: string }[]> {
     const result = await execQuery<SedeTable>(
       "SELECT Id, Nombre FROM WmsWdGeneral.dbo.Sede",

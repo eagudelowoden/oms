@@ -132,7 +132,19 @@ export async function POST(
       if (!consultaRes.ok) return NextResponse.json({ error: "Consulta fallida" }, { status: 502 });
 
       const data = await consultaRes.json();
-      return NextResponse.json(data);
+      const registros: Array<Record<string, unknown>> = data?.registros ?? [];
+
+      const sapMap = await AgentesBackendService.getCodigosSap();
+      const enriched = registros.map((r) => {
+        const sap = typeof r.codigo_sap === "string" ? r.codigo_sap.trim() : "";
+        return {
+          ...r,
+          codigo_sap: sap || null,
+          descripcion_sap: sap ? (sapMap.get(sap) ?? null) : null,
+        };
+      });
+
+      return NextResponse.json({ ...data, registros: enriched });
     } catch (error) {
       console.error("Error sincronizarSeriales:", error);
       return NextResponse.json({ error: "Error al sincronizar seriales" }, { status: 500 });

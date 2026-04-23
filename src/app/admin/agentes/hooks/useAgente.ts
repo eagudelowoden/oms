@@ -89,6 +89,8 @@ export function usePrealerta() {
         cantidad: s.cantidad,
         caja: cajaActual,
         tramite: s.tramite,
+        codigo_sap: s.codigoSap ?? undefined,
+        descripcion: s.descripcion ?? undefined,
       }))
     : [
         ...serialesEscaneados,
@@ -277,15 +279,25 @@ export function usePrealerta() {
         await empacarMutation.mutateAsync({
           prealertaId: idPrealerta,
           caja: cajaActual,
-          seriales: sinDuplicados.map(({ codigo, tipo, mac, cantidad, tramite, codigo_sap, descripcion }) => ({
-            Serial: codigo,
-            Mac: mac ?? "",
-            Tipo: tipo ?? "Serializable",
-            Cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
-            Tramite: tramite ?? "Manual",
-            CodigoSap: codigo_sap ?? "",
-            Descripcion: descripcion ?? "",
-          })),
+          seriales: sinDuplicados.map(
+            ({
+              codigo,
+              tipo,
+              mac,
+              cantidad,
+              tramite,
+              codigo_sap,
+              descripcion,
+            }) => ({
+              Serial: codigo,
+              Mac: mac ?? "",
+              Tipo: tipo ?? "Serializable",
+              Cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
+              Tramite: tramite ?? "Manual",
+              CodigoSap: codigo_sap ?? "",
+              Descripcion: descripcion ?? "",
+            }),
+          ),
         });
 
       setProgreso(100);
@@ -370,9 +382,13 @@ export function usePrealerta() {
   const handleRemoveSerial = async (idx: number) => {
     const serial = serialesMostrados[idx];
     if (!serial) return;
-    const enEscaneados = serialesEscaneados.some((s) => s.codigo === serial.codigo);
+    const enEscaneados = serialesEscaneados.some(
+      (s) => s.codigo === serial.codigo,
+    );
     if (enEscaneados || !preAlertaSeleccionada?.id) {
-      setSerialEscaneados((prev) => prev.filter((s) => s.codigo !== serial.codigo));
+      setSerialEscaneados((prev) =>
+        prev.filter((s) => s.codigo !== serial.codigo),
+      );
       return;
     }
     try {
@@ -413,7 +429,9 @@ export function usePrealerta() {
             }),
           ),
         );
-        showToast(`✓ ${enDB.length} serial${enDB.length !== 1 ? "es" : ""} eliminado${enDB.length !== 1 ? "s" : ""}`);
+        showToast(
+          `✓ ${enDB.length} serial${enDB.length !== 1 ? "es" : ""} eliminado${enDB.length !== 1 ? "s" : ""}`,
+        );
       } catch {
         showToast("Error al eliminar", "error");
       }
@@ -425,7 +443,11 @@ export function usePrealerta() {
   const handleSerialConfirm = (seriales: string[]) => {
     setSerialEscaneados((prev) => [
       ...prev,
-      ...seriales.map((codigo) => ({ codigo, origen: "manual" as const, tramite: "Manual" })),
+      ...seriales.map((codigo) => ({
+        codigo,
+        origen: "manual" as const,
+        tramite: "Manual",
+      })),
     ]);
   };
 
