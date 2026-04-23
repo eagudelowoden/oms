@@ -230,7 +230,7 @@ export default function AdminLayout({
               <span>Agentes</span>
             </Link>
             <Link
-              href="/admin/agentes"
+              href="/admin/sucursal"
               className={linkClass("/admin/sucursal")}
             >
               <span className="material-symbols-rounded">pending_actions</span>

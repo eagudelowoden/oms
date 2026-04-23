@@ -1,0 +1,532 @@
+/* --- VARIABLES Y WRAPPER --- */
+.adminWrapper {
+  display: flex;
+  height: 100vh;
+  overflow: hidden; /* ← el wrapper no scrollea */
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+  width: 255px;
+  height: 100vh;
+  background-color: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1100;
+  flex-shrink: 0;
+}
+
+.sidebarHeader {
+  height: 45px;
+  padding: 0 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  position: relative;
+}
+
+/* --- LOGO --- */
+.logoGroup {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.logoBadge {
+  background: #2563eb;
+  color: white;
+  padding: 5px;
+  border-radius: 8px;
+  display: flex;
+}
+
+.logoText {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #1e293b;
+}
+
+/* --- INDICADOR DE CLIENTE --- */
+.currentClientBadge {
+  margin: 1rem;
+  padding: 0.7rem;
+  background: rgba(37, 99, 235, 0.05);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.clientInfo small {
+  display: block;
+  font-size: 0.65rem;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.clientInfo p {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2563eb;
+  word-break: break-all;
+}
+
+/* --- NAVEGACIÓN --- */
+.navMenu {
+  flex: 1;
+  padding: 0.5rem;
+  overflow-y: auto;
+}
+
+.navSectionTitle {
+  padding: 0 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  color: #64748b;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  transition: all 0.2s ease;
+}
+
+.navItem:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.navItem.active {
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+}
+
+/* --- FOOTER SIDEBAR (Sutil y Flotante) --- */
+.sidebarFooter {
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  position: relative;
+  overflow: visible !important; /* Permite que el panel flote fuera */
+}
+
+.userMenuWrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Trigger sutil (el botón del perfil) */
+.userProfileTrigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.userProfileTrigger:hover {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.userAvatar {
+  width: 30px;
+  height: 30px;
+  background: #2563eb;
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+}
+
+.userName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.userRole {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* --- PANEL DESPLEGABLE (Minimalista) --- */
+.userOptionsPanel {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  width: 80%;
+  min-width: 200px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.1);
+  padding: 6px;
+  z-index: 9999; /* Siempre arriba */
+  animation: slideUp 0.2s ease-out;
+}
+
+.optionBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.optionBtn:hover {
+  background: #f1f5f9;
+  color: #2563eb;
+}
+
+.logoutOption:hover {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 4px 0;
+}
+
+.arrowIcon {
+  color: #94a3b8;
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+
+/* --- CONTENIDO PRINCIPAL --- */
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* ← tampoco */
+  min-width: 0;
+}
+.pageContainer {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.topHeader {
+  height: 45px; /* ← era 70px / 64px, bájalo */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.headerBreadcrumb {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* --- RESPONSIVE --- */
+.hamburger,
+.closeMenuMobile {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+  color: #64748b;
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+  }
+
+  .sidebar.sidebarOpen {
+    transform: translateX(0);
+  }
+  .hamburger,
+  .closeMenuMobile {
+    display: flex;
+    align-items: center;
+  }
+
+  .mobileOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
+  }
+
+  .mobileOverlay.showOverlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* --- ANIMACIONES Y OTROS --- */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingContainer {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+/* --- FOOTER SIDEBAR (Ajuste para móviles) --- */
+.sidebarFooter {
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  position: relative;
+  /* IMPORTANTE: Permitir que el menú flote hacia afuera */
+  overflow: visible !important;
+}
+
+.userMenuWrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* --- PANEL DESPLEGABLE (Z-INDEX ALTO) --- */
+.userOptionsPanel {
+  position: absolute;
+  bottom: calc(100% + 12px); /* Aparece arriba del botón */
+  left: 0;
+  width: 100%;
+  min-width: 200px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  /* Sombra más profunda para que resalte en móviles */
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  /* Z-INDEX CRÍTICO: Debe ser superior al sidebar y al overlay */
+  z-index: 9999;
+  animation: slideUp 0.2s ease-out;
+}
+
+@media (max-width: 1024px) {
+  /* Aseguramos que el sidebar no corte el popover cuando está abierto */
+  .sidebar.sidebarOpen {
+    overflow: visible;
+  }
+
+  /* Ajuste de ancho para que no se salga de la pantalla en móviles muy pequeños */
+  .userOptionsPanel {
+    width: calc(100% + 20px);
+    left: -10px;
+  }
+}
+
+/* Animación de entrada */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* --- TOP HEADER ALINEACIÓN --- */
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* --- CONTROL DE VISIBILIDAD --- */
+.headerUserMobile {
+  display: none; /* Oculto en PC */
+}
+
+.sidebarFooterDesktop {
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+  overflow: visible !important;
+}
+
+@media (max-width: 1024px) {
+  .sidebarFooterDesktop {
+    display: none; /* Se quita del sidebar en móvil */
+  }
+
+  .headerUserMobile {
+    display: block; /* Se muestra en el header en móvil */
+  }
+
+  /* Ajuste del panel flotante en el Header (hacia abajo) */
+  .headerUserMobile .userOptionsPanel {
+    bottom: auto;
+    top: calc(100% + 5px);
+    right: 0;
+    left: auto;
+    width: 180px;
+  }
+
+  /* Escondemos el nombre/rol en móvil para que no choque con el breadcrumb */
+  .userInfoHideMobile {
+    display: none;
+  }
+
+  .userProfileTrigger {
+    border: none;
+    background: transparent;
+    padding: 0;
+  }
+}
+
+/* Estilos de los paneles flotantes */
+.userOptionsPanel {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  z-index: 9999;
+}
+.currentClientBadge {
+  margin: 0.5rem;
+  padding: 0.7rem;
+  background: #f8fafc; /* Fondo muy suave */
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.sessionInfoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.infoRow span {
+  font-size: 12px; /* Iconos pequeños y discretos */
+  color: #94a3b8;
+}
+
+.clientName {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2563eb; /* El cliente destaca en azul */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userName {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b; /* El usuario es un tono gris secundario */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.roleTag {
+  font-size: 9px;
+  background: #e2e8f0;
+  color: #475569;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Opcional: un divisor casi invisible */
+.sessionDivider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 2px 0;
+}
