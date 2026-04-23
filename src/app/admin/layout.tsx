@@ -229,6 +229,13 @@ export default function AdminLayout({
               <span className="material-symbols-rounded">pending_actions</span>
               <span>Agentes</span>
             </Link>
+            <Link
+              href="/admin/agentes"
+              className={linkClass("/admin/sucursal")}
+            >
+              <span className="material-symbols-rounded">pending_actions</span>
+              <span>Sucursal</span>
+            </Link>
             {usuario.perfilId === 1 && (
               <Link
                 href="/admin/usuarios"
