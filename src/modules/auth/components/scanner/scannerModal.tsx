@@ -36,6 +36,8 @@ export default function ScannerModal({
   const [camaras, setCamaras] = useState<CamaraDisponible[]>([]);
   const [camaraActual, setCamaraActual] = useState<string | null>(null);
 
+  const [barcodeLocked, setBarcodeLocked] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const scannerRef = useRef<{ reset?: () => void; decodeFromVideoElement?: unknown } | null>(null);
@@ -46,6 +48,7 @@ export default function ScannerModal({
     serial: "",
     time: 0,
   });
+  const lockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     serialesRef.current = seriales;
@@ -160,13 +163,15 @@ export default function ScannerModal({
           video: idAUsar
             ? {
                 deviceId: { exact: idAUsar },
-                width: { ideal: 1920 },
-                height: { ideal: 1080 },
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                frameRate: { ideal: 30 },
               }
             : {
                 facingMode: { ideal: "environment" },
-                width: { ideal: 1920 },
-                height: { ideal: 1080 },
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                frameRate: { ideal: 30 },
               },
         };
 
@@ -176,6 +181,7 @@ export default function ScannerModal({
         const track = stream.getVideoTracks()[0];
         interface TrackCapabilities extends MediaTrackCapabilities {
           torch?: boolean;
+          focusMode?: string[];
         }
         setTimeout(async () => {
           try {
@@ -183,6 +189,12 @@ export default function ScannerModal({
             setTorchAvailable(
               "torch" in capabilities ? (capabilities.torch ?? true) : true,
             );
+            // Forzar autofoco continuo para seriales pequeños/cercanos
+            if (capabilities.focusMode?.includes("continuous")) {
+              await track.applyConstraints({
+                advanced: [{ focusMode: "continuous" } as MediaTrackConstraintSet],
+              });
+            }
           } catch (_) {
             setTorchAvailable(true);
           }
@@ -207,12 +219,6 @@ export default function ScannerModal({
         hints.set(DecodeHintType.POSSIBLE_FORMATS, [
           BarcodeFormat.CODE_128,
           BarcodeFormat.CODE_39,
-          BarcodeFormat.EAN_13,
-          BarcodeFormat.EAN_8,
-          BarcodeFormat.QR_CODE,
-          BarcodeFormat.DATA_MATRIX,
-          BarcodeFormat.UPC_A,
-          BarcodeFormat.UPC_E,
         ]);
         hints.set(DecodeHintType.TRY_HARDER, true);
 
@@ -221,7 +227,15 @@ export default function ScannerModal({
 
         const videoEl = videoRef.current;
         codeReader.decodeFromVideoElement(videoEl, (result) => {
-          if (result) agregarSerial(result.getText());
+          if (result) {
+            setBarcodeLocked(true);
+            if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
+            lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 300);
+            agregarSerial(result.getText());
+          } else {
+            if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
+            lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 200);
+          }
         });
       } catch (err: unknown) {
         const e = err as { name?: string; message?: string; constraint?: string };
@@ -322,6 +336,8 @@ export default function ScannerModal({
 
   /* ── DETENER CÁMARA ── */
   const detenerCamara = useCallback(() => {
+    if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
+    setBarcodeLocked(false);
     if (scannerRef.current) {
       try {
         scannerRef.current.reset?.();
@@ -489,7 +505,7 @@ export default function ScannerModal({
 
           {scanning && (
             <>
-              <div className={styles.scanOverlay}>
+              <div className={`${styles.scanOverlay} ${barcodeLocked ? styles.overlayLocked : ""}`}>
                 <div className={styles.cornerTL} />
                 <div className={styles.cornerTR} />
                 <div className={styles.cornerBL} />
