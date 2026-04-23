@@ -72,21 +72,21 @@ export function usePrealerta() {
   // serialesMostrados muestra TODOS (escaneados + DB disponibles sin duplicados)
   const serialesMostrados: SerialItem[] = esCajaExistente
     ? serialesDeCaja.map((s) => ({
-      codigo: s.serial,
-      origen: "api" as const,
-      estado: "Empacado" as const,
-      tipo: s.tipo as "Serializable" | "No-serializable",
-      cantidad: s.cantidad,
-      caja: cajaActual,
-    }))
+        codigo: s.serial,
+        origen: "api" as const,
+        estado: "Empacado" as const,
+        tipo: s.tipo as "Serializable" | "No-serializable",
+        cantidad: s.cantidad,
+        caja: cajaActual,
+      }))
     : [
-      ...serialesEscaneados,
-      ...serialesDeDB.filter(
-        (d) =>
-          d.estado === "Disponible" &&
-          !serialesEscaneados.some((e) => e.codigo === d.codigo), // sin duplicados
-      ),
-    ];
+        ...serialesEscaneados,
+        ...serialesDeDB.filter(
+          (d) =>
+            d.estado === "Disponible" &&
+            !serialesEscaneados.some((e) => e.codigo === d.codigo), // sin duplicados
+        ),
+      ];
 
   /* ── SINCRONIZAR API ── */
   const { sincronizando, sincronizarDesdeAPI } = useSincronizarAPI({
@@ -167,7 +167,10 @@ export function usePrealerta() {
       const id = preAlertaSeleccionada?.id;
       queryClient.removeQueries({ queryKey: ["cajas", id], exact: false });
       queryClient.removeQueries({ queryKey: ["seriales", id], exact: false });
-      queryClient.removeQueries({ queryKey: ["serialesPorCaja"], exact: false });
+      queryClient.removeQueries({
+        queryKey: ["serialesPorCaja"],
+        exact: false,
+      });
     },
   });
 
@@ -264,10 +267,10 @@ export function usePrealerta() {
           prealertaId: idPrealerta,
           caja: cajaActual,
           seriales: sinDuplicados.map(({ codigo, tipo, mac, cantidad }) => ({
-            serial: codigo,
-            mac: mac ?? "",
-            tipo: tipo ?? "Serializable",
-            cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
+            Serial: codigo,
+            Mac: mac ?? "",
+            Tipo: tipo ?? "Serializable",
+            Cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
           })),
         });
 
@@ -278,9 +281,17 @@ export function usePrealerta() {
         setSerialEscaneados([]); // ← limpia escaneados
         setSeleccionados(new Set());
         setCajaActual((prev) => prev + 1);
-        queryClient.removeQueries({ queryKey: ["seriales", preAlertaSeleccionada?.id], exact: false });
-        queryClient.removeQueries({ queryKey: ["cajas", preAlertaSeleccionada?.id], exact: false });
-        showToast(`✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaActual}`);
+        queryClient.removeQueries({
+          queryKey: ["seriales", preAlertaSeleccionada?.id],
+          exact: false,
+        });
+        queryClient.removeQueries({
+          queryKey: ["cajas", preAlertaSeleccionada?.id],
+          exact: false,
+        });
+        showToast(
+          `✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaActual}`,
+        );
       }
       if (yaExistian > 0)
         showToast(`⚠ ${yaExistian} ya estaban empacados`, "error");
