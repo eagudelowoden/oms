@@ -219,9 +219,8 @@ export function usePrealerta() {
         idResponsable: usuario.id,
         estado: "Pendiente",
       });
-      showToast(`✓ Prealerta creada`);
-    } catch {
-      showToast("Error al crear la prealerta", "error");
+    } catch (err) {
+      throw err;
     }
   };
 

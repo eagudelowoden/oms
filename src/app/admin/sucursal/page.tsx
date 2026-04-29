@@ -65,7 +65,16 @@ export default function AgentePage() {
 
   return (
     <div className={styles.wrapper}>
-      <PrealertaHeader onCrear={handleCrearPrealerta} />
+      <PrealertaHeader
+        onCrear={async (sedeId, sedeNombre) => {
+          try {
+            await handleCrearPrealerta(sedeId, sedeNombre);
+            showToast("✓ Prealerta creada");
+          } catch {
+            showToast("Error al crear la prealerta", "error");
+          }
+        }}
+      />
 
       <CargarArchivo
         preAlertaSeleccionada={preAlertaSeleccionada}

@@ -27,6 +27,13 @@ const ICON_EXCEL = (
   </svg>
 );
 
+const normalizar = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .trim();
+
 function descargarPlantilla(tipo: "prealerta" | "seriales") {
   const wb = XLSX.utils.book_new();
 
@@ -85,40 +92,50 @@ export default function CargarArchivo({
       }
 
       let creadas = 0;
-      let errores = 0;
+      const errorDetalle: string[] = [];
 
-      for (const row of rows) {
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
         const nombre = row["Nombre"]?.toString().trim();
         const ciudad = row["Ciudad"]?.toString().trim();
 
-        if (!nombre || !ciudad) {
-          errores++;
+        if (!nombre) {
+          errorDetalle.push(`Fila ${i + 2}: falta el campo Nombre`);
+          continue;
+        }
+        if (!ciudad) {
+          errorDetalle.push(`Fila ${i + 2}: falta el campo Ciudad`);
           continue;
         }
 
         const sedeEncontrada = sedes.find(
-          (s) => s.nombre.toLowerCase() === ciudad.toLowerCase(),
+          (s) => normalizar(s.nombre) === normalizar(ciudad),
         );
 
         if (!sedeEncontrada) {
-          onShowToast(`Ciudad no encontrada: "${ciudad}"`, "error");
-          errores++;
+          const disponibles = sedes.map((s) => s.nombre).join(", ");
+          errorDetalle.push(
+            `Fila ${i + 2}: ciudad "${ciudad}" no encontrada. Disponibles: ${disponibles}`,
+          );
           continue;
         }
 
+        const nombreTruncado = nombre.slice(0, 50);
+
         try {
-          await onCrearPrealerta(sedeEncontrada.id, sedeEncontrada.nombre, nombre);
+          await onCrearPrealerta(sedeEncontrada.id, sedeEncontrada.nombre, nombreTruncado);
           creadas++;
-        } catch {
-          errores++;
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Error desconocido";
+          errorDetalle.push(`Fila ${i + 2}: ${msg}`);
         }
       }
 
       if (creadas > 0) {
         onShowToast(`✓ ${creadas} prealerta${creadas !== 1 ? "s" : ""} creada${creadas !== 1 ? "s" : ""}`);
       }
-      if (errores > 0) {
-        onShowToast(`✗ ${errores} fila${errores !== 1 ? "s" : ""} con error`, "error");
+      for (const detalle of errorDetalle) {
+        onShowToast(detalle, "error");
       }
     } catch {
       onShowToast("Error al leer el archivo", "error");
