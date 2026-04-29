@@ -79,13 +79,30 @@ export function usePrealerta() {
   });
 
   /* ── SERIALES MOSTRADOS ── */
-  // Siempre muestra escaneados + disponibles de DB (sin duplicados).
-  // El dropdown de caja determina el destino al empacar.
+  // Muestra: seriales ya empacados en la caja seleccionada + escaneados + disponibles sin duplicar.
+  const serialesEnCaja: SerialItem[] = esCajaExistente
+    ? serialesDeCaja.map((s) => ({
+        codigo: s.serial,
+        origen: "api" as const,
+        estado: "Empacado" as const,
+        tipo: s.tipo as "Serializable" | "No-serializable",
+        cantidad: s.cantidad,
+        caja: cajaActual,
+        tramite: s.tramite,
+        codigo_sap: s.codigoSap ?? undefined,
+        descripcion: s.descripcion ?? undefined,
+      }))
+    : [];
+
+  const codigosEnCaja = new Set(serialesEnCaja.map((s) => s.codigo));
+
   const serialesMostrados: SerialItem[] = [
-    ...serialesEscaneados,
+    ...serialesEnCaja,
+    ...serialesEscaneados.filter((e) => !codigosEnCaja.has(e.codigo)),
     ...serialesDeDB.filter(
       (d) =>
         d.estado === "Disponible" &&
+        !codigosEnCaja.has(d.codigo) &&
         !serialesEscaneados.some((e) => e.codigo === d.codigo),
     ),
   ];
@@ -229,10 +246,16 @@ export function usePrealerta() {
       return;
     }
 
+    const candidatos = serialesMostrados.filter(
+      (s) => s.estado !== "Empacado",
+    );
+
     const serialesAEmpacar =
       seleccionados.size > 0
-        ? serialesMostrados.filter((_, i) => seleccionados.has(i))
-        : serialesMostrados;
+        ? candidatos.filter((s) =>
+            seleccionados.has(serialesMostrados.indexOf(s)),
+          )
+        : candidatos;
 
     const sinDuplicados = serialesAEmpacar.filter(
       (s, i, self) => i === self.findIndex((x) => x.codigo === s.codigo),
