@@ -206,7 +206,7 @@ export default function PrealertaAcciones({
                 </option>
                 {cajas.map((c) => (
                   <option key={c.numero} value={c.numero}>
-                    Caja {c.numero}
+                    Caja {c.numero} ({c.totalSeriales} ser.)
                   </option>
                 ))}
               </select>

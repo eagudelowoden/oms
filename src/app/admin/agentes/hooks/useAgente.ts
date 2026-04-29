@@ -79,27 +79,16 @@ export function usePrealerta() {
   });
 
   /* ── SERIALES MOSTRADOS ── */
-  // serialesMostrados muestra TODOS (escaneados + DB disponibles sin duplicados)
-  const serialesMostrados: SerialItem[] = esCajaExistente
-    ? serialesDeCaja.map((s) => ({
-        codigo: s.serial,
-        origen: "api" as const,
-        estado: "Empacado" as const,
-        tipo: s.tipo as "Serializable" | "No-serializable",
-        cantidad: s.cantidad,
-        caja: cajaActual,
-        tramite: s.tramite,
-        codigo_sap: s.codigoSap ?? undefined,
-        descripcion: s.descripcion ?? undefined,
-      }))
-    : [
-        ...serialesEscaneados,
-        ...serialesDeDB.filter(
-          (d) =>
-            d.estado === "Disponible" &&
-            !serialesEscaneados.some((e) => e.codigo === d.codigo), // sin duplicados
-        ),
-      ];
+  // Siempre muestra escaneados + disponibles de DB (sin duplicados).
+  // El dropdown de caja determina el destino al empacar.
+  const serialesMostrados: SerialItem[] = [
+    ...serialesEscaneados,
+    ...serialesDeDB.filter(
+      (d) =>
+        d.estado === "Disponible" &&
+        !serialesEscaneados.some((e) => e.codigo === d.codigo),
+    ),
+  ];
 
   /* ── SINCRONIZAR API ── */
   const { sincronizando, sincronizarDesdeAPI } = useSincronizarAPI({
