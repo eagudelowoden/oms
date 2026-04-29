@@ -1,0 +1,36 @@
+/* globals.css */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* 💡 Esto corta cualquier scroll accidental */
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+:root {
+  --bg-main: #ffffff;
+  --bg-card: #ffffff;
+  --text-main: #1e293b;
+  --border-color: #e2e8f0;
+}
+
+.dark {
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --text-main: #f1f5f9;
+  --border-color: #334155;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 0.3s ease;
+}
