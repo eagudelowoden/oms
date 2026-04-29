@@ -201,8 +201,7 @@ export function usePrealerta() {
       ? JSON.parse(usuarioRaw)
       : null;
     if (!usuario?.id) {
-      showToast("No hay sesión activa", "error");
-      return;
+      throw new Error("No hay sesión activa");
     }
 
     const nombreBase = nombrePersonalizado?.trim()
@@ -226,6 +225,7 @@ export function usePrealerta() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: result.id, nombre: nombreFinal }),
       });
+      queryClient.invalidateQueries({ queryKey: ["prealertas"] });
     }
   };
 
