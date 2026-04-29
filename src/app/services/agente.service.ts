@@ -237,6 +237,15 @@ export const AgentesBackendService = {
     return row?.ultimaCaja ?? 0;
   },
 
+  async updatePrealertNombre(id: number, nombre: string): Promise<void> {
+    const pool = await getDBConnection();
+    await pool
+      .request()
+      .input("Id", sql.Int, id)
+      .input("Nombre", sql.VarChar(50), nombre.slice(0, 50))
+      .query("UPDATE Prealerta SET Nombre = @Nombre WHERE Id = @Id");
+  },
+
   async deletePrealert(id: number): Promise<{ success: boolean }> {
     // Usamos execProc para ejecutar el procedimiento de borrado
     // No necesitamos el resultado, así que solo esperamos la ejecución

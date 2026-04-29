@@ -213,6 +213,17 @@ export async function POST(
     }
   }
 
+  if (action === "updateNombre") {
+    try {
+      const body = await request.json();
+      await AgentesBackendService.updatePrealertNombre(body.id, body.nombre);
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      console.error("Error al actualizar nombre:", error);
+      return NextResponse.json({ error: "Error al actualizar" }, { status: 500 });
+    }
+  }
+
   if (action === "insertSerialBatch") {
     try {
       const body = await request.json();

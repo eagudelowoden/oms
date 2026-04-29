@@ -205,22 +205,27 @@ export function usePrealerta() {
       return;
     }
 
-    const nombre =
-      nombrePersonalizado?.trim() ||
-      `${usuario.nombres} ${usuario.apellidos} - CODIGO - ${sedeNombre}`;
+    const nombreBase = nombrePersonalizado?.trim()
+      ? nombrePersonalizado.trim()
+      : `${usuario.nombres} ${usuario.apellidos}`;
 
-    try {
-      await crearMutation.mutateAsync({
-        nombre,
-        tipoOrigenId: 13,
-        origenId: sedeId,
-        guia: `GUIA-${Math.floor(Math.random() * 1000)}`,
-        usuarioId: usuario.id,
-        idResponsable: usuario.id,
-        estado: "Pendiente",
+    const result = await crearMutation.mutateAsync({
+      nombre: nombreBase.slice(0, 50),
+      tipoOrigenId: 13,
+      origenId: sedeId,
+      guia: `GUIA-${Math.floor(Math.random() * 1000)}`,
+      usuarioId: usuario.id,
+      idResponsable: usuario.id,
+      estado: "Pendiente",
+    });
+
+    if (result?.id) {
+      const nombreFinal = `${nombreBase} - ${result.id} - ${sedeNombre}`.slice(0, 50);
+      await fetch("/api/agente/updateNombre", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: result.id, nombre: nombreFinal }),
       });
-    } catch (err) {
-      throw err;
     }
   };
 
