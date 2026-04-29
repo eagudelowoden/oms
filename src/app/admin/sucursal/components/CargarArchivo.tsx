@@ -14,6 +14,10 @@ interface Props {
   preAlertaSeleccionada: { id?: number; nombre: string } | null;
   onShowToast: (msg: string, type?: "ok" | "error") => void;
   onCargarSeriales: (seriales: SerialItem[]) => void;
+  onEmpacarDesdeArchivo: (
+    seriales: SerialItem[],
+    caja: number,
+  ) => Promise<{ exitosos: number; yaExistian: number; fallidos: number }>;
   onCrearPrealerta: (sedeId: number, sedeNombre: string, nombre: string) => Promise<void>;
 }
 
@@ -47,12 +51,13 @@ function descargarPlantilla(tipo: "prealerta" | "seriales") {
     XLSX.writeFile(wb, "plantilla_prealerta.xlsx");
   } else {
     const ws = XLSX.utils.aoa_to_sheet([
-      ["Serial", "Tipo", "Cantidad", "Mac", "CodigoSap", "Descripcion"],
-      ["ABC123456", "Serializable", "1", "", "", ""],
-      ["", "No-serializable", "5", "", "T0005", "Fuente 12V 2A"],
+      ["Caja", "Serial", "Tipo", "Cantidad", "Mac", "CodigoSap", "Descripcion"],
+      ["1", "ABC123456", "Serializable", "1", "", "", ""],
+      ["1", "DEF789012", "Serializable", "1", "", "", ""],
+      ["2", "", "No-serializable", "5", "", "T0005", "Fuente 12V 2A"],
     ]);
     ws["!cols"] = [
-      { wch: 20 }, { wch: 18 }, { wch: 10 }, { wch: 18 }, { wch: 12 }, { wch: 30 },
+      { wch: 8 }, { wch: 20 }, { wch: 18 }, { wch: 10 }, { wch: 18 }, { wch: 12 }, { wch: 30 },
     ];
     XLSX.utils.book_append_sheet(wb, ws, "Seriales");
     XLSX.writeFile(wb, "plantilla_seriales.xlsx");
@@ -63,6 +68,7 @@ export default function CargarArchivo({
   preAlertaSeleccionada,
   onShowToast,
   onCargarSeriales,
+  onEmpacarDesdeArchivo,
   onCrearPrealerta,
 }: Props) {
   const inputPrealerta = useRef<HTMLInputElement>(null);
@@ -162,39 +168,66 @@ export default function CargarArchivo({
         return;
       }
 
-      const seriales: SerialItem[] = rows.reduce<SerialItem[]>((acc, row) => {
-          const serial = row["Serial"]?.toString().trim() ?? "";
-          const tipo = row["Tipo"]?.toString().trim();
-          const cantidad = Number(row["Cantidad"] ?? 1);
-          const mac = row["Mac"]?.toString().trim() ?? "";
-          const codigoSap = row["CodigoSap"]?.toString().trim() ?? "";
-          const descripcion = row["Descripcion"]?.toString().trim() ?? "";
+      // Agrupar seriales por caja
+      const porCaja = new Map<number, SerialItem[]>();
 
-          const tipoNorm: "Serializable" | "No-serializable" =
-            tipo?.toLowerCase().includes("no") ? "No-serializable" : "Serializable";
+      for (const row of rows) {
+        const caja = Number(row["Caja"] ?? 1) || 1;
+        const serial = row["Serial"]?.toString().trim() ?? "";
+        const tipo = row["Tipo"]?.toString().trim();
+        const cantidad = Number(row["Cantidad"] ?? 1);
+        const mac = row["Mac"]?.toString().trim() ?? "";
+        const codigoSap = row["CodigoSap"]?.toString().trim() ?? "";
+        const descripcion = row["Descripcion"]?.toString().trim() ?? "";
 
-          if (tipoNorm === "Serializable" && !serial) return acc;
+        const tipoNorm: "Serializable" | "No-serializable" =
+          tipo?.toLowerCase().includes("no") ? "No-serializable" : "Serializable";
 
-          acc.push({
-            codigo: serial || codigoSap,
-            origen: "api",
-            tipo: tipoNorm,
-            cantidad: tipoNorm === "No-serializable" ? (cantidad || 1) : 1,
-            mac: mac || undefined,
-            codigo_sap: codigoSap || undefined,
-            descripcion: descripcion || undefined,
-            tramite: "Archivo",
-          });
-          return acc;
-        }, []);
+        if (tipoNorm === "Serializable" && !serial) continue;
 
-      if (seriales.length === 0) {
+        const item: SerialItem = {
+          codigo: serial || codigoSap,
+          origen: "api",
+          tipo: tipoNorm,
+          cantidad: tipoNorm === "No-serializable" ? (cantidad || 1) : 1,
+          mac: mac || undefined,
+          codigo_sap: codigoSap || undefined,
+          descripcion: descripcion || undefined,
+          tramite: "Archivo",
+          caja,
+        };
+
+        const grupo = porCaja.get(caja) ?? [];
+        grupo.push(item);
+        porCaja.set(caja, grupo);
+      }
+
+      if (porCaja.size === 0) {
         onShowToast("No se encontraron seriales válidos", "error");
         return;
       }
 
-      onCargarSeriales(seriales);
-      onShowToast(`✓ ${seriales.length} serial${seriales.length !== 1 ? "es" : ""} cargado${seriales.length !== 1 ? "s" : ""}`);
+      let totalExitosos = 0;
+      let totalYaExistian = 0;
+      let totalFallidos = 0;
+
+      for (const [caja, seriales] of porCaja) {
+        try {
+          const { exitosos, yaExistian, fallidos } = await onEmpacarDesdeArchivo(seriales, caja);
+          totalExitosos += exitosos;
+          totalYaExistian += yaExistian;
+          totalFallidos += fallidos;
+        } catch {
+          totalFallidos += seriales.length;
+        }
+      }
+
+      if (totalExitosos > 0)
+        onShowToast(`✓ ${totalExitosos} serial${totalExitosos !== 1 ? "es" : ""} empacado${totalExitosos !== 1 ? "s" : ""} en ${porCaja.size} caja${porCaja.size !== 1 ? "s" : ""}`);
+      if (totalYaExistian > 0)
+        onShowToast(`⚠ ${totalYaExistian} ya estaban empacados`, "error");
+      if (totalFallidos > 0)
+        onShowToast(`✗ ${totalFallidos} no se pudieron empacar`, "error");
     } catch {
       onShowToast("Error al leer el archivo", "error");
     } finally {

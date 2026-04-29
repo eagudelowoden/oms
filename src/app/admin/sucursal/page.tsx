@@ -61,6 +61,7 @@ export default function AgentePage() {
     cajas,
     serialesDeCaja,
     handleCargarSeriales,
+    handleEmpacarDesdeArchivo,
   } = usePrealerta();
 
   return (
@@ -80,6 +81,7 @@ export default function AgentePage() {
         preAlertaSeleccionada={preAlertaSeleccionada}
         onShowToast={showToast}
         onCargarSeriales={handleCargarSeriales}
+        onEmpacarDesdeArchivo={handleEmpacarDesdeArchivo}
         onCrearPrealerta={handleCrearPrealerta}
       />
 

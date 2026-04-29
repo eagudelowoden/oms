@@ -237,6 +237,30 @@ export function usePrealerta() {
     });
   };
 
+  const handleEmpacarDesdeArchivo = async (
+    seriales: SerialItem[],
+    caja: number,
+  ): Promise<{ exitosos: number; yaExistian: number; fallidos: number }> => {
+    if (!preAlertaSeleccionada) throw new Error("Sin prealerta seleccionada");
+
+    const idPrealerta = await resolverIdPrealerta(preAlertaSeleccionada);
+    if (!idPrealerta) throw new Error("No se pudo obtener el Id");
+
+    return empacarMutation.mutateAsync({
+      prealertaId: idPrealerta,
+      caja,
+      seriales: seriales.map(({ codigo, tipo, mac, cantidad, tramite, codigo_sap, descripcion }) => ({
+        Serial: codigo,
+        Mac: mac ?? "",
+        Tipo: tipo ?? "Serializable",
+        Cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
+        Tramite: tramite ?? "Archivo",
+        CodigoSap: codigo_sap ?? "",
+        Descripcion: descripcion ?? "",
+      })),
+    });
+  };
+
   const handleEliminar = async () => {
     if (!confirmItem) return;
     const item = confirmItem;
@@ -550,5 +574,6 @@ export function usePrealerta() {
     handleActualizarTipo,
     empacarAccesoriosAgrupados,
     handleCargarSeriales,
+    handleEmpacarDesdeArchivo,
   };
 }
