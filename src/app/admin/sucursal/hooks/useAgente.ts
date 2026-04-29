@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  prealertaQueries,
-  prealertaMutations,
-} from "@/app/services/agente.client";
+  sucursalQueries,
+  sucursalMutations,
+} from "@/app/services/sucursal.client";
 import { PrealertaItem } from "@/app/models/Prealerta.models";
 import { SerialItem } from "@/app/models/seriales.models";
 import { UsuarioSesion } from "@/app/models/UsuarioSesion";
@@ -43,20 +43,20 @@ export function usePrealerta() {
 
   /* ── QUERIES ── */
   const { data: prealertas = [], isLoading } = useQuery({
-    queryKey: ["prealertas"],
-    queryFn: prealertaQueries.list,
+    queryKey: ["sucursal-prealertas"],
+    queryFn: sucursalQueries.list,
   });
 
   const { data: serialesDeDB = [], isFetching: cargandoSeriales } = useQuery({
-    queryKey: ["seriales", preAlertaSeleccionada?.id],
-    queryFn: () => prealertaQueries.seriales(preAlertaSeleccionada!.id!),
+    queryKey: ["sucursal-seriales", preAlertaSeleccionada?.id],
+    queryFn: () => sucursalQueries.seriales(preAlertaSeleccionada!.id!),
     enabled: !!preAlertaSeleccionada?.id,
     staleTime: 0,
   });
 
   const { data: cajas = [] } = useQuery({
-    queryKey: ["cajas", preAlertaSeleccionada?.id],
-    queryFn: () => prealertaQueries.cajas(preAlertaSeleccionada!.id!),
+    queryKey: ["sucursal-cajas", preAlertaSeleccionada?.id],
+    queryFn: () => sucursalQueries.cajas(preAlertaSeleccionada!.id!),
     enabled: !!preAlertaSeleccionada?.id,
     staleTime: 0,
   });
@@ -71,9 +71,9 @@ export function usePrealerta() {
   const esCajaExistente = cajas.some((c) => c.numero === cajaActual);
 
   const { data: serialesDeCaja = [], isFetching: cargandoCaja } = useQuery({
-    queryKey: ["serialesPorCaja", preAlertaSeleccionada?.id, cajaActual],
+    queryKey: ["sucursal-serialesPorCaja", preAlertaSeleccionada?.id, cajaActual],
     queryFn: () =>
-      prealertaQueries.serialesPorCaja(preAlertaSeleccionada!.id!, cajaActual),
+      sucursalQueries.serialesPorCaja(preAlertaSeleccionada!.id!, cajaActual),
     enabled: !!preAlertaSeleccionada?.id && esCajaExistente,
     staleTime: 0,
   });
@@ -137,7 +137,7 @@ export function usePrealerta() {
   ): Promise<number | null> => {
     if (item.id) return item.id;
     const res = await fetch(
-      `/api/agente/getId?nombre=${encodeURIComponent(item.nombre)}`,
+      `/api/sucursal/getId?nombre=${encodeURIComponent(item.nombre)}`,
     );
     if (!res.ok) return null;
     return res.json();
@@ -145,26 +145,26 @@ export function usePrealerta() {
 
   /* ── MUTATIONS ── */
   const crearMutation = useMutation({
-    mutationFn: prealertaMutations.create,
+    mutationFn: sucursalMutations.create,
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["prealertas"] }),
+      queryClient.invalidateQueries({ queryKey: ["sucursal-prealertas"] }),
   });
 
   const eliminarMutation = useMutation({
-    mutationFn: prealertaMutations.delete,
+    mutationFn: sucursalMutations.delete,
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["prealertas"] }),
+      queryClient.invalidateQueries({ queryKey: ["sucursal-prealertas"] }),
   });
 
   const invalidarCachePrealerta = (id: number | undefined) => {
     if (!id) return;
-    queryClient.invalidateQueries({ queryKey: ["seriales", id] });
-    queryClient.invalidateQueries({ queryKey: ["cajas", id] });
-    queryClient.invalidateQueries({ queryKey: ["serialesPorCaja", id] });
+    queryClient.invalidateQueries({ queryKey: ["sucursal-seriales", id] });
+    queryClient.invalidateQueries({ queryKey: ["sucursal-cajas", id] });
+    queryClient.invalidateQueries({ queryKey: ["sucursal-serialesPorCaja", id] });
   };
 
   const empacarMutation = useMutation({
-    mutationFn: prealertaMutations.empacar,
+    mutationFn: sucursalMutations.empacar,
     onSuccess: () => invalidarCachePrealerta(preAlertaSeleccionada?.id),
   });
 
@@ -175,7 +175,7 @@ export function usePrealerta() {
     }: {
       prealertaId: number;
       seriales: string[];
-    }) => prealertaMutations.desempacar(prealertaId, seriales),
+    }) => sucursalMutations.desempacar(prealertaId, seriales),
     onSuccess: () => invalidarCachePrealerta(preAlertaSeleccionada?.id),
   });
 
@@ -186,7 +186,7 @@ export function usePrealerta() {
     }: {
       prealertaId: number;
       serial: string;
-    }) => prealertaMutations.eliminarSerial(prealertaId, serial),
+    }) => sucursalMutations.eliminarSerial(prealertaId, serial),
     onSuccess: () => invalidarCachePrealerta(preAlertaSeleccionada?.id),
   });
 
@@ -220,12 +220,12 @@ export function usePrealerta() {
 
     if (result?.id) {
       const nombreFinal = `${nombreBase} - ${result.id} - ${sedeNombre}`.slice(0, 50);
-      await fetch("/api/agente/updateNombre", {
+      await fetch("/api/sucursal/updateNombre", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: result.id, nombre: nombreFinal }),
       });
-      queryClient.invalidateQueries({ queryKey: ["prealertas"] });
+      queryClient.invalidateQueries({ queryKey: ["sucursal-prealertas"] });
     }
   };
 
