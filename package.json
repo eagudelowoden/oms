@@ -21,7 +21,8 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.2",
     "tarn": "^3.0.2",
-    "tedious": "^19.2.1"
+    "tedious": "^19.2.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

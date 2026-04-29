@@ -191,7 +191,11 @@ export function usePrealerta() {
   });
 
   /* ── HANDLERS ── */
-  const handleCrearPrealerta = async (sedeId: number, sedeNombre: string) => {
+  const handleCrearPrealerta = async (
+    sedeId: number,
+    sedeNombre: string,
+    nombrePersonalizado?: string,
+  ) => {
     const usuarioRaw = localStorage.getItem("usuario");
     const usuario: UsuarioSesion | null = usuarioRaw
       ? JSON.parse(usuarioRaw)
@@ -201,9 +205,13 @@ export function usePrealerta() {
       return;
     }
 
+    const nombre =
+      nombrePersonalizado?.trim() ||
+      `${usuario.nombres} ${usuario.apellidos} - CODIGO - ${sedeNombre}`;
+
     try {
       await crearMutation.mutateAsync({
-        nombre: `${usuario.nombres} ${usuario.apellidos} - CODIGO - ${sedeNombre}`,
+        nombre,
         tipoOrigenId: 13,
         origenId: sedeId,
         guia: `GUIA-${Math.floor(Math.random() * 1000)}`,
@@ -215,6 +223,14 @@ export function usePrealerta() {
     } catch {
       showToast("Error al crear la prealerta", "error");
     }
+  };
+
+  const handleCargarSeriales = (nuevos: SerialItem[]) => {
+    setSerialEscaneados((prev) => {
+      const existentes = new Set(prev.map((s) => s.codigo));
+      const sinDuplicados = nuevos.filter((s) => !existentes.has(s.codigo));
+      return [...prev, ...sinDuplicados];
+    });
   };
 
   const handleEliminar = async () => {
@@ -529,5 +545,6 @@ export function usePrealerta() {
     handleToggleAll,
     handleActualizarTipo,
     empacarAccesoriosAgrupados,
+    handleCargarSeriales,
   };
 }

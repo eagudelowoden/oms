@@ -89,6 +89,49 @@
   background: var(--c-blue-bg);
 }
 
+/* ── BOTONES EXCEL ── */
+.btnExcel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 5px 13px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btnExcel:hover:not(:disabled) {
+  background: #15803d;
+}
+.btnExcel:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btnPlantilla {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  color: var(--c-muted);
+  border: 1px dashed var(--c-light);
+  border-radius: var(--radius-pill);
+  padding: 4px 11px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.btnPlantilla:hover {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
 /* ── SEARCH BAR ── */
 .searchBar {
   display: flex;

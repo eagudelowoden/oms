@@ -12,6 +12,7 @@ import ScannerModal from "@/modules/auth/components/scanner/scannerModal";
 import SincronizarModal from "./components/ModalSincronizarSeriales";
 import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios";
 import RegistroSeries from "./components/RegistroAccesorios";
+import CargarArchivo from "./components/CargarArchivo";
 
 export default function AgentePage() {
   const {
@@ -59,11 +60,19 @@ export default function AgentePage() {
     cargandoSeriales,
     cajas,
     serialesDeCaja,
+    handleCargarSeriales,
   } = usePrealerta();
 
   return (
     <div className={styles.wrapper}>
       <PrealertaHeader onCrear={handleCrearPrealerta} />
+
+      <CargarArchivo
+        preAlertaSeleccionada={preAlertaSeleccionada}
+        onShowToast={showToast}
+        onCargarSeriales={handleCargarSeriales}
+        onCrearPrealerta={handleCrearPrealerta}
+      />
 
       <PrealertaTabla
         isLoading={isLoading}
