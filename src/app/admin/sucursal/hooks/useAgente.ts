@@ -68,38 +68,14 @@ export function usePrealerta() {
     setCajaActual(maxCaja + 1);
   }, [preAlertaSeleccionada?.id, cajas.length]);
 
-  const esCajaExistente = cajas.some((c) => c.numero === cajaActual);
-
-  const { data: serialesDeCaja = [], isFetching: cargandoCaja } = useQuery({
-    queryKey: ["sucursal-serialesPorCaja", preAlertaSeleccionada?.id, cajaActual],
-    queryFn: () =>
-      sucursalQueries.serialesPorCaja(preAlertaSeleccionada!.id!, cajaActual),
-    enabled: !!preAlertaSeleccionada?.id && esCajaExistente,
-    staleTime: 0,
-  });
 
   /* ── SERIALES MOSTRADOS ── */
-  // serialesMostrados muestra TODOS (escaneados + DB disponibles sin duplicados)
-  const serialesMostrados: SerialItem[] = esCajaExistente
-    ? serialesDeCaja.map((s) => ({
-        codigo: s.serial,
-        origen: "api" as const,
-        estado: "Empacado" as const,
-        tipo: s.tipo as "Serializable" | "No-serializable",
-        cantidad: s.cantidad,
-        caja: cajaActual,
-        tramite: s.tramite,
-        codigo_sap: s.codigoSap ?? undefined,
-        descripcion: s.descripcion ?? undefined,
-      }))
-    : [
-        ...serialesEscaneados,
-        ...serialesDeDB.filter(
-          (d) =>
-            d.estado === "Disponible" &&
-            !serialesEscaneados.some((e) => e.codigo === d.codigo), // sin duplicados
-        ),
-      ];
+  // Muestra todos los seriales de la prealerta (Empacado + Disponible) sin importar la caja
+  const codigosEnDB = new Set(serialesDeDB.map((s) => s.codigo));
+  const serialesMostrados: SerialItem[] = [
+    ...serialesDeDB,
+    ...serialesEscaneados.filter((e) => !codigosEnDB.has(e.codigo)),
+  ];
 
   /* ── SINCRONIZAR API ── */
   const { sincronizando, sincronizarDesdeAPI } = useSincronizarAPI({
@@ -580,10 +556,9 @@ export function usePrealerta() {
     setModalAccesorios,
     cajaActual,
     setCajaActual,
-    cargandoSeriales: cargandoSeriales || cargandoCaja,
+    cargandoSeriales,
     sincronizandoAccesorios,
     cajas,
-    serialesDeCaja,
     // Handlers
     handleSort,
     handleCrearPrealerta,
