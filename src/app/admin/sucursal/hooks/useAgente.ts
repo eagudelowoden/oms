@@ -461,15 +461,43 @@ export function usePrealerta() {
     setSeleccionados(new Set());
   };
 
-  const handleSerialConfirm = (seriales: string[]) => {
-    setSerialEscaneados((prev) => [
-      ...prev,
-      ...seriales.map((codigo) => ({
-        codigo,
-        origen: "manual" as const,
-        tramite: "Manual",
-      })),
-    ]);
+  const handleSerialConfirm = async (seriales: string[]) => {
+    if (!preAlertaSeleccionada?.id) {
+      setSerialEscaneados((prev) => [
+        ...prev,
+        ...seriales.map((codigo) => ({
+          codigo,
+          origen: "manual" as const,
+          tramite: "Manual",
+        })),
+      ]);
+      return;
+    }
+
+    // Con prealerta seleccionada, empacar directamente en la caja actual
+    try {
+      const { exitosos, yaExistian, fallidos } = await empacarMutation.mutateAsync({
+        prealertaId: preAlertaSeleccionada.id,
+        caja: cajaActual,
+        seriales: seriales.map((codigo) => ({
+          Serial: codigo,
+          Mac: "",
+          Tipo: "Serializable" as const,
+          Cantidad: 1,
+          Tramite: "Manual",
+          CodigoSap: "",
+          Descripcion: "",
+        })),
+      });
+      if (exitosos > 0)
+        showToast(`✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaActual}`);
+      if (yaExistian > 0)
+        showToast(`⚠ ${yaExistian} ya estaban empacados`, "error");
+      if (fallidos > 0)
+        showToast(`✗ ${fallidos} no se pudieron empacar`, "error");
+    } catch {
+      showToast("Error al empacar los seriales escaneados", "error");
+    }
   };
 
   const handleAgregarSerial = (item: SerialItem) =>
