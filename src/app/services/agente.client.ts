@@ -71,7 +71,7 @@ export const prealertaMutations = {
     return res.json();
   },
 
-  empacar: async (body: Record<string, unknown>) => {
+  empacar: async (body: Record<string, unknown>): Promise<{ exitosos: number; yaExistian: number; fallidos: number; enOtraPrealerta: number }> => {
     const res = await fetch("/api/agente/insertSerialBatch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

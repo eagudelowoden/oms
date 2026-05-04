@@ -322,6 +322,8 @@ export function usePrealerta() {
       }
       if (yaExistian > 0)
         showToast(`⚠ ${yaExistian} ya estaban empacados`, "error");
+      if (enOtraPrealerta > 0)
+        showToast(`✗ ${enOtraPrealerta} serial${enOtraPrealerta !== 1 ? "es" : ""} ya existe${enOtraPrealerta !== 1 ? "n" : ""} en otra prealerta`, "error");
       if (fallidos > 0)
         showToast(`✗ ${fallidos} no se pudieron insertar`, "error");
     } catch {
@@ -469,6 +471,8 @@ export function usePrealerta() {
         showToast(`✓ ${exitosos} serial${exitosos !== 1 ? "es" : ""} empacado${exitosos !== 1 ? "s" : ""} en caja ${cajaActual}`);
       if (yaExistian > 0)
         showToast(`⚠ ${yaExistian} ya estaban empacados`, "error");
+      if (enOtraPrealerta > 0)
+        showToast(`✗ ${enOtraPrealerta} serial${enOtraPrealerta !== 1 ? "es" : ""} ya existe${enOtraPrealerta !== 1 ? "n" : ""} en otra prealerta`, "error");
       if (fallidos > 0)
         showToast(`✗ ${fallidos} no se pudieron empacar`, "error");
     } catch {

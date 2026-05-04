@@ -17,7 +17,7 @@ interface Props {
   onEmpacarDesdeArchivo: (
     seriales: SerialItem[],
     caja: number,
-  ) => Promise<{ exitosos: number; yaExistian: number; fallidos: number }>;
+  ) => Promise<{ exitosos: number; yaExistian: number; fallidos: number; enOtraPrealerta: number }>;
   onCrearPrealerta: (sedeId: number, sedeNombre: string, nombre: string) => Promise<void>;
 }
 
@@ -210,13 +210,15 @@ export default function CargarArchivo({
       let totalExitosos = 0;
       let totalYaExistian = 0;
       let totalFallidos = 0;
+      let totalEnOtraPrealerta = 0;
 
       for (const [caja, seriales] of porCaja) {
         try {
-          const { exitosos, yaExistian, fallidos } = await onEmpacarDesdeArchivo(seriales, caja);
+          const { exitosos, yaExistian, fallidos, enOtraPrealerta } = await onEmpacarDesdeArchivo(seriales, caja);
           totalExitosos += exitosos;
           totalYaExistian += yaExistian;
           totalFallidos += fallidos;
+          totalEnOtraPrealerta += enOtraPrealerta ?? 0;
         } catch {
           totalFallidos += seriales.length;
         }
@@ -226,6 +228,8 @@ export default function CargarArchivo({
         onShowToast(`✓ ${totalExitosos} serial${totalExitosos !== 1 ? "es" : ""} empacado${totalExitosos !== 1 ? "s" : ""} en ${porCaja.size} caja${porCaja.size !== 1 ? "s" : ""}`);
       if (totalYaExistian > 0)
         onShowToast(`⚠ ${totalYaExistian} ya estaban empacados`, "error");
+      if (totalEnOtraPrealerta > 0)
+        onShowToast(`✗ ${totalEnOtraPrealerta} serial${totalEnOtraPrealerta !== 1 ? "es" : ""} ya existe${totalEnOtraPrealerta !== 1 ? "n" : ""} en otra prealerta`, "error");
       if (totalFallidos > 0)
         onShowToast(`✗ ${totalFallidos} no se pudieron empacar`, "error");
     } catch {
