@@ -5,13 +5,8 @@ import styles from "./css/prealerta.module.css";
 import { usePrealerta } from "./hooks/useAgente";
 import PrealertaHeader from "./components/Sucursalcabezado";
 import PrealertaTabla from "./components/TablaDetalle";
-import PrealertaAcciones from "./components/SucursalAcciones";
 import { PrealertaSeriales } from "./components/SerialesListado";
 import { ConfirmModal, Toast } from "./components/ModalEliminar";
-import ScannerModal from "@/modules/auth/components/scanner/scannerModal";
-import SincronizarModal from "./components/ModalSincronizarSeriales";
-import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios";
-import RegistroSeries from "./components/RegistroAccesorios";
 import CargarArchivo from "./components/CargarArchivo";
 
 export default function AgentePage() {
@@ -22,13 +17,10 @@ export default function AgentePage() {
     sortCol,
     sortAsc,
     filteredAndSorted,
-    scannerOpen,
-    setScannerOpen,
     serialesMostrados,
     handleRemoveSerial,
     handleRemoveSeleccionados,
     confirmItem,
-    setConfirmItem,
     preAlertaSeleccionada,
     setPreAlertaSeleccionada,
     toast,
@@ -36,30 +28,11 @@ export default function AgentePage() {
     handleCrearPrealerta,
     pedirConfirmacion,
     handleEliminar,
-    handleSerialConfirm,
-    handleEmpacar,
     showToast,
-    empacando,
-    progreso,
-    sincronizando,
-    sincronizarDesdeAPI,
-    sincronizandoAccesorios,
-    empacarAccesoriosAgrupados,
     seleccionados,
     handleToggleSerial,
     handleToggleAll,
-    modalSincronizar,
-    setModalSincronizar,
-    modalAccesorios,
-    setModalAccesorios,
-    handleAgregarSerial,
-    handleActualizarTipo,
-    cajaActual,
-    setCajaActual,
-    handleDesempacar,
     cargandoSeriales,
-    cajas,
-    serialesDeCaja,
     handleCargarSeriales,
     handleEmpacarDesdeArchivo,
   } = usePrealerta();
@@ -98,25 +71,6 @@ export default function AgentePage() {
         onEliminar={pedirConfirmacion}
       />
 
-      <PrealertaAcciones
-        seleccionada={preAlertaSeleccionada}
-        onClearSeleccion={() => setPreAlertaSeleccionada(null)}
-        onAbrirScanner={() => setScannerOpen(true)}
-        onShowToast={showToast}
-        onSincronizar={() => setModalSincronizar(true)}
-        sincronizando={sincronizando}
-        onEmpacar={handleEmpacar}
-        empacando={empacando}
-        progreso={progreso}
-        cajaActual={cajaActual}
-        onCajaChange={setCajaActual}
-        onDesempacar={handleDesempacar}
-        onSincronizarAccesorios={() => setModalAccesorios(true)}
-        sincronizandoAccesorios={sincronizandoAccesorios}
-        cajas={cajas}
-        serialesDeCaja={serialesDeCaja}
-      />
-
       <PrealertaSeriales
         seriales={serialesMostrados}
         seleccionados={seleccionados}
@@ -127,39 +81,9 @@ export default function AgentePage() {
         cargandoSeriales={cargandoSeriales}
       />
 
-      <RegistroSeries
-        onAgregarAccesorio={handleAgregarSerial}
-        onShowToast={showToast}
-      />
-
-      <ScannerModal
-        isOpen={scannerOpen}
-        onClose={() => setScannerOpen(false)}
-        onConfirm={handleSerialConfirm}
-      />
-
-      <SincronizarModal
-        isOpen={modalSincronizar}
-        fecha={new Date().toLocaleDateString("en-CA", {
-          timeZone: "America/Bogota",
-        })}
-        onClose={() => setModalSincronizar(false)}
-        onConfirm={(fecha, documento) => sincronizarDesdeAPI(fecha, documento)}
-      />
-
-      <SincronizarAccesoriosModal
-        isOpen={modalAccesorios}
-        onClose={() => setModalAccesorios(false)}
-        sincronizando={sincronizandoAccesorios}
-        onConfirm={(accesorios) => {
-          empacarAccesoriosAgrupados(accesorios);
-          setModalAccesorios(false);
-        }}
-      />
-
       <ConfirmModal
         item={confirmItem}
-        onCancel={() => setConfirmItem(null)}
+        onCancel={() => setPreAlertaSeleccionada(null)}
         onConfirm={handleEliminar}
       />
 
