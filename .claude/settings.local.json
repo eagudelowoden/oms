@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" diff claude/reverent-mendeleev-25ce50..dagudelo/sucursal --name-only)",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" diff --stat HEAD)",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/components/SucursalAcciones.tsx)",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"fix: desestructurar onSincronizarAccesorios y sincronizandoAccesorios en SucursalAcciones\")",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/page.tsx)",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"refactor\\(sucursal\\): simplificar page — solo header, carga archivo, tabla y materiales\")"
+    ]
+  }
+}
