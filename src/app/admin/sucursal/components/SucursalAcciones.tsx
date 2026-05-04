@@ -28,6 +28,8 @@ export default function PrealertaAcciones({
   onShowToast,
   onSincronizar,
   sincronizando,
+  onSincronizarAccesorios,
+  sincronizandoAccesorios,
   onEmpacar,
   empacando,
   progreso,
