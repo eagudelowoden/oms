@@ -61,7 +61,7 @@ export const sucursalMutations = {
     return res.json();
   },
 
-  empacar: async (body: Record<string, unknown>): Promise<{ exitosos: number; yaExistian: number; fallidos: number }> => {
+  empacar: async (body: Record<string, unknown>): Promise<{ exitosos: number; yaExistian: number; fallidos: number; enOtraPrealerta: number }> => {
     const res = await fetch(`${BASE}/insertSerialBatch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

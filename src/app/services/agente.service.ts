@@ -37,7 +37,8 @@ export const AgentesBackendService = {
   }) {
     let exitosos = 0,
       yaExistian = 0,
-      fallidos = 0;
+      fallidos = 0,
+      enOtraPrealerta = 0;
     const LOTE = 10;
 
     for (let i = 0; i < data.seriales.length; i += LOTE) {
@@ -55,6 +56,20 @@ export const AgentesBackendService = {
               CodigoSap,
               Descripcion,
             } = item;
+
+            // Seriales serializables no pueden existir en otra prealerta
+            if (Tipo !== "No-serializable" && Serial?.trim()) {
+              const duplicado = await execQuery<{ PrealertaId: number }>(
+                `SELECT TOP 1 PrealertaId FROM PrealertaSerial
+                 WHERE Serial = @serial AND PrealertaId != @prealertaId`,
+                { serial: Serial, prealertaId: data.prealertaId },
+              );
+              if (duplicado.length > 0) {
+                enOtraPrealerta++;
+                return;
+              }
+            }
+
             const [row] = await execProc<{ estado: string }>(
               "pa_InsertPrealertSerialOms",
               {
@@ -88,7 +103,7 @@ export const AgentesBackendService = {
       );
     }
 
-    return { success: true, exitosos, yaExistian, fallidos };
+    return { success: true, exitosos, yaExistian, fallidos, enOtraPrealerta };
   },
 
   async getSerialsByPrealerta(prealertaId: number) {
