@@ -194,6 +194,24 @@ export async function POST(
     }
   }
 
+  if (action === "guardarDisponible") {
+    try {
+      const body = await request.json();
+      const { prealertaId, seriales } = body as {
+        prealertaId: number;
+        seriales: Array<{ serial: string; codigoSap?: string; descripcion?: string; tramite?: string }>;
+      };
+      if (!prealertaId || !Array.isArray(seriales)) {
+        return NextResponse.json({ error: "prealertaId y seriales son requeridos" }, { status: 400 });
+      }
+      const result = await AgentesBackendService.guardarSerialesDisponible({ prealertaId, seriales });
+      return NextResponse.json(result);
+    } catch (error) {
+      console.error("Error al guardar seriales disponibles:", error);
+      return NextResponse.json({ error: "Error al guardar" }, { status: 500 });
+    }
+  }
+
   if (action === "create") {
     try {
       const body = await request.json();

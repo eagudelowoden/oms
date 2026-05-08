@@ -52,6 +52,10 @@ export default function AgentePage() {
     setModalSincronizar,
     modalAccesorios,
     setModalAccesorios,
+    serialesPrevista,
+    limpiarPrevista,
+    guardandoSeriales,
+    handleGuardarSeriales,
     handleAgregarSerial,
     handleActualizarTipo,
     cajaActual,
@@ -61,6 +65,8 @@ export default function AgentePage() {
     cajas,
     serialesDeCaja,
   } = usePrealerta();
+
+  const fechaHoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
 
   return (
     <div className={styles.wrapper}>
@@ -121,11 +127,14 @@ export default function AgentePage() {
 
       <SincronizarModal
         isOpen={modalSincronizar}
-        fecha={new Date().toLocaleDateString("en-CA", {
-          timeZone: "America/Bogota",
-        })}
-        onClose={() => setModalSincronizar(false)}
-        onConfirm={(fecha, documento) => sincronizarDesdeAPI(fecha, documento)}
+        fecha={fechaHoy}
+        sincronizando={sincronizando}
+        serialesPrevista={serialesPrevista}
+        guardando={guardandoSeriales}
+        onClose={() => { setModalSincronizar(false); limpiarPrevista(); }}
+        onSincronizar={(fecha, documento) => sincronizarDesdeAPI(fecha, documento)}
+        onGuardar={handleGuardarSeriales}
+        onVolver={limpiarPrevista}
       />
 
       <SincronizarAccesoriosModal
