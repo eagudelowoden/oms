@@ -7,7 +7,14 @@
       "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/components/SucursalAcciones.tsx)",
       "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"fix: desestructurar onSincronizarAccesorios y sincronizandoAccesorios en SucursalAcciones\")",
       "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/page.tsx)",
-      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"refactor\\(sucursal\\): simplificar page — solo header, carga archivo, tabla y materiales\")"
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"refactor\\(sucursal\\): simplificar page — solo header, carga archivo, tabla y materiales\")",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/hooks/useAgente.ts)",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"fix\\(sucursal\\): mostrar todos los seriales de la prealerta sin filtrar por caja\")",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" cherry-pick 50cefb7)",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" log --oneline -4 dagudelo/sucursal)",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/services/agente.service.ts src/app/services/sucursal.client.ts src/app/services/agente.client.ts src/app/admin/sucursal/hooks/useAgente.ts src/app/admin/agentes/hooks/useAgente.ts src/app/admin/sucursal/components/CargarArchivo.tsx)",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"fix: bloquear inserción de serial serializable que ya existe en otra prealerta\")",
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" cherry-pick 1ddc882)"
     ]
   }
 }
