@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import styles from "./css/prealerta.module.css";
 import { usePrealerta } from "./hooks/useAgente";
 import PrealertaHeader from "./components/Agentecabezado";
@@ -12,6 +12,7 @@ import ScannerModal from "@/modules/auth/components/scanner/scannerModal";
 import SincronizarModal from "./components/ModalSincronizarSeriales";
 import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios";
 import RegistroSeries from "./components/RegistroAccesorios";
+import RegistroManualSerial from "./components/RegistroManualSerial";
 
 export default function AgentePage() {
   const {
@@ -66,11 +67,18 @@ export default function AgentePage() {
     serialesDeCaja,
   } = usePrealerta();
 
-  const fechaHoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
+  const fechaHoy = new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Bogota",
+  });
+
+  const [mostrarRegistroManual, setMostrarRegistroManual] = useState(true);
 
   return (
     <div className={styles.wrapper}>
-      <PrealertaHeader onCrear={handleCrearPrealerta} onSedeChange={setSedeId} />
+      <PrealertaHeader
+        onCrear={handleCrearPrealerta}
+        onSedeChange={setSedeId}
+      />
 
       <PrealertaTabla
         isLoading={isLoading}
@@ -114,6 +122,33 @@ export default function AgentePage() {
         cargandoSeriales={cargandoSeriales}
       />
 
+      {mostrarRegistroManual && (
+        <RegistroManualSerial
+          onAgregarSerial={handleAgregarSerial}
+          onShowToast={showToast}
+          onClose={() => setMostrarRegistroManual(false)}
+        />
+      )}
+      {!mostrarRegistroManual && (
+        <button
+          type="button"
+          onClick={() => setMostrarRegistroManual(true)}
+          style={{
+            alignSelf: "flex-start",
+            height: 30,
+            padding: "0 14px",
+            background: "transparent",
+            border: "0.5px solid #e2e8f0",
+            borderRadius: 6,
+            fontSize: 11,
+            color: "#64748b",
+            cursor: "pointer",
+          }}
+        >
+          + Registro Manual
+        </button>
+      )}
+
       <RegistroSeries
         onAgregarAccesorio={handleAgregarSerial}
         onShowToast={showToast}
@@ -131,8 +166,13 @@ export default function AgentePage() {
         sincronizando={sincronizando}
         serialesPrevista={serialesPrevista}
         guardando={guardandoSeriales}
-        onClose={() => { setModalSincronizar(false); limpiarPrevista(); }}
-        onSincronizar={(fecha, documento) => sincronizarDesdeAPI(fecha, documento)}
+        onClose={() => {
+          setModalSincronizar(false);
+          limpiarPrevista();
+        }}
+        onSincronizar={(fecha, documento) =>
+          sincronizarDesdeAPI(fecha, documento)
+        }
         onGuardar={handleGuardarSeriales}
         onVolver={limpiarPrevista}
       />

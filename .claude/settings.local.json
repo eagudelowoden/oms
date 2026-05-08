@@ -8,7 +8,11 @@
       "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"fix: desestructurar onSincronizarAccesorios y sincronizandoAccesorios en SucursalAcciones\")",
       "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/page.tsx)",
       "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"refactor\\(sucursal\\): simplificar page — solo header, carga archivo, tabla y materiales\")",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(Select-String -Pattern \"MiniScannerCaptura|RegistroManualSerial\")",
+      "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; $out = npx tsc --noEmit 2>&1; $out | Where-Object { $_ -match \"MiniScannerCaptura|RegistroManualSerial\" })",
+      "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; \\(npx tsc --noEmit 2>&1\\) -match \"MiniScanner|RegistroManual\")",
+      "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; npx tsc --noEmit 2>&1 > \"$env:TEMP\\\\tsc_out.txt\"; Get-Content \"$env:TEMP\\\\tsc_out.txt\" | Select-String \"agentes\")"
     ]
   }
 }
