@@ -1,21 +1,28 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" diff claude/reverent-mendeleev-25ce50..dagudelo/sucursal --name-only)",
-      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" status)",
-      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" diff --stat HEAD)",
-      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/components/SucursalAcciones.tsx)",
-      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"fix: desestructurar onSincronizarAccesorios y sincronizandoAccesorios en SucursalAcciones\")",
-      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/page.tsx)",
-      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"refactor\\(sucursal\\): simplificar page — solo header, carga archivo, tabla y materiales\")",
+      "permissions": {
+            "allow": [
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" diff claude/reverent-mendeleev-25ce50..dagudelo/sucursal --name-only)",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" status)",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" diff --stat HEAD)",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/components/SucursalAcciones.tsx)",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"fix: desestructurar onSincronizarAccesorios y sincronizandoAccesorios en SucursalAcciones\")",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/page.tsx)",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"refactor\\(sucursal\\): simplificar page — solo header, carga archivo, tabla y materiales\")",
+<<<<<<< HEAD
+      "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/admin/sucursal/hooks/useAgente.ts)",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"fix\\(sucursal\\): mostrar todos los seriales de la prealerta sin filtrar por caja\")",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" cherry-pick 50cefb7)",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" log --oneline -4 dagudelo/sucursal)",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" add src/app/services/agente.service.ts src/app/services/sucursal.client.ts src/app/services/agente.client.ts src/app/admin/sucursal/hooks/useAgente.ts src/app/admin/agentes/hooks/useAgente.ts src/app/admin/sucursal/components/CargarArchivo.tsx)",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\\\\.claude\\\\worktrees\\\\reverent-mendeleev-25ce50\" commit -m \"fix: bloquear inserción de serial serializable que ya existe en otra prealerta\")",
+                  "Bash(git -C \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" cherry-pick 1ddc882)"
+=======
       "Bash(npx tsc *)",
-      "Bash(Select-String -Pattern \"MiniScannerCaptura|RegistroManualSerial\")",
-      "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; $out = npx tsc --noEmit 2>&1; $out | Where-Object { $_ -match \"MiniScannerCaptura|RegistroManualSerial\" })",
-      "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; \\(npx tsc --noEmit 2>&1\\) -match \"MiniScanner|RegistroManual\")",
-      "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; npx tsc --noEmit 2>&1 > \"$env:TEMP\\\\tsc_out.txt\"; Get-Content \"$env:TEMP\\\\tsc_out.txt\" | Select-String \"agentes\")",
-      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" -Recurse -Include \"*.sql\",\"*.migration*\" -ErrorAction SilentlyContinue)",
-      "Bash(Select-Object FullName)",
-      "Bash(Head -20)"
-    ]
-  }
+                  "Bash(Select-String -Pattern \"MiniScannerCaptura|RegistroManualSerial\")",
+                  "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; $out = npx tsc --noEmit 2>&1; $out | Where-Object { $_ -match \"MiniScannerCaptura|RegistroManualSerial\" })",
+                  "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; \\(npx tsc --noEmit 2>&1\\) -match \"MiniScanner|RegistroManual\")",
+                  "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; npx tsc --noEmit 2>&1 > \"$env:TEMP\\\\tsc_out.txt\"; Get-Content \"$env:TEMP\\\\tsc_out.txt\" | Select-String \"agentes\")"
+>>>>>>> e1390a954162ad63701f7479592c3bdd446dc44f
+            ]
+      }
 }
