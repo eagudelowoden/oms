@@ -91,6 +91,19 @@ export const prealertaMutations = {
     return res.json();
   },
 
+  guardarDisponible: async (body: {
+    prealertaId: number;
+    seriales: Array<{ serial: string; mac?: string; codigoSap?: string; descripcion?: string; tramite?: string }>;
+  }): Promise<{ insertados: number; yaExistian: number; enOtraPrealerta: number; fallidos: number }> => {
+    const res = await fetch("/api/agente/guardarDisponible", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error("Error al guardar seriales disponibles");
+    return res.json();
+  },
+
   eliminarSerial: async (prealertaId: number, serial: string) => {
     const res = await fetch("/api/agente/eliminarSerial", {
       method: "POST",

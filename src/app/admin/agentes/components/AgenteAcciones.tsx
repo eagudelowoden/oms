@@ -75,7 +75,7 @@ export default function PrealertaAcciones({
 
         <div className={styles.uploadGroup}>
           {/* ── Sincronizar seriales ── */}
-          <button
+          {/* <button
             type="button"
             className={styles.btnUpload}
             onClick={handleSincronizar}
@@ -115,10 +115,10 @@ export default function PrealertaAcciones({
               </svg>
             )}
             {sincronizando ? "Sincronizando…" : "Sincronizar Seriales"}
-          </button>
+          </button> */}
 
           {/* ── Sincronizar accesorios ── */}
-          <button
+          {/* <button
             type="button"
             className={styles.btnUpload}
             onClick={handleSincronizarAccesorios}
@@ -160,7 +160,7 @@ export default function PrealertaAcciones({
             {sincronizandoAccesorios
               ? "Sincronizando…"
               : "Sincronizar Accesorios"}
-          </button>
+          </button> */}
 
           {/* ── Escanear ── */}
           <button

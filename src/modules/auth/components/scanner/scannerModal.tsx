@@ -37,6 +37,7 @@ export default function ScannerModal({
   const [camaraActual, setCamaraActual] = useState<string | null>(null);
 
   const [barcodeLocked, setBarcodeLocked] = useState(false);
+  const [codigoPendiente, setCodigoPendiente] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -49,6 +50,12 @@ export default function ScannerModal({
     time: 0,
   });
   const lockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const codigoPendienteRef = useRef<string | null>(null);
+
+  // Mantener ref sincronizado con el estado
+  useEffect(() => {
+    codigoPendienteRef.current = codigoPendiente;
+  }, [codigoPendiente]);
 
   useEffect(() => {
     serialesRef.current = seriales;
@@ -228,10 +235,18 @@ export default function ScannerModal({
         const videoEl = videoRef.current;
         codeReader.decodeFromVideoElement(videoEl, (result) => {
           if (result) {
+            const texto = result.getText().trim().toUpperCase();
+            if (!texto) return;
+            // Si ya hay un código pendiente de confirmar, ignorar nuevas lecturas
+            if (codigoPendienteRef.current) return;
+
             setBarcodeLocked(true);
             if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
             lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 300);
-            agregarSerial(result.getText());
+
+            // Mostrar para confirmación en lugar de agregar directamente
+            codigoPendienteRef.current = texto;
+            setCodigoPendiente(texto);
           } else {
             if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
             lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 200);
@@ -361,6 +376,8 @@ export default function ScannerModal({
       serialesRef.current = [];
       setManualInput("");
       setCamError(null);
+      setCodigoPendiente(null);
+      codigoPendienteRef.current = null;
       lastScanRef.current = { serial: "", time: 0 };
     }
   }, [isOpen, detenerCamara]);
@@ -587,6 +604,44 @@ export default function ScannerModal({
                 </button>
               </div>
             </>
+          )}
+
+          {/* ── BANNER DE CONFIRMACIÓN ── */}
+          {codigoPendiente && (
+            <div className={styles.pendingBanner}>
+              <span className={styles.pendingLabel}>Código detectado — confirma antes de agregar</span>
+              <span className={styles.pendingCode}>{codigoPendiente}</span>
+              <div className={styles.pendingBtns}>
+                <button
+                  type="button"
+                  className={styles.btnPendingOk}
+                  onClick={() => {
+                    agregarSerial(codigoPendiente);
+                    codigoPendienteRef.current = null;
+                    setCodigoPendiente(null);
+                  }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                    <polyline points="2,7 6,11 12,3" />
+                  </svg>
+                  Agregar
+                </button>
+                <button
+                  type="button"
+                  className={styles.btnPendingDiscard}
+                  onClick={() => {
+                    codigoPendienteRef.current = null;
+                    setCodigoPendiente(null);
+                    setBarcodeLocked(false);
+                  }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="2" y1="2" x2="10" y2="10" /><line x1="10" y1="2" x2="2" y2="10" />
+                  </svg>
+                  Ignorar
+                </button>
+              </div>
+            </div>
           )}
         </div>
 

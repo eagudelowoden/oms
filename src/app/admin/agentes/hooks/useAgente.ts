@@ -16,6 +16,7 @@ export function usePrealerta() {
 
   // ── UI STATE ──
   const [query, setQuery] = useState("");
+  const [sedeId, setSedeId] = useState<number | null>(null);
   const [sortCol, setSortCol] = useState<"nombre" | "fecha" | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -34,6 +35,8 @@ export function usePrealerta() {
   const [cajaActual, setCajaActual] = useState(1);
   const [sincronizandoAccesorios, setSincronizandoAccesorios] = useState(false);
   const [modalAccesorios, setModalAccesorios] = useState(false);
+  const [serialesPrevista, setSerialePrevista] = useState<SerialItem[]>([]);
+  const [guardandoSeriales, setGuardandoSeriales] = useState(false);
 
   /* ── TOAST ── */
   const showToast = (msg: string, type: "ok" | "error" = "ok") => {
@@ -110,14 +113,16 @@ export function usePrealerta() {
   /* ── SINCRONIZAR API ── */
   const { sincronizando, sincronizarDesdeAPI } = useSincronizarAPI({
     serialesEscaneados,
-    setSerialEscaneados,
+    onPrevista: (seriales) => setSerialePrevista(seriales),
     showToast,
   });
 
   /* ── FILTRO + ORDEN ── */
   const filteredAndSorted = (() => {
-    let list = prealertas.filter((r) =>
-      r.nombre.toLowerCase().includes(query.toLowerCase()),
+    let list = prealertas.filter(
+      (r) =>
+        r.nombre.toLowerCase().includes(query.toLowerCase()) &&
+        (sedeId === null || r.origenId === sedeId),
     );
     if (sortCol) {
       list = [...list].sort((a, b) => {
@@ -276,7 +281,7 @@ export function usePrealerta() {
     setProgreso(0);
 
     try {
-      const { exitosos, yaExistian, fallidos } =
+      const { exitosos, yaExistian, fallidos, enOtraPrealerta } =
         await empacarMutation.mutateAsync({
           prealertaId: idPrealerta,
           caja: cajaActual,
@@ -445,6 +450,44 @@ export function usePrealerta() {
   const handleAgregarSerial = (item: SerialItem) =>
     setSerialEscaneados((prev) => [...prev, item]);
 
+  const handleGuardarSeriales = async () => {
+    if (!preAlertaSeleccionada?.id) {
+      showToast("Selecciona una prealerta primero", "error");
+      return;
+    }
+    setGuardandoSeriales(true);
+    try {
+      const { insertados, yaExistian, enOtraPrealerta, fallidos } =
+        await prealertaMutations.guardarDisponible({
+          prealertaId: preAlertaSeleccionada.id,
+          seriales: serialesPrevista.map(({ codigo, mac, codigo_sap, descripcion, tramite }) => ({
+            serial: codigo,
+            mac,
+            codigoSap: codigo_sap,
+            descripcion,
+            tramite: tramite ?? "Sincronizado",
+          })),
+        });
+
+      setSerialePrevista([]);
+      setModalSincronizar(false);
+      invalidarCachePrealerta(preAlertaSeleccionada.id);
+
+      if (insertados > 0)
+        showToast(`✓ ${insertados} serial${insertados !== 1 ? "es" : ""} guardado${insertados !== 1 ? "s" : ""}`);
+      if (yaExistian > 0)
+        showToast(`⚠ ${yaExistian} ya existían en la prealerta`, "error");
+      if (enOtraPrealerta > 0)
+        showToast(`✗ ${enOtraPrealerta} ya en otra prealerta`, "error");
+      if (fallidos > 0)
+        showToast(`✗ ${fallidos} fallaron`, "error");
+    } catch {
+      showToast("Error al guardar seriales", "error");
+    } finally {
+      setGuardandoSeriales(false);
+    }
+  };
+
   const handleToggleSerial = (idx: number) => {
     setSeleccionados((prev) => {
       const next = new Set(prev);
@@ -500,6 +543,7 @@ export function usePrealerta() {
     isLoading,
     query,
     setQuery,
+    setSedeId,
     sortCol,
     sortAsc,
     filteredAndSorted,
@@ -520,6 +564,9 @@ export function usePrealerta() {
     setModalSincronizar,
     modalAccesorios,
     setModalAccesorios,
+    serialesPrevista,
+    limpiarPrevista: () => setSerialePrevista([]),
+    guardandoSeriales,
     cajaActual,
     setCajaActual,
     cargandoSeriales: cargandoSeriales || cargandoCaja,
@@ -538,6 +585,7 @@ export function usePrealerta() {
     handleDesempacar,
     showToast,
     sincronizarDesdeAPI,
+    handleGuardarSeriales,
     handleAgregarSerial,
     handleToggleSerial,
     handleToggleAll,

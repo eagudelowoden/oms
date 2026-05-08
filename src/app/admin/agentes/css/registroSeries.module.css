@@ -193,3 +193,161 @@
 .btnGuardar:hover {
   background: #1d4ed8;
 }
+
+/* ── REGISTRO MANUAL SERIAL ── */
+.manualRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.manualFieldLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--c-hint);
+  min-width: 46px;
+  flex-shrink: 0;
+}
+
+.manualFieldWrap {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-bg);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.manualFieldWrap:focus-within {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+
+.manualFieldInput {
+  flex: 1;
+  height: 32px;
+  padding: 0 8px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-family: "Courier New", monospace;
+  color: var(--c-text);
+  outline: none;
+  letter-spacing: 0.04em;
+}
+.manualFieldInput::placeholder {
+  color: var(--c-light);
+  font-family: inherit;
+  letter-spacing: 0;
+}
+
+.btnCamara {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 32px;
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  border-left: 0.5px solid #163259;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.btnCamara:hover {
+  background: #2563eb;
+}
+
+.btnRegistrar {
+  width: 100%;
+  height: 34px;
+  background: #1e293b;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.15s;
+  margin-top: 2px;
+}
+.btnRegistrar:hover:not(:disabled) {
+  background: #334155;
+}
+.btnRegistrar:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* Tabla de registros manuales */
+.manualTable {
+  width: 100%;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.manualTable table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.manualTable thead tr {
+  background: #f1f5f9;
+}
+
+.manualTable th {
+  padding: 5px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
+.manualTable tbody tr {
+  border-top: 0.5px solid var(--c-border);
+  transition: background 0.1s;
+}
+.manualTable tbody tr:hover {
+  background: #f8fafc;
+}
+
+.tdMono {
+  padding: 5px 8px;
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  color: var(--c-text);
+}
+
+.tdEmpty {
+  color: var(--c-light);
+  font-family: inherit;
+}
+
+.btnRemoveRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  margin: 2px 4px;
+  transition: all 0.15s;
+}
+.btnRemoveRow:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}

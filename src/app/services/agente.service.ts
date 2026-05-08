@@ -220,6 +220,69 @@ export const AgentesBackendService = {
     return row?.eliminados ?? 0;
   },
 
+  async guardarSerialesDisponible(data: {
+    prealertaId: number;
+    seriales: Array<{
+      serial: string;
+      mac?: string;
+      codigoSap?: string;
+      descripcion?: string;
+      tramite?: string;
+    }>;
+  }) {
+    let insertados = 0, yaExistian = 0, enOtraPrealerta = 0, fallidos = 0;
+    const LOTE = 10;
+
+    for (let i = 0; i < data.seriales.length; i += LOTE) {
+      const lote = data.seriales.slice(i, i + LOTE);
+      await Promise.all(
+        lote.map(async (item) => {
+          try {
+            // Verificar si existe en otra prealerta
+            const enOtra = await execQuery<{ PrealertaId: number }>(
+              `SELECT TOP 1 PrealertaId FROM PrealertaSerial
+               WHERE Serial = @serial AND PrealertaId != @prealertaId`,
+              { serial: item.serial, prealertaId: data.prealertaId },
+            );
+            if (enOtra.length > 0) { enOtraPrealerta++; return; }
+
+            // Verificar si ya existe en la misma prealerta
+            const enMisma = await execQuery<{ Id: number }>(
+              `SELECT TOP 1 1 AS Id FROM PrealertaSerial
+               WHERE Serial = @serial AND PrealertaId = @prealertaId`,
+              { serial: item.serial, prealertaId: data.prealertaId },
+            );
+            if (enMisma.length > 0) { yaExistian++; return; }
+
+            // Insertar con Caja = NULL (Disponible)
+            await execQuery(
+              `INSERT INTO PrealertaSerial
+                (PrealertaId, Serial, Mac, CodigoSap, Descripcion, Cantidad, Caja, Falla,
+                 TecnicoCliente, Pedido, Tramite, Novedad, Garantia, Tipo)
+               VALUES
+                (@prealertaId, @serial, @mac, @codigoSap, @descripcion, 1, NULL, '',
+                 '', '', @tramite, '', 0, 'Serializable')`,
+              {
+                prealertaId: data.prealertaId,
+                serial: item.serial,
+                mac: item.mac ?? "",
+                codigoSap: item.codigoSap ?? "",
+                descripcion: item.descripcion ?? "",
+                tramite: item.tramite ?? "Sincronizado",
+              },
+            );
+            insertados++;
+          } catch (err) {
+            console.error("Error guardando serial disponible:", item.serial, err);
+            fallidos++;
+          }
+        }),
+      );
+    }
+
+    return { insertados, yaExistian, enOtraPrealerta, fallidos };
+  },
+
   async getListPrealert() {
     const rows = await execProc<PrealertaListRow>("pa_GetListPrealertOms");
 
