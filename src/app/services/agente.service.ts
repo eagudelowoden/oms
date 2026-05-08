@@ -231,6 +231,7 @@ export const AgentesBackendService = {
     }>;
   }) {
     let insertados = 0, yaExistian = 0, enOtraPrealerta = 0, fallidos = 0;
+    const errores: string[] = [];
     const LOTE = 10;
 
     for (let i = 0; i < data.seriales.length; i += LOTE) {
@@ -260,7 +261,7 @@ export const AgentesBackendService = {
                 (PrealertaId, Serial, Mac, CodigoSap, Descripcion, Cantidad, Caja, Falla,
                  TecnicoCliente, Pedido, Tramite, Novedad, Garantia, Tipo)
                VALUES
-                (@prealertaId, @serial, @mac, @codigoSap, @descripcion, 1, NULL, '',
+                (@prealertaId, @serial, @mac, @codigoSap, @descripcion, 1, 0, '',
                  '', '', @tramite, '', 0, 'Serializable')`,
               {
                 prealertaId: data.prealertaId,
@@ -273,14 +274,16 @@ export const AgentesBackendService = {
             );
             insertados++;
           } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
             console.error("Error guardando serial disponible:", item.serial, err);
+            errores.push(`${item.serial}: ${msg}`);
             fallidos++;
           }
         }),
       );
     }
 
-    return { insertados, yaExistian, enOtraPrealerta, fallidos };
+    return { insertados, yaExistian, enOtraPrealerta, fallidos, errores };
   },
 
   async getListPrealert() {

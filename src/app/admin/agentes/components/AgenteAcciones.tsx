@@ -6,7 +6,8 @@ import { CajaItem, SerialEmpacado } from "@/app/models/seriales.models";
 interface Props {
   seleccionada: PrealertaItem | null;
   onClearSeleccion: () => void;
-  onAbrirScanner: () => void;
+  onCargaManual: () => void;
+  mostrarRegistroManual: boolean;
   onShowToast: (msg: string, type?: "ok" | "error") => void;
   onSincronizar: (fecha: string) => void;
   sincronizando: boolean;
@@ -24,7 +25,8 @@ interface Props {
 
 export default function PrealertaAcciones({
   seleccionada,
-  onAbrirScanner,
+  onCargaManual,
+  mostrarRegistroManual,
   onShowToast,
   onSincronizar,
   sincronizando,
@@ -162,17 +164,12 @@ export default function PrealertaAcciones({
               : "Sincronizar Accesorios"}
           </button> */}
 
-          {/* ── Escanear ── */}
+          {/* ── Carga Manual ── */}
           <button
             type="button"
-            className={`${styles.btnManual} ${!seleccionada ? styles.btnManualDisabled : ""}`}
-            onClick={() => {
-              if (!seleccionada) {
-                onShowToast("Selecciona una prealerta primero", "error");
-                return;
-              }
-              onAbrirScanner();
-            }}
+            className={styles.btnManual}
+            onClick={onCargaManual}
+            style={mostrarRegistroManual ? { background: "#1e293b", color: "#fff" } : undefined}
           >
             <svg
               width="14"
@@ -182,13 +179,12 @@ export default function PrealertaAcciones({
               stroke="currentColor"
               strokeWidth="1.5"
               strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <rect x="1" y="1" width="5" height="5" rx="1" />
-              <rect x="10" y="1" width="5" height="5" rx="1" />
-              <rect x="1" y="10" width="5" height="5" rx="1" />
-              <path d="M10 10h2v2h-2zM12 12h3M12 10h3M10 12v3" />
+              <path d="M8 1v10M4 7l4 4 4-4" />
+              <path d="M2 13h12" />
             </svg>
-            {seleccionada ? "Escanear" : "Carga manual"}
+            Carga Manual
           </button>
 
           {/* ── Selector de caja ── */}

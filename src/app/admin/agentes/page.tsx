@@ -8,7 +8,6 @@ import PrealertaTabla from "./components/TablaDetalle";
 import PrealertaAcciones from "./components/AgenteAcciones";
 import { PrealertaSeriales } from "./components/SerialesListado";
 import { ConfirmModal, Toast } from "./components/ModalEliminar";
-import ScannerModal from "@/modules/auth/components/scanner/scannerModal";
 import SincronizarModal from "./components/ModalSincronizarSeriales";
 import SincronizarAccesoriosModal from "./components/ModalSincronizarAccesorios";
 import RegistroSeries from "./components/RegistroAccesorios";
@@ -23,8 +22,6 @@ export default function AgentePage() {
     sortCol,
     sortAsc,
     filteredAndSorted,
-    scannerOpen,
-    setScannerOpen,
     serialesMostrados,
     handleRemoveSerial,
     handleRemoveSeleccionados,
@@ -37,7 +34,6 @@ export default function AgentePage() {
     handleCrearPrealerta,
     pedirConfirmacion,
     handleEliminar,
-    handleSerialConfirm,
     handleEmpacar,
     showToast,
     empacando,
@@ -96,7 +92,8 @@ export default function AgentePage() {
       <PrealertaAcciones
         seleccionada={preAlertaSeleccionada}
         onClearSeleccion={() => setPreAlertaSeleccionada(null)}
-        onAbrirScanner={() => setScannerOpen(true)}
+        onCargaManual={() => setMostrarRegistroManual((v) => !v)}
+        mostrarRegistroManual={mostrarRegistroManual}
         onShowToast={showToast}
         onSincronizar={() => setModalSincronizar(true)}
         sincronizando={sincronizando}
@@ -129,35 +126,10 @@ export default function AgentePage() {
           onClose={() => setMostrarRegistroManual(false)}
         />
       )}
-      {!mostrarRegistroManual && (
-        <button
-          type="button"
-          onClick={() => setMostrarRegistroManual(true)}
-          style={{
-            alignSelf: "flex-start",
-            height: 30,
-            padding: "0 14px",
-            background: "transparent",
-            border: "0.5px solid #e2e8f0",
-            borderRadius: 6,
-            fontSize: 11,
-            color: "#64748b",
-            cursor: "pointer",
-          }}
-        >
-          + Registro Manual
-        </button>
-      )}
 
       <RegistroSeries
         onAgregarAccesorio={handleAgregarSerial}
         onShowToast={showToast}
-      />
-
-      <ScannerModal
-        isOpen={scannerOpen}
-        onClose={() => setScannerOpen(false)}
-        onConfirm={handleSerialConfirm}
       />
 
       <SincronizarModal

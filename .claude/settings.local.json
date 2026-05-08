@@ -12,7 +12,10 @@
       "Bash(Select-String -Pattern \"MiniScannerCaptura|RegistroManualSerial\")",
       "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; $out = npx tsc --noEmit 2>&1; $out | Where-Object { $_ -match \"MiniScannerCaptura|RegistroManualSerial\" })",
       "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; \\(npx tsc --noEmit 2>&1\\) -match \"MiniScanner|RegistroManual\")",
-      "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; npx tsc --noEmit 2>&1 > \"$env:TEMP\\\\tsc_out.txt\"; Get-Content \"$env:TEMP\\\\tsc_out.txt\" | Select-String \"agentes\")"
+      "PowerShell(cd \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\"; npx tsc --noEmit 2>&1 > \"$env:TEMP\\\\tsc_out.txt\"; Get-Content \"$env:TEMP\\\\tsc_out.txt\" | Select-String \"agentes\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\e.agudelo\\\\Documents\\\\OMS\\\\oms\" -Recurse -Include \"*.sql\",\"*.migration*\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object FullName)",
+      "Bash(Head -20)"
     ]
   }
 }

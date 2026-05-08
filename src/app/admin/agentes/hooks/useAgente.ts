@@ -447,8 +447,40 @@ export function usePrealerta() {
     ]);
   };
 
-  const handleAgregarSerial = (item: SerialItem) =>
+  const handleAgregarSerial = async (item: SerialItem) => {
     setSerialEscaneados((prev) => [...prev, item]);
+
+    if (!preAlertaSeleccionada?.id) return;
+
+    try {
+      const { insertados, yaExistian, enOtraPrealerta, fallidos } =
+        await prealertaMutations.guardarDisponible({
+          prealertaId: preAlertaSeleccionada.id,
+          seriales: [
+            {
+              serial: item.codigo,
+              mac: item.mac,
+              codigoSap: item.codigo_sap,
+              descripcion: item.descripcion,
+              tramite: item.tramite ?? "Manual",
+            },
+          ],
+        });
+
+      invalidarCachePrealerta(preAlertaSeleccionada.id);
+
+      if (insertados > 0)
+        showToast(`✓ Serial ${item.codigo} guardado`);
+      if (yaExistian > 0)
+        showToast(`⚠ ${item.codigo} ya existía en la prealerta`, "error");
+      if (enOtraPrealerta > 0)
+        showToast(`✗ ${item.codigo} ya está en otra prealerta`, "error");
+      if (fallidos > 0)
+        showToast(`✗ Error al guardar ${item.codigo}`, "error");
+    } catch {
+      showToast("Error al guardar el serial en la prealerta", "error");
+    }
+  };
 
   const handleGuardarSeriales = async () => {
     if (!preAlertaSeleccionada?.id) {
