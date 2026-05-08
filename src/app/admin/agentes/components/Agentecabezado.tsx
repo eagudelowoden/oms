@@ -8,9 +8,10 @@ interface Sede {
 
 interface Props {
   onCrear: (sedeId: number, sedeNombre: string) => void;
+  onSedeChange?: (sedeId: number) => void;
 }
 
-export default function PrealertaHeader({ onCrear }: Props) {
+export default function PrealertaHeader({ onCrear, onSedeChange }: Props) {
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [sedeSeleccionada, setSedeSeleccionada] = useState<number | "">("");
   const [cargando, setCargando] = useState(true);
@@ -20,11 +21,19 @@ export default function PrealertaHeader({ onCrear }: Props) {
       .then((r) => r.json())
       .then((data) => {
         setSedes(data);
-        if (data.length > 0) setSedeSeleccionada(data[0].id);
+        if (data.length > 0) {
+          setSedeSeleccionada(data[0].id);
+          onSedeChange?.(data[0].id);
+        }
       })
       .catch(console.error)
       .finally(() => setCargando(false));
   }, []);
+
+  const handleSedeChange = (sedeId: number) => {
+    setSedeSeleccionada(sedeId);
+    onSedeChange?.(sedeId);
+  };
 
   const handleCrear = () => {
     if (!sedeSeleccionada) return;
@@ -39,7 +48,7 @@ export default function PrealertaHeader({ onCrear }: Props) {
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <select
           value={sedeSeleccionada}
-          onChange={(e) => setSedeSeleccionada(Number(e.target.value))}
+          onChange={(e) => handleSedeChange(Number(e.target.value))}
           disabled={cargando}
           className={styles.selectSede}
         >

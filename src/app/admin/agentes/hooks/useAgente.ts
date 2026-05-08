@@ -16,6 +16,7 @@ export function usePrealerta() {
 
   // ── UI STATE ──
   const [query, setQuery] = useState("");
+  const [sedeId, setSedeId] = useState<number | null>(null);
   const [sortCol, setSortCol] = useState<"nombre" | "fecha" | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -116,8 +117,10 @@ export function usePrealerta() {
 
   /* ── FILTRO + ORDEN ── */
   const filteredAndSorted = (() => {
-    let list = prealertas.filter((r) =>
-      r.nombre.toLowerCase().includes(query.toLowerCase()),
+    let list = prealertas.filter(
+      (r) =>
+        r.nombre.toLowerCase().includes(query.toLowerCase()) &&
+        (sedeId === null || r.origenId === sedeId),
     );
     if (sortCol) {
       list = [...list].sort((a, b) => {
@@ -500,6 +503,7 @@ export function usePrealerta() {
     isLoading,
     query,
     setQuery,
+    setSedeId,
     sortCol,
     sortAsc,
     filteredAndSorted,

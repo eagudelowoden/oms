@@ -18,6 +18,7 @@ export default function AgentePage() {
     isLoading,
     query,
     setQuery,
+    setSedeId,
     sortCol,
     sortAsc,
     filteredAndSorted,
@@ -63,7 +64,7 @@ export default function AgentePage() {
 
   return (
     <div className={styles.wrapper}>
-      <PrealertaHeader onCrear={handleCrearPrealerta} />
+      <PrealertaHeader onCrear={handleCrearPrealerta} onSedeChange={setSedeId} />
 
       <PrealertaTabla
         isLoading={isLoading}
