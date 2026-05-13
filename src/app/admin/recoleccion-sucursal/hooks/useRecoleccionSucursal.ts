@@ -66,16 +66,7 @@ export function useRecoleccionSucursal() {
     onError: () => showToast("Error al procesar el escaneo", "error"),
   });
 
-  const updateAccesorioMutation = useMutation({
-    mutationFn: ({ id, cantidad }: { id: number; cantidad: number }) =>
-      recoleccionSucursalMutations.updateAccesorio(id, cantidad),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recoleccion-accesorios", seleccionada?.id] });
-    },
-    onError: () => showToast("Error al actualizar accesorio", "error"),
-  });
-
-  const cerrarVerificacionMutation = useMutation({
+const cerrarVerificacionMutation = useMutation({
     mutationFn: () => recoleccionSucursalMutations.cerrarVerificacion(seleccionada!.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recoleccion-prealertas"] });
@@ -89,10 +80,6 @@ export function useRecoleccionSucursal() {
   const handleScan = (serial: string) => {
     if (!seleccionada) return;
     escanearMutation.mutate({ serial });
-  };
-
-  const handleUpdateAccesorio = (id: number, cantidad: number) => {
-    updateAccesorioMutation.mutate({ id, cantidad });
   };
 
   const handleCerrarVerificacion = () => {
@@ -122,7 +109,6 @@ export function useRecoleccionSucursal() {
     setScannerOpen,
     toast,
     handleScan,
-    handleUpdateAccesorio,
     handleCerrarVerificacion,
     isPending: cerrarVerificacionMutation.isPending,
   };

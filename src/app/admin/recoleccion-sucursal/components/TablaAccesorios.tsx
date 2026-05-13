@@ -7,10 +7,9 @@ import { AccesorioRecoleccionRow } from "@/app/services/recoleccion-sucursal.ser
 interface Props {
   accesorios: AccesorioRecoleccionRow[];
   cargando: boolean;
-  onUpdateCantidad: (id: number, cantidad: number) => void;
 }
 
-export default function TablaAccesorios({ accesorios, cargando, onUpdateCantidad }: Props) {
+export default function TablaAccesorios({ accesorios, cargando }: Props) {
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
@@ -64,12 +63,6 @@ export default function TablaAccesorios({ accesorios, cargando, onUpdateCantidad
                         defaultValue={a.cantidadRecibida || ""}
                         min={0}
                         max={a.cantidad}
-                        onBlur={(e) => {
-                          const val = parseInt(e.target.value) || 0;
-                          if (val !== a.cantidadRecibida) {
-                            onUpdateCantidad(a.id, val);
-                          }
-                        }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") (e.target as HTMLInputElement).blur();
                         }}

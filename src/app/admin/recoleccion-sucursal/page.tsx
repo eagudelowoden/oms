@@ -28,7 +28,6 @@ export default function RecoleccionSucursalPage() {
     setScannerOpen,
     toast,
     handleScan,
-    handleUpdateAccesorio,
     handleCerrarVerificacion,
     isPending,
   } = useRecoleccionSucursal();
@@ -66,7 +65,6 @@ export default function RecoleccionSucursalPage() {
       <TablaAccesorios
         accesorios={accesorios}
         cargando={loadingAccesorios}
-        onUpdateCantidad={handleUpdateAccesorio}
       />
 
       <div className={styles.footerBar}>

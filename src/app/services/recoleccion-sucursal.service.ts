@@ -98,7 +98,7 @@ export const RecoleccionSucursalService = {
          ISNULL(Recogido, 0) AS Recogido
        FROM PrealertaSerial
        WHERE PrealertaId = @id
-         AND (Tipo = 'Serializable' OR Tipo IS NULL)
+         AND LOWER(ISNULL(Tipo, 'serializable')) NOT LIKE '%no%'
        ORDER BY Caja ASC, Serial ASC`,
       { id: prealertaId },
     );
@@ -137,7 +137,7 @@ export const RecoleccionSucursalService = {
          Tramite
        FROM PrealertaSerial
        WHERE PrealertaId = @id
-         AND Tipo = 'No Serializable'
+         AND LOWER(Tipo) LIKE '%no%'
        ORDER BY Caja ASC, Descripcion ASC`,
       { id: prealertaId },
     );
