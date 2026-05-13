@@ -173,17 +173,6 @@ export const RecoleccionSucursalService = {
     return { found: true, id: rows[0].Id };
   },
 
-  async updateCantidadRecibida(
-    serialId: number,
-    cantidadRecibida: number,
-  ): Promise<{ success: boolean }> {
-    await execQuery(
-      `UPDATE PrealertaSerial SET CantidadRecibida = @cantidad WHERE Id = @id`,
-      { id: serialId, cantidad: cantidadRecibida },
-    );
-    return { success: true };
-  },
-
   async cerrarVerificacion(prealertaId: number): Promise<{ success: boolean }> {
     await execQuery(
       `UPDATE Prealerta SET Estado = 'En Tránsito' WHERE Id = @id`,
