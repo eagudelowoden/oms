@@ -239,6 +239,30 @@ export default function AdminLayout({
               <span>Sucursal</span>
             </Link>
 
+            <Link
+              href="/admin/programar-recoleccion"
+              className={linkClass("/admin/programar-recoleccion")}
+            >
+              <span className="material-symbols-rounded">local_shipping</span>
+              <span>Programar Recolección</span>
+            </Link>
+
+            <Link
+              href="/admin/confirmar-programacion"
+              className={linkClass("/admin/confirmar-programacion")}
+            >
+              <span className="material-symbols-rounded">task_alt</span>
+              <span>Confirmar Programación</span>
+            </Link>
+
+            <Link
+              href="/admin/recoleccion-sucursal"
+              className={linkClass("/admin/recoleccion-sucursal")}
+            >
+              <span className="material-symbols-rounded">store</span>
+              <span>Recolección Sucursal</span>
+            </Link>
+
             {usuario.perfilId === 1 && (
               <Link
                 href="/admin/usuarios"

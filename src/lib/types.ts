@@ -74,4 +74,6 @@ export interface PrealertaListRow {
   TipoOrigenId: number | null;
   OrigenId: number | null;
   UsuarioNombre: string | null;
+  Programado: string | null;
+  FechaAutorizado: string | null;
 }
