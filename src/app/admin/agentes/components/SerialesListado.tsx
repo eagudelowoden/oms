@@ -120,6 +120,7 @@ export function PrealertaSeriales({
                 <th>Material</th>
                 <th>SAP</th>
                 <th>Serial</th>
+                <th>Mac</th>
                 <th>Caja</th>
                 <th>Estado</th>
                 <th>Cant</th>
@@ -173,6 +174,11 @@ export function PrealertaSeriales({
                     {/* Serial */}
                     <td className={styles.serialRowCode}>
                       {item.tipo === "No-serializable" ? "—" : item.codigo}
+                    </td>
+
+                    {/* Mac */}
+                    <td className={styles.serialRowCode} style={{ fontSize: 11 }}>
+                      {item.mac ?? "—"}
                     </td>
 
                     {/* Caja */}

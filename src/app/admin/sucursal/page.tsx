@@ -21,6 +21,7 @@ export default function AgentePage() {
     handleRemoveSerial,
     handleRemoveSeleccionados,
     confirmItem,
+    setConfirmItem,
     preAlertaSeleccionada,
     setPreAlertaSeleccionada,
     toast,
@@ -35,27 +36,19 @@ export default function AgentePage() {
     cargandoSeriales,
     handleCargarSeriales,
     handleEmpacarDesdeArchivo,
+    handleCrearYEmpacarDesdeArchivo,
   } = usePrealerta();
 
   return (
     <div className={styles.wrapper}>
-      <PrealertaHeader
-        onCrear={async (sedeId, sedeNombre) => {
-          try {
-            await handleCrearPrealerta(sedeId, sedeNombre);
-            showToast("✓ Prealerta creada");
-          } catch {
-            showToast("Error al crear la prealerta", "error");
-          }
-        }}
-      />
+      <PrealertaHeader />
 
       <CargarArchivo
         preAlertaSeleccionada={preAlertaSeleccionada}
         onShowToast={showToast}
         onCargarSeriales={handleCargarSeriales}
         onEmpacarDesdeArchivo={handleEmpacarDesdeArchivo}
-        onCrearPrealerta={handleCrearPrealerta}
+        onCrearYEmpacarDesdeArchivo={handleCrearYEmpacarDesdeArchivo}
       />
 
       <PrealertaTabla
@@ -83,7 +76,7 @@ export default function AgentePage() {
 
       <ConfirmModal
         item={confirmItem}
-        onCancel={() => setPreAlertaSeleccionada(null)}
+        onCancel={() => setConfirmItem(null)}
         onConfirm={handleEliminar}
       />
 

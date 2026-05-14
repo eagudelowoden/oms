@@ -24,6 +24,7 @@ export default function TablaMateriales({ materiales, cargando }: Props) {
               <th>Material</th>
               <th>Sap</th>
               <th>Serial</th>
+              <th>Mac</th>
               <th>Caja</th>
               <th>Estado</th>
               <th>Cant.</th>
@@ -35,13 +36,13 @@ export default function TablaMateriales({ materiales, cargando }: Props) {
           <tbody>
             {cargando ? (
               <tr>
-                <td colSpan={9} className={styles.emptyCell}>
+                <td colSpan={10} className={styles.emptyCell}>
                   Cargando materiales...
                 </td>
               </tr>
             ) : materiales.length === 0 ? (
               <tr>
-                <td colSpan={9} className={styles.emptyCell}>
+                <td colSpan={10} className={styles.emptyCell}>
                   Selecciona una prealerta para ver sus materiales
                 </td>
               </tr>
@@ -52,6 +53,9 @@ export default function TablaMateriales({ materiales, cargando }: Props) {
                   <td className={styles.tdMuted}>{m.codigoSap || "-"}</td>
                   <td style={{ fontFamily: "Courier New, monospace", fontWeight: 600 }}>
                     {m.serial}
+                  </td>
+                  <td className={styles.tdMuted} style={{ fontFamily: "Courier New, monospace", fontSize: 11 }}>
+                    {m.mac ?? "-"}
                   </td>
                   <td className={styles.tdMuted}>{m.caja > 0 ? m.caja : "-"}</td>
                   <td>

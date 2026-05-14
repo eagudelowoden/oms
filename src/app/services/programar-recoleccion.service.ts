@@ -16,6 +16,7 @@ export interface MaterialRow {
   descripcion: string;
   codigoSap: string;
   serial: string;
+  mac: string | null;
   caja: number;
   estado: string;
   cantidad: number;
@@ -72,6 +73,7 @@ export const ProgramarRecoleccionService = {
       Descripcion: string | null;
       CodigoSap: string | null;
       Serial: string;
+      Mac: string | null;
       Caja: number;
       Cantidad: number;
       Tipo: string | null;
@@ -82,6 +84,7 @@ export const ProgramarRecoleccionService = {
          Descripcion,
          CodigoSap,
          Serial,
+         Mac,
          Caja,
          Cantidad,
          Tipo,
@@ -97,6 +100,7 @@ export const ProgramarRecoleccionService = {
       descripcion: r.Descripcion ?? "",
       codigoSap: r.CodigoSap ?? "",
       serial: r.Serial,
+      mac: r.Mac ?? null,
       caja: r.Caja,
       estado: r.Caja > 0 ? "Empacado" : "Disponible",
       cantidad: r.Cantidad,

@@ -100,7 +100,7 @@ export default function TablaPrealertas({
                     <EstadoBadge estado={p.estado} />
                   </td>
                   <td className={styles.tdMuted}>{p.programado ?? "-"}</td>
-                  <td className={styles.tdMuted}>{p.fechaAutorizado ?? "-"}</td>
+                  <td className={styles.tdMuted}>{p.noAutorizacion ?? "-"}</td>
                 </tr>
               ))
             )}

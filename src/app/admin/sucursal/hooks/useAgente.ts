@@ -237,6 +237,63 @@ export function usePrealerta() {
     });
   };
 
+  const handleCrearYEmpacarDesdeArchivo = async (
+    sedeId: number,
+    sedeNombre: string,
+    nombre: string,
+    serialesItems: SerialItem[],
+  ): Promise<void> => {
+    const usuarioRaw = localStorage.getItem("usuario");
+    const usuario: UsuarioSesion | null = usuarioRaw ? JSON.parse(usuarioRaw) : null;
+    if (!usuario?.id) throw new Error("No hay sesión activa");
+
+    const result = await crearMutation.mutateAsync({
+      nombre: `${sedeNombre} ${usuario.nombres} ${usuario.apellidos}`.slice(0, 50),
+      tipoOrigenId: 13,
+      origenId: sedeId,
+      guia: `GUIA-${Math.floor(Math.random() * 1000)}`,
+      usuarioId: usuario.id,
+      idResponsable: usuario.id,
+      estado: "Pendiente",
+    });
+
+    if (!result?.id) throw new Error("No se pudo crear la prealerta");
+
+    const nombreFinal = `${sedeNombre} ${usuario.nombres} ${usuario.apellidos} - ${result.id}`.slice(0, 50);
+    await fetch("/api/sucursal/updateNombre", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: result.id, nombre: nombreFinal }),
+    });
+
+    // Agrupar por caja y empacar
+    const porCaja = new Map<number, SerialItem[]>();
+    for (const item of serialesItems) {
+      const caja = item.caja ?? 1;
+      const grupo = porCaja.get(caja) ?? [];
+      grupo.push(item);
+      porCaja.set(caja, grupo);
+    }
+
+    for (const [caja, seriales] of porCaja) {
+      await empacarMutation.mutateAsync({
+        prealertaId: result.id,
+        caja,
+        seriales: seriales.map(({ codigo, tipo, mac, cantidad, tramite, codigo_sap, descripcion }) => ({
+          Serial: codigo,
+          Mac: mac ?? "",
+          Tipo: tipo ?? "Serializable",
+          Cantidad: tipo === "No-serializable" ? (cantidad ?? 1) : 1,
+          Tramite: tramite ?? "Archivo",
+          CodigoSap: codigo_sap ?? "",
+          Descripcion: descripcion ?? "",
+        })),
+      });
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["sucursal-prealertas"] });
+  };
+
   const handleEliminar = async () => {
     if (!confirmItem) return;
     const item = confirmItem;
@@ -284,7 +341,7 @@ export function usePrealerta() {
     setProgreso(0);
 
     try {
-      const { exitosos, yaExistian, fallidos } =
+      const { exitosos, yaExistian, fallidos, enOtraPrealerta } =
         await empacarMutation.mutateAsync({
           prealertaId: idPrealerta,
           caja: cajaActual,
@@ -454,7 +511,7 @@ export function usePrealerta() {
 
     // Con prealerta seleccionada, empacar directamente en la caja actual
     try {
-      const { exitosos, yaExistian, fallidos } = await empacarMutation.mutateAsync({
+      const { exitosos, yaExistian, fallidos, enOtraPrealerta } = await empacarMutation.mutateAsync({
         prealertaId: preAlertaSeleccionada.id,
         caja: cajaActual,
         seriales: seriales.map((codigo) => ({
@@ -582,5 +639,6 @@ export function usePrealerta() {
     empacarAccesoriosAgrupados,
     handleCargarSeriales,
     handleEmpacarDesdeArchivo,
+    handleCrearYEmpacarDesdeArchivo,
   };
 }
