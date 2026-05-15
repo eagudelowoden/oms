@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "../css/prealerta.module.css";
 import { PrealertaItem } from "@/app/models/Prealerta.models";
 
@@ -44,19 +44,37 @@ export default function PrealertaTabla({
   onSeleccionar,
   onEliminar,
 }: Props) {
+  const [ciudadFiltro, setCiudadFiltro] = useState("");
+
+  const ciudades = [...new Set(
+    items.map((i) => i.ciudad ?? "").filter(Boolean)
+  )].sort();
+
+  const visibles = ciudadFiltro
+    ? items.filter((i) => i.ciudad === ciudadFiltro)
+    : items;
+
   return (
     <div className={styles.card}>
-      {/* Búsqueda */}
+      {/* Búsqueda + filtro ciudad */}
       <div className={styles.searchBar}>
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-        >
+        <div className={styles.cityFilterWrap}>
+          <span className={`material-symbols-rounded ${styles.cityFilterIcon}`}>location_on</span>
+          <select
+            className={styles.cityFilterSelect}
+            value={ciudadFiltro}
+            onChange={(e) => setCiudadFiltro(e.target.value)}
+          >
+            <option value="">Todas las ciudades</option>
+            {ciudades.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <svg className={styles.cityFilterChevron} width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" style={{ color: "var(--c-hint)", flexShrink: 0 }}>
           <circle cx="5" cy="5" r="3.2" />
           <line x1="7.6" y1="7.6" x2="10.5" y2="10.5" />
         </svg>
@@ -68,13 +86,7 @@ export default function PrealertaTabla({
           onChange={(e) => setQuery(e.target.value)}
         />
         {query && (
-          <button
-            type="button"
-            className={styles.clearBtn}
-            onClick={() => setQuery("")}
-          >
-            ✕
-          </button>
+          <button type="button" className={styles.clearBtn} onClick={() => setQuery("")}>✕</button>
         )}
       </div>
 
@@ -107,14 +119,14 @@ export default function PrealertaTabla({
                   Cargando...
                 </td>
               </tr>
-            ) : items.length === 0 ? (
+            ) : visibles.length === 0 ? (
               <tr>
                 <td colSpan={5} className={styles.emptyCell}>
                   Sin resultados
                 </td>
               </tr>
             ) : (
-              items.map((item, i) => (
+              visibles.map((item, i) => (
                 <tr
                   key={item.id ?? i}
                   className={
