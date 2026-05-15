@@ -138,26 +138,26 @@ export default function PrealertaAcciones({
           </button>
 
           {/* ── Selector de caja ── */}
-          <div className={styles.cajaWrapper}>
-            <label className={styles.cajaLabel}>Caja</label>
-            <div className={styles.selectWrapper}>
-              <select
-                className={styles.cajaSelect}
-                value={cajaActual}
-                onChange={(e) => onCajaChange(Number(e.target.value))}
-                disabled={empacando}
-              >
-                <option value={siguienteNumero}>Crear caja {siguienteNumero}</option>
-                {cajas.map((c) => (
-                  <option key={c.numero} value={c.numero}>
-                    Caja {c.numero} ({c.totalSeriales} ser.)
-                  </option>
-                ))}
-              </select>
-              <svg className={styles.selectChevron} width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
+          <div className={styles.cajaSelectWrap}>
+            <span className="material-symbols-rounded" style={{ fontSize: 14, color: "var(--c-hint)", pointerEvents: "none", flexShrink: 0 }}>
+              inventory_2
+            </span>
+            <select
+              className={styles.cajaSelectField}
+              value={cajaActual}
+              onChange={(e) => onCajaChange(Number(e.target.value))}
+              disabled={empacando}
+            >
+              <option value={siguienteNumero}>+ Nueva caja {siguienteNumero}</option>
+              {cajas.map((c) => (
+                <option key={c.numero} value={c.numero}>
+                  Caja {c.numero} · {c.totalSeriales} ser.
+                </option>
+              ))}
+            </select>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ pointerEvents: "none", color: "var(--c-hint)", flexShrink: 0 }}>
+              <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
 
           {/* ── Empacar ── */}

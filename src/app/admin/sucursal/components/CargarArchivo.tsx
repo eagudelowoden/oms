@@ -219,30 +219,28 @@ export default function CargarArchivo({
     <div className={styles.card} style={{ padding: "10px 14px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
 
-        {/* ── Selector de sede (para crear prealerta) ── */}
-        <select
-          style={{
-            height: 30,
-            padding: "0 8px",
-            fontSize: 11,
-            border: "0.5px solid #e2e8f0",
-            borderRadius: 6,
-            background: "#fff",
-            color: "#1e293b",
-            outline: "none",
-            cursor: "pointer",
-          }}
-          value={sedeSeleccionada?.id ?? ""}
-          onChange={(e) => {
-            const sede = sedes.find((s) => s.id === Number(e.target.value));
-            setSedeSeleccionada(sede ?? null);
-          }}
-        >
-          {sedes.length === 0 && <option value="">Cargando sedes...</option>}
-          {sedes.map((s) => (
-            <option key={s.id} value={s.id}>{s.nombre}</option>
-          ))}
-        </select>
+        {/* ── Selector de sede ── */}
+        <div className={styles.sedeSelectWrap}>
+          <span className="material-symbols-rounded" style={{ fontSize: 14, color: "var(--c-hint)", pointerEvents: "none" }}>
+            location_on
+          </span>
+          <select
+            className={styles.sedeSelect}
+            value={sedeSeleccionada?.id ?? ""}
+            onChange={(e) => {
+              const sede = sedes.find((s) => s.id === Number(e.target.value));
+              setSedeSeleccionada(sede ?? null);
+            }}
+          >
+            {sedes.length === 0 && <option value="">Cargando sedes…</option>}
+            {sedes.map((s) => (
+              <option key={s.id} value={s.id}>{s.nombre}</option>
+            ))}
+          </select>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ pointerEvents: "none", color: "var(--c-hint)", flexShrink: 0 }}>
+            <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
 
         {/* ── Cargar Archivo: crea prealerta + asocia seriales ── */}
         <input

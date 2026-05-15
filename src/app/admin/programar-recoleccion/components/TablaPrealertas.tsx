@@ -28,14 +28,11 @@ export default function TablaPrealertas({
   onSeleccionar,
   onRefresh,
 }: Props) {
-  const [query, setQuery] = useState("");
+  const [ciudadFiltro, setCiudadFiltro] = useState("");
 
-  const filtered = query.trim()
-    ? prealertas.filter(
-        (p) =>
-          p.nombre.toLowerCase().includes(query.toLowerCase()) ||
-          (p.ciudad ?? "").toLowerCase().includes(query.toLowerCase()),
-      )
+  const ciudades = [...new Set(prealertas.map((p) => p.ciudad ?? "").filter(Boolean))].sort();
+  const filtered = ciudadFiltro
+    ? prealertas.filter((p) => p.ciudad === ciudadFiltro)
     : prealertas;
 
   return (
@@ -45,34 +42,35 @@ export default function TablaPrealertas({
           <span className={styles.cardInnerTitle}>Prealertas</span>
           <span className={styles.countPill}>{filtered.length}</span>
         </div>
-        <div className={styles.cardInnerRight}>
-          <div className={styles.filterWrap}>
-            <span className="material-symbols-rounded" style={{ fontSize: 13, color: "var(--c-hint)" }}>
-              search
-            </span>
-            <input
-              className={styles.filterInput}
-              type="text"
-              placeholder="Nombre o ciudad…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            {query && (
-              <button className={styles.filterClear} onClick={() => setQuery("")} title="Limpiar">
-                <span className="material-symbols-rounded" style={{ fontSize: 13 }}>close</span>
-              </button>
-            )}
-          </div>
-          <button
-            className={styles.btnRefresh}
-            onClick={() => onRefresh()}
-            disabled={isLoading}
-            title="Refrescar"
+        <button
+          className={styles.btnRefresh}
+          onClick={() => onRefresh()}
+          disabled={isLoading}
+          title="Refrescar"
+        >
+          <span className={`material-symbols-rounded ${isLoading ? styles.spinning : ""}`}>
+            refresh
+          </span>
+        </button>
+      </div>
+
+      {/* ── City filter ── */}
+      <div style={{ padding: "6px 12px", borderBottom: "0.5px solid var(--c-border)", background: "var(--c-bg)", display: "flex", alignItems: "center" }}>
+        <div className={styles.cityFilterWrap}>
+          <span className={`material-symbols-rounded ${styles.cityFilterIcon}`}>location_on</span>
+          <select
+            className={styles.cityFilterSelect}
+            value={ciudadFiltro}
+            onChange={(e) => setCiudadFiltro(e.target.value)}
           >
-            <span className={`material-symbols-rounded ${isLoading ? styles.spinning : ""}`}>
-              refresh
-            </span>
-          </button>
+            <option value="">Todas las ciudades</option>
+            {ciudades.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <svg className={styles.cityFilterChevron} width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
       </div>
 
