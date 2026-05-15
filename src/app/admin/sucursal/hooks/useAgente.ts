@@ -216,7 +216,7 @@ export function usePrealerta() {
   const handleEmpacarDesdeArchivo = async (
     seriales: SerialItem[],
     caja: number,
-  ): Promise<{ exitosos: number; yaExistian: number; fallidos: number }> => {
+  ): Promise<{ exitosos: number; yaExistian: number; fallidos: number; enOtraPrealerta: number }> => {
     if (!preAlertaSeleccionada) throw new Error("Sin prealerta seleccionada");
 
     const idPrealerta = await resolverIdPrealerta(preAlertaSeleccionada);

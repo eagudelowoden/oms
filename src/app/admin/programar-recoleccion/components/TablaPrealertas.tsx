@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import styles from "../css/programar.module.css";
 import { PrealertaRecoleccionRow } from "@/app/services/programar-recoleccion.service";
 
@@ -28,23 +28,52 @@ export default function TablaPrealertas({
   onSeleccionar,
   onRefresh,
 }: Props) {
+  const [query, setQuery] = useState("");
+
+  const filtered = query.trim()
+    ? prealertas.filter(
+        (p) =>
+          p.nombre.toLowerCase().includes(query.toLowerCase()) ||
+          (p.ciudad ?? "").toLowerCase().includes(query.toLowerCase()),
+      )
+    : prealertas;
+
   return (
     <div className={styles.card}>
       <div className={styles.cardInnerHeader}>
         <div className={styles.cardInnerLeft}>
           <span className={styles.cardInnerTitle}>Prealertas</span>
-          <span className={styles.countPill}>{prealertas.length}</span>
+          <span className={styles.countPill}>{filtered.length}</span>
         </div>
-        <button
-          className={styles.btnRefresh}
-          onClick={() => onRefresh()}
-          disabled={isLoading}
-          title="Refrescar"
-        >
-          <span className={`material-symbols-rounded ${isLoading ? styles.spinning : ""}`}>
-            refresh
-          </span>
-        </button>
+        <div className={styles.cardInnerRight}>
+          <div className={styles.filterWrap}>
+            <span className="material-symbols-rounded" style={{ fontSize: 13, color: "var(--c-hint)" }}>
+              search
+            </span>
+            <input
+              className={styles.filterInput}
+              type="text"
+              placeholder="Nombre o ciudad…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            {query && (
+              <button className={styles.filterClear} onClick={() => setQuery("")} title="Limpiar">
+                <span className="material-symbols-rounded" style={{ fontSize: 13 }}>close</span>
+              </button>
+            )}
+          </div>
+          <button
+            className={styles.btnRefresh}
+            onClick={() => onRefresh()}
+            disabled={isLoading}
+            title="Refrescar"
+          >
+            <span className={`material-symbols-rounded ${isLoading ? styles.spinning : ""}`}>
+              refresh
+            </span>
+          </button>
+        </div>
       </div>
 
       <div className={styles.tableWrap}>
@@ -69,14 +98,14 @@ export default function TablaPrealertas({
                   Cargando...
                 </td>
               </tr>
-            ) : prealertas.length === 0 ? (
+            ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={9} className={styles.emptyCell}>
                   No hay prealertas
                 </td>
               </tr>
             ) : (
-              prealertas.map((p) => (
+              filtered.map((p) => (
                 <tr
                   key={p.id}
                   className={seleccionada?.id === p.id ? styles.trSelected : ""}

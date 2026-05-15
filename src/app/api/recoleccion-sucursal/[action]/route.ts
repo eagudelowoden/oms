@@ -54,14 +54,6 @@ export async function POST(
       return NextResponse.json(result);
     }
 
-    if (action === "updateAccesorio") {
-      const { serialId, cantidadRecibida } = body;
-      if (serialId == null || cantidadRecibida == null)
-        return NextResponse.json({ error: "serialId y cantidadRecibida requeridos" }, { status: 400 });
-      const result = await RecoleccionSucursalService.updateCantidadRecibida(serialId, cantidadRecibida);
-      return NextResponse.json(result);
-    }
-
     if (action === "cerrarVerificacion") {
       const { prealertaId } = body;
       if (!prealertaId)

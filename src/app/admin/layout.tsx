@@ -32,6 +32,7 @@ export default function AdminLayout({
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [cargando, setCargando] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showChangeClient, setShowChangeClient] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -182,7 +183,7 @@ export default function AdminLayout({
         />
 
         <aside
-          className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ""}`}
+          className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ""} ${sidebarCollapsed ? styles.sidebarCollapsed : ""}`}
         >
           <div className={styles.sidebarHeader}>
             <div className={styles.logoGroup}>
@@ -191,6 +192,15 @@ export default function AdminLayout({
               </div>
               <span className={styles.logoText}>OMS</span>
             </div>
+            <button
+              className={styles.sidebarToggleDesktop}
+              onClick={() => setSidebarCollapsed((c) => !c)}
+              title={sidebarCollapsed ? "Expandir menú" : "Colapsar menú"}
+            >
+              <span className="material-symbols-rounded">
+                {sidebarCollapsed ? "menu_open" : "menu"}
+              </span>
+            </button>
             <button
               className={styles.closeMenuMobile}
               onClick={() => setIsSidebarOpen(false)}

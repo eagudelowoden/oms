@@ -169,6 +169,49 @@
   align-items: center;
   gap: 8px;
 }
+.cardInnerRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── FILTER INPUT ── */
+.filterWrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.filterWrap:focus-within {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.08);
+}
+.filterInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 11px;
+  color: var(--c-text);
+  width: 120px;
+}
+.filterInput::placeholder { color: var(--c-hint); }
+
+.filterClear {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--c-hint);
+  padding: 0;
+  transition: color 0.15s;
+}
+.filterClear:hover { color: var(--c-text); }
 .cardInnerTitle {
   font-size: 10px;
   font-weight: 600;

@@ -134,6 +134,49 @@
   align-items: center;
   gap: 8px;
 }
+.cardHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── FILTER INPUT ── */
+.filterWrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.filterWrap:focus-within {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.08);
+}
+.filterInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 11px;
+  color: var(--c-text);
+  width: 120px;
+}
+.filterInput::placeholder { color: var(--c-hint); }
+
+.filterClear {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--c-hint);
+  padding: 0;
+  transition: color 0.15s;
+}
+.filterClear:hover { color: var(--c-text); }
 .cardTitle {
   font-size: 10px;
   font-weight: 600;
@@ -149,6 +192,61 @@
   border-radius: 99px;
   padding: 1px 7px;
 }
+
+/* ── SCAN ROW (manual input + camera button) ── */
+.scanRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.manualScanWrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.manualScanWrap:focus-within {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.08);
+}
+
+.manualScanInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 11px;
+  font-family: "Courier New", monospace;
+  color: var(--c-text);
+  width: 130px;
+}
+.manualScanInput::placeholder {
+  color: var(--c-hint);
+  font-family: var(--font-main, "Inter", sans-serif);
+}
+
+.btnManualScan {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--c-blue);
+  padding: 0;
+  border-radius: 4px;
+  transition: opacity 0.15s;
+}
+.btnManualScan:disabled {
+  color: var(--c-light);
+  cursor: default;
+}
+.btnManualScan .material-symbols-rounded { font-size: 15px; }
 
 /* ── ESCANEAR BUTTON ── */
 .btnEscanear {

@@ -24,7 +24,7 @@ export default function SincronizarModal({
   isOpen,
   fecha,
   onClose,
-  onConfirm,
+  onSincronizar: onConfirm,
 }: PropsSincronizarSeriales) {
   // Inicialización lazy: se ejecuta solo una vez al montar
   const [documento, setDocumento] = useState<string>(() =>

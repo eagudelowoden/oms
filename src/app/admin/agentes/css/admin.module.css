@@ -530,3 +530,58 @@
   background: #f1f5f9;
   margin: 2px 0;
 }
+
+/* ── SIDEBAR COLLAPSE TOGGLE (solo desktop) ── */
+.sidebarToggleDesktop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebarToggleDesktop:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+.sidebarToggleDesktop .material-symbols-rounded {
+  font-size: 20px;
+}
+
+@media (max-width: 1024px) {
+  .sidebarToggleDesktop {
+    display: none;
+  }
+}
+
+/* ── COLLAPSED SIDEBAR ── */
+.sidebarCollapsed {
+  width: 56px !important;
+}
+
+.sidebarCollapsed .logoText,
+.sidebarCollapsed .currentClientBadge,
+.sidebarCollapsed .navSectionTitle,
+.sidebarCollapsed .sidebarFooterDesktop {
+  display: none;
+}
+
+.sidebarCollapsed .navItem {
+  justify-content: center;
+  padding: 10px 0;
+  gap: 0;
+}
+
+/* Oculta el texto del navItem (segundo span) cuando está colapsado */
+.sidebarCollapsed .navItem > span:last-child {
+  display: none;
+}
+
+/* Icono centrado más grande cuando está colapsado */
+.sidebarCollapsed .navItem .material-symbols-rounded {
+  font-size: 22px;
+}

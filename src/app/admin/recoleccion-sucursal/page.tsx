@@ -55,10 +55,12 @@ export default function RecoleccionSucursalPage() {
         seriales={seriales}
         cargando={loadingSeriales}
         onEscanear={() => {
-          if (!seleccionada) {
-            return;
-          }
+          if (!seleccionada) return;
           setScannerOpen(true);
+        }}
+        onManualScan={(value) => {
+          if (!seleccionada) return;
+          handleScan(value);
         }}
       />
 

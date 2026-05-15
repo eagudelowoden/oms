@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import styles from "../css/recoleccion.module.css";
 import { SerialRecoleccionRow } from "@/app/services/recoleccion-sucursal.service";
 
@@ -8,9 +8,19 @@ interface Props {
   seriales: SerialRecoleccionRow[];
   cargando: boolean;
   onEscanear: () => void;
+  onManualScan: (value: string) => void;
 }
 
-export default function TablaMateriales({ seriales, cargando, onEscanear }: Props) {
+export default function TablaMateriales({ seriales, cargando, onEscanear, onManualScan }: Props) {
+  const [manualValue, setManualValue] = useState("");
+
+  const handleSubmit = () => {
+    const v = manualValue.trim();
+    if (!v) return;
+    onManualScan(v);
+    setManualValue("");
+  };
+
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
@@ -18,10 +28,33 @@ export default function TablaMateriales({ seriales, cargando, onEscanear }: Prop
           <span className={styles.cardTitle}>Materiales</span>
           <span className={styles.countPill}>{seriales.length}</span>
         </div>
-        <button className={styles.btnEscanear} onClick={onEscanear}>
-          <span className="material-symbols-rounded">qr_code_scanner</span>
-          Escanear
-        </button>
+        <div className={styles.scanRow}>
+          <div className={styles.manualScanWrap}>
+            <span className="material-symbols-rounded" style={{ fontSize: 14, color: "var(--c-hint)" }}>
+              search
+            </span>
+            <input
+              className={styles.manualScanInput}
+              type="text"
+              placeholder="Serial o MAC…"
+              value={manualValue}
+              onChange={(e) => setManualValue(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            />
+            <button
+              className={styles.btnManualScan}
+              onClick={handleSubmit}
+              disabled={!manualValue.trim()}
+              title="Registrar"
+            >
+              <span className="material-symbols-rounded">check</span>
+            </button>
+          </div>
+          <button className={styles.btnEscanear} onClick={onEscanear}>
+            <span className="material-symbols-rounded">qr_code_scanner</span>
+            Cámara
+          </button>
+        </div>
       </div>
 
       <div className={styles.tableWrap}>
