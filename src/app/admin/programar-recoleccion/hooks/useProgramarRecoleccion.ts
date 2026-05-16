@@ -91,6 +91,11 @@ export function useProgramarRecoleccion() {
   const isPending =
     programarMutation.isPending || desprogramarMutation.isPending;
 
+  const materialesConTecnico = materiales.map((m) => ({
+    ...m,
+    tecnico: m.tecnico || seleccionada?.usuarioNombre || "",
+  }));
+
   return {
     fecha,
     setFecha,
@@ -99,7 +104,7 @@ export function useProgramarRecoleccion() {
     refetchPrealertas,
     seleccionada,
     setSeleccionada,
-    materiales,
+    materiales: materialesConTecnico,
     cargandoMateriales,
     toast,
     isPending,

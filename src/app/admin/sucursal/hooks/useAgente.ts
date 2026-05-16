@@ -72,9 +72,12 @@ export function usePrealerta() {
   /* ── SERIALES MOSTRADOS ── */
   // Muestra todos los seriales de la prealerta (Empacado + Disponible) sin importar la caja
   const codigosEnDB = new Set(serialesDeDB.map((s) => s.codigo));
+  const tecnicoPrealerta = preAlertaSeleccionada?.usuarioNombre ?? undefined;
   const serialesMostrados: SerialItem[] = [
-    ...serialesDeDB,
-    ...serialesEscaneados.filter((e) => !codigosEnDB.has(e.codigo)),
+    ...serialesDeDB.map((s) => ({ ...s, tecnico: s.tecnico || tecnicoPrealerta })),
+    ...serialesEscaneados
+      .filter((e) => !codigosEnDB.has(e.codigo))
+      .map((s) => ({ ...s, tecnico: s.tecnico || tecnicoPrealerta })),
   ];
 
   /* ── SINCRONIZAR API ── */

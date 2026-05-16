@@ -99,15 +99,21 @@ export function usePrealerta() {
 
   const codigosEnCaja = new Set(serialesEnCaja.map((s) => s.codigo));
 
+  const tecnicoPrealerta = preAlertaSeleccionada?.usuarioNombre ?? undefined;
+
   const serialesMostrados: SerialItem[] = [
-    ...serialesEnCaja,
-    ...serialesEscaneados.filter((e) => !codigosEnCaja.has(e.codigo)),
-    ...serialesDeDB.filter(
-      (d) =>
-        d.estado === "Disponible" &&
-        !codigosEnCaja.has(d.codigo) &&
-        !serialesEscaneados.some((e) => e.codigo === d.codigo),
-    ),
+    ...serialesEnCaja.map((s) => ({ ...s, tecnico: s.tecnico || tecnicoPrealerta })),
+    ...serialesEscaneados
+      .filter((e) => !codigosEnCaja.has(e.codigo))
+      .map((s) => ({ ...s, tecnico: s.tecnico || tecnicoPrealerta })),
+    ...serialesDeDB
+      .filter(
+        (d) =>
+          d.estado === "Disponible" &&
+          !codigosEnCaja.has(d.codigo) &&
+          !serialesEscaneados.some((e) => e.codigo === d.codigo),
+      )
+      .map((s) => ({ ...s, tecnico: s.tecnico || tecnicoPrealerta })),
   ];
 
   /* ── SINCRONIZAR API (CRM) ── */

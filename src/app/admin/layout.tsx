@@ -273,6 +273,22 @@ export default function AdminLayout({
               <span>Recolección Sucursal</span>
             </Link>
 
+            <Link
+              href="/admin/confirmar-envio"
+              className={linkClass("/admin/confirmar-envio")}
+            >
+              <span className="material-symbols-rounded">local_shipping</span>
+              <span>Confirmar Envío</span>
+            </Link>
+
+            <Link
+              href="/admin/confirmar-recepcion"
+              className={linkClass("/admin/confirmar-recepcion")}
+            >
+              <span className="material-symbols-rounded">move_to_inbox</span>
+              <span>Confirmar Recepción</span>
+            </Link>
+
             {usuario.perfilId === 1 && (
               <Link
                 href="/admin/usuarios"

@@ -89,6 +89,11 @@ export function useConfirmarProgramacion() {
 
   const isPending = reprogramarMutation.isPending || autorizarMutation.isPending;
 
+  const materialesConTecnico = materiales.map((m) => ({
+    ...m,
+    tecnico: m.tecnico || seleccionada?.usuarioNombre || "",
+  }));
+
   return {
     fecha,
     setFecha,
@@ -97,7 +102,7 @@ export function useConfirmarProgramacion() {
     refetchPrealertas,
     seleccionada,
     setSeleccionada,
-    materiales,
+    materiales: materialesConTecnico,
     cargandoMateriales,
     toast,
     isPending,

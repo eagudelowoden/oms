@@ -90,13 +90,18 @@ const cerrarVerificacionMutation = useMutation({
     cerrarVerificacionMutation.mutate();
   };
 
+  const serialesConTecnico = seriales.map((s) => ({
+    ...s,
+    tecnico: s.tecnico || seleccionada?.usuarioNombre || "",
+  }));
+
   return {
     prealertas,
     loadingPrealertas,
     refetchPrealertas,
     seleccionada,
     setSeleccionada,
-    seriales,
+    seriales: serialesConTecnico,
     loadingSeriales,
     refetchSeriales,
     accesorios,
