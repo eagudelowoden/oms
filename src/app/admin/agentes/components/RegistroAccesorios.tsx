@@ -24,13 +24,19 @@ export default function RegistroAccesorios({ onAgregarAccesorio, onShowToast }: 
     staleTime: 5 * 60 * 1000,
   });
 
+  const sinMultimodelo = codigos.filter(
+    (c) =>
+      !c.descripcion.toLowerCase().includes("multimodelo") &&
+      !c.codigo.toLowerCase().includes("multimodelo"),
+  );
+
   const filtrados = busqueda.trim()
-    ? codigos
+    ? sinMultimodelo
         .filter((c) =>
           `${c.codigo} ${c.descripcion}`.toLowerCase().includes(busqueda.toLowerCase()),
         )
         .slice(0, 60)
-    : codigos.slice(0, 60);
+    : sinMultimodelo.slice(0, 60);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
