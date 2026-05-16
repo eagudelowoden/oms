@@ -13,6 +13,8 @@ export interface PrealertaRecepcionRow {
 
 export const ConfirmarRecepcionService = {
   async getPrealertas(): Promise<PrealertaRecepcionRow[]> {
+    console.log("[ConfirmarRecepcion] getPrealertas — buscando Estado IN ('Enviado','Recibido')");
+
     const rows = await execQuery<{
       Id: number;
       Nombre: string | null;
@@ -34,9 +36,15 @@ export const ConfirmarRecepcionService = {
       LEFT JOIN UsuarioSys u ON p.UsuarioId = u.Id
       LEFT JOIN WmsWdGeneral.dbo.Sede s ON p.OrigenId = s.Id
       WHERE p.Activo = 1
-        AND p.Estado = 'Enviado'
+        AND p.Estado IN ('Enviado', 'Recibido')
       ORDER BY p.Fecha DESC
     `);
+
+    console.log(`[ConfirmarRecepcion] Total filas SQL: ${rows.length}`);
+    if (rows.length > 0) {
+      const estados = [...new Set(rows.map((r) => r.Estado))];
+      console.log(`[ConfirmarRecepcion] Estados encontrados: ${JSON.stringify(estados)}`);
+    }
 
     return rows.map((r) => ({
       id: r.Id,
@@ -51,11 +59,16 @@ export const ConfirmarRecepcionService = {
   },
 
   async confirmarRecepcion(id: number): Promise<void> {
-    await execQuery(
-      `UPDATE Prealerta
-       SET Estado = 'Recibido', FechaRecepcion = GETDATE()
-       WHERE Id = @Id AND Activo = 1`,
-      { Id: id },
-    );
+    try {
+      await execQuery(
+        `UPDATE Prealerta SET Estado = 'Recibido', FechaRecepcion = GETDATE() WHERE Id = @Id AND Activo = 1`,
+        { Id: id },
+      );
+    } catch {
+      await execQuery(
+        `UPDATE Prealerta SET Estado = 'Recibido' WHERE Id = @Id AND Activo = 1`,
+        { Id: id },
+      );
+    }
   },
 };

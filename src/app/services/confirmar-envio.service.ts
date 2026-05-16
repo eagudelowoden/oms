@@ -32,7 +32,11 @@ export const ConfirmarEnvioService = {
   },
 
   async getPrealertas(validaReco: number): Promise<PrealertaEnvioRow[]> {
-    const estado = validaReco === 1 ? "Verificado" : "Autorizado";
+    // validaReco=1 → solo Verificado; validaReco=0 → solo Autorizado
+    // Después de confirmar envío el estado queda en 'Enviado' (se mantiene visible)
+    const estadoBase = validaReco === 1 ? "Verificado" : "Autorizado";
+
+    console.log(`[ConfirmarEnvio] getPrealertas validaReco=${validaReco} estadoBase=${estadoBase}`);
 
     const rows = await execQuery<{
       Id: number;
@@ -53,20 +57,35 @@ export const ConfirmarEnvioService = {
         p.Fecha,
         u.nombres       AS UsuarioNombre,
         p.Estado,
-        CONVERT(VARCHAR(10), p.Programado, 120)    AS Programado,
+        CONVERT(VARCHAR(10), p.Programado, 120)      AS Programado,
         CONVERT(VARCHAR(19), p.FechaAutorizado, 120) AS FechaAutorizado,
         p.NoAutorizacion
       FROM Prealerta p
       LEFT JOIN UsuarioSys u ON p.UsuarioId = u.Id
       LEFT JOIN WmsWdGeneral.dbo.Sede s ON p.OrigenId = s.Id
       WHERE p.Activo = 1
-        AND p.Estado = @Estado
+        AND p.Estado IN ('Autorizado', 'Verificado', 'Enviado')
       ORDER BY p.Fecha DESC
     `,
-      { Estado: estado },
     );
 
-    return rows.map((r) => ({
+    console.log(`[ConfirmarEnvio] Total filas SQL: ${rows.length}`);
+    if (rows.length > 0) {
+      const estados = [...new Set(rows.map((r) => r.Estado))];
+      console.log(`[ConfirmarEnvio] Estados encontrados: ${JSON.stringify(estados)}`);
+    }
+
+    // Mantener las del estadoBase + las que ya fueron Enviadas (confirmadas)
+    const resultado = rows.filter(
+      (r) => (r.Estado ?? "") === estadoBase || (r.Estado ?? "") === "Enviado",
+    );
+
+    // Si por alguna razón no hay nada con el estadoBase, devolver todo lo que llegó
+    const final = resultado.length > 0 ? resultado : rows;
+
+    console.log(`[ConfirmarEnvio] Filas devueltas: ${final.length}`);
+
+    return final.map((r) => ({
       id: r.Id,
       nombre: r.Nombre ?? "Sin Nombre",
       ciudad: r.Ciudad ?? "",
@@ -80,11 +99,17 @@ export const ConfirmarEnvioService = {
   },
 
   async confirmarEnvio(id: number): Promise<void> {
-    await execQuery(
-      `UPDATE Prealerta
-       SET Estado = 'Enviado', FechaEnvio = GETDATE()
-       WHERE Id = @Id AND Activo = 1`,
-      { Id: id },
-    );
+    // Intentar con FechaEnvio; si la columna no existe, actualizar solo Estado
+    try {
+      await execQuery(
+        `UPDATE Prealerta SET Estado = 'Enviado', FechaEnvio = GETDATE() WHERE Id = @Id AND Activo = 1`,
+        { Id: id },
+      );
+    } catch {
+      await execQuery(
+        `UPDATE Prealerta SET Estado = 'Enviado' WHERE Id = @Id AND Activo = 1`,
+        { Id: id },
+      );
+    }
   },
 };

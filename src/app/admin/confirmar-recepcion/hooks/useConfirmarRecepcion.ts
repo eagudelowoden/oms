@@ -20,17 +20,29 @@ export function useConfirmarRecepcion() {
   };
 
   /* ── QUERY ── */
-  const { data: prealertas = [], isLoading, refetch: refetchPrealertas } = useQuery({
+  const {
+    data: prealertas = [],
+    isLoading,
+    isError,
+    error,
+    refetch: refetchPrealertas,
+  } = useQuery({
     queryKey: ["confirmar-recepcion-prealertas"],
     queryFn: confirmarRecepcionQueries.list,
+    retry: 1,
   });
 
   /* ── MUTATION ── */
   const confirmarMutation = useMutation({
     mutationFn: (id: number) => confirmarRecepcionMutations.confirmar(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["confirmar-recepcion-prealertas"] });
-      setSeleccionada(null);
+    onSuccess: (_data, id) => {
+      // Actualizar estado en cache local sin recargar la lista
+      queryClient.setQueryData<PrealertaRecepcionRow[]>(
+        ["confirmar-recepcion-prealertas"],
+        (prev) =>
+          prev?.map((p) => (p.id === id ? { ...p, estado: "Recibido" } : p)) ?? [],
+      );
+      setSeleccionada((prev) => prev ? { ...prev, estado: "Recibido" } : prev);
       showToast("✓ Recepción confirmada correctamente");
     },
     onError: (err: Error) => {
@@ -48,10 +60,13 @@ export function useConfirmarRecepcion() {
   };
 
   const isPending = confirmarMutation.isPending;
+  const errorMsg = isError ? (error instanceof Error ? error.message : "Error al cargar datos") : null;
 
   return {
     prealertas,
     isLoading,
+    isError,
+    errorMsg,
     refetchPrealertas,
     seleccionada,
     setSeleccionada,

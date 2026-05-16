@@ -28,9 +28,17 @@ export async function GET(
 
   try {
     if (action === "list") {
-      const clientId = await getClientIdFromToken();
-      const validaReco = await ConfirmarEnvioService.getValidaReco(clientId);
+      let validaReco = 0;
+      try {
+        const clientId = await getClientIdFromToken();
+        console.log(`[confirmar-envio/list] clientId=${clientId}`);
+        validaReco = await ConfirmarEnvioService.getValidaReco(clientId);
+        console.log(`[confirmar-envio/list] validaReco=${validaReco}`);
+      } catch (err) {
+        console.warn("[confirmar-envio/list] No se pudo obtener validaReco, usando 0:", err);
+      }
       const data = await ConfirmarEnvioService.getPrealertas(validaReco);
+      console.log(`[confirmar-envio/list] Enviando ${data.length} prealertas`);
       return NextResponse.json(data);
     }
 

@@ -10,6 +10,8 @@ export default function ConfirmarEnvioPage() {
   const {
     prealertas,
     isLoading,
+    isError,
+    errorMsg,
     refetchPrealertas,
     seleccionada,
     setSeleccionada,
@@ -21,6 +23,12 @@ export default function ConfirmarEnvioPage() {
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.pageTitle}>Confirmar envío</h1>
+
+      {isError && (
+        <div className={styles.toastError} style={{ marginBottom: 12 }}>
+          ⚠ Error al cargar prealertas: {errorMsg}
+        </div>
+      )}
 
       <Acciones
         seleccionada={seleccionada}

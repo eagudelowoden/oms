@@ -20,17 +20,29 @@ export function useConfirmarEnvio() {
   };
 
   /* ── QUERY ── */
-  const { data: prealertas = [], isLoading, refetch: refetchPrealertas } = useQuery({
+  const {
+    data: prealertas = [],
+    isLoading,
+    isError,
+    error,
+    refetch: refetchPrealertas,
+  } = useQuery({
     queryKey: ["confirmar-envio-prealertas"],
     queryFn: confirmarEnvioQueries.list,
+    retry: 1,
   });
 
   /* ── MUTATION ── */
   const confirmarMutation = useMutation({
     mutationFn: (id: number) => confirmarEnvioMutations.confirmar(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["confirmar-envio-prealertas"] });
-      setSeleccionada(null);
+    onSuccess: (_data, id) => {
+      // Actualizar estado en cache local sin recargar la lista
+      queryClient.setQueryData<PrealertaEnvioRow[]>(
+        ["confirmar-envio-prealertas"],
+        (prev) =>
+          prev?.map((p) => (p.id === id ? { ...p, estado: "Enviado" } : p)) ?? [],
+      );
+      setSeleccionada((prev) => prev ? { ...prev, estado: "Enviado" } : prev);
       showToast("✓ Envío confirmado correctamente");
     },
     onError: (err: Error) => {
@@ -48,10 +60,13 @@ export function useConfirmarEnvio() {
   };
 
   const isPending = confirmarMutation.isPending;
+  const errorMsg = isError ? (error instanceof Error ? error.message : "Error al cargar datos") : null;
 
   return {
     prealertas,
     isLoading,
+    isError,
+    errorMsg,
     refetchPrealertas,
     seleccionada,
     setSeleccionada,

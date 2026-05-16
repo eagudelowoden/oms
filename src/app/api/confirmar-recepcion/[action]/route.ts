@@ -9,7 +9,9 @@ export async function GET(
 
   try {
     if (action === "list") {
+      console.log("[confirmar-recepcion/list] Iniciando consulta...");
       const data = await ConfirmarRecepcionService.getPrealertas();
+      console.log(`[confirmar-recepcion/list] Enviando ${data.length} prealertas`);
       return NextResponse.json(data);
     }
 

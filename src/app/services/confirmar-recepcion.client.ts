@@ -5,7 +5,13 @@ const BASE = "/api/confirmar-recepcion";
 export const confirmarRecepcionQueries = {
   list: async (): Promise<PrealertaRecepcionRow[]> => {
     const res = await fetch(`${BASE}/list`);
-    if (!res.ok) throw new Error("Error al obtener prealertas");
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const detail = (body as { detail?: string; error?: string })?.detail
+        ?? (body as { detail?: string; error?: string })?.error
+        ?? `HTTP ${res.status}`;
+      throw new Error(detail);
+    }
     return res.json();
   },
 };
