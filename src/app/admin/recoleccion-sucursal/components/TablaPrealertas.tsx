@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../css/recoleccion.module.css";
 import { PrealertaSucursalRow } from "@/app/services/recoleccion-sucursal.service";
 
@@ -10,6 +10,7 @@ interface Props {
   seleccionada: PrealertaSucursalRow | null;
   onSeleccionar: (p: PrealertaSucursalRow) => void;
   onRefresh: () => void;
+  onDeseleccionar?: () => void;
 }
 
 export default function TablaPrealertas({
@@ -18,6 +19,7 @@ export default function TablaPrealertas({
   seleccionada,
   onSeleccionar,
   onRefresh,
+  onDeseleccionar,
 }: Props) {
   const [ciudadFiltro, setCiudadFiltro] = useState("");
 
@@ -25,6 +27,13 @@ export default function TablaPrealertas({
   const filtered = ciudadFiltro
     ? prealertas.filter((p) => p.ciudad === ciudadFiltro)
     : prealertas;
+
+  useEffect(() => {
+    if (seleccionada && !filtered.find((p) => p.id === seleccionada.id)) {
+      onDeseleccionar?.();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ciudadFiltro]);
 
   return (
     <div className={styles.card}>

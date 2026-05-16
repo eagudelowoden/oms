@@ -9,6 +9,12 @@ export const programarRecoleccionQueries = {
     return res.json();
   },
 
+  listProgramadas: async (): Promise<PrealertaRecoleccionRow[]> => {
+    const res = await fetch(`${BASE}/list-programadas`);
+    if (!res.ok) throw new Error("Error al obtener prealertas programadas");
+    return res.json();
+  },
+
   materiales: async (prealertaId: number): Promise<MaterialRow[]> => {
     const res = await fetch(`${BASE}/materiales?prealertaId=${prealertaId}`);
     if (!res.ok) throw new Error("Error al obtener materiales");

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../css/confirmar.module.css";
 import { PrealertaRecoleccionRow } from "@/app/services/programar-recoleccion.service";
 
@@ -10,6 +10,7 @@ interface Props {
   seleccionada: PrealertaRecoleccionRow | null;
   onSeleccionar: (p: PrealertaRecoleccionRow) => void;
   onRefresh: () => void;
+  onDeseleccionar?: () => void;
 }
 
 function EstadoBadge({ estado }: { estado: string }) {
@@ -27,6 +28,7 @@ export default function TablaPrealertas({
   seleccionada,
   onSeleccionar,
   onRefresh,
+  onDeseleccionar,
 }: Props) {
   const [ciudadFiltro, setCiudadFiltro] = useState("");
 
@@ -34,6 +36,13 @@ export default function TablaPrealertas({
   const filtered = ciudadFiltro
     ? prealertas.filter((p) => p.ciudad === ciudadFiltro)
     : prealertas;
+
+  useEffect(() => {
+    if (seleccionada && !filtered.find((p) => p.id === seleccionada.id)) {
+      onDeseleccionar?.();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ciudadFiltro]);
 
   return (
     <div className={styles.card}>

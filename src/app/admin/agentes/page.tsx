@@ -40,6 +40,11 @@ export default function AgentePage() {
     progreso,
     sincronizando,
     sincronizarDesdeAPI,
+    handleSincronizarCodigoSap,
+    sincronizandoSap,
+    modalEnriquecerSap,
+    setModalEnriquecerSap,
+    handleEnriquecerSap,
     sincronizandoAccesorios,
     empacarAccesoriosAgrupados,
     seleccionados,
@@ -117,6 +122,8 @@ export default function AgentePage() {
         onRemove={handleRemoveSerial}
         onRemoveSeleccionados={handleRemoveSeleccionados}
         cargandoSeriales={cargandoSeriales}
+        onSincronizarSap={preAlertaSeleccionada ? handleSincronizarCodigoSap : undefined}
+        sincronizandoSap={sincronizandoSap}
       />
 
       {mostrarRegistroManual && (
@@ -147,6 +154,19 @@ export default function AgentePage() {
         }
         onGuardar={handleGuardarSeriales}
         onVolver={limpiarPrevista}
+      />
+
+      {/* Modal enriquecer seriales con código SAP vía API CRM */}
+      <SincronizarModal
+        isOpen={modalEnriquecerSap}
+        fecha={fechaHoy}
+        sincronizando={sincronizandoSap}
+        serialesPrevista={[]}
+        guardando={false}
+        onClose={() => setModalEnriquecerSap(false)}
+        onSincronizar={(fecha, documento) => handleEnriquecerSap(fecha, documento)}
+        onGuardar={() => {}}
+        onVolver={() => {}}
       />
 
       <SincronizarAccesoriosModal

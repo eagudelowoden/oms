@@ -37,6 +37,44 @@ export const SucursalBackendService = {
       origenId: r.OrigenId ?? undefined,
     }));
   },
+  /**
+   * Para cada serial de la prealerta que no tenga CodigoSap,
+   * busca el serial en la tabla CodigoSap (campo `codigo`).
+   * Si lo encuentra, actualiza CodigoSap y Descripcion en PrealertaSerial.
+   * Retorna cuántos registros fueron actualizados.
+   */
+  async sincronizarConCodigoSap(prealertaId: number): Promise<{ actualizados: number }> {
+    // Seriales sin SAP code
+    const seriales = await execQuery<{ Id: number; Serial: string }>(
+      `SELECT Id, Serial FROM PrealertaSerial
+       WHERE PrealertaId = @prealertaId
+         AND (CodigoSap IS NULL OR CodigoSap = '')
+         AND (Serial IS NOT NULL AND Serial <> '')`,
+      { prealertaId },
+    );
+
+    if (seriales.length === 0) return { actualizados: 0 };
+
+    // Cargar tabla CodigoSap (codigo → Descripcion)
+    const sapMap = await AgentesBackendService.getCodigosSap();
+
+    let actualizados = 0;
+    for (const row of seriales) {
+      const desc = sapMap.get(row.Serial.trim());
+      if (desc !== undefined) {
+        await execQuery(
+          `UPDATE PrealertaSerial
+              SET CodigoSap = @codigo, Descripcion = @descripcion
+            WHERE Id = @id`,
+          { id: row.Id, codigo: row.Serial.trim(), descripcion: desc },
+        );
+        actualizados++;
+      }
+    }
+
+    return { actualizados };
+  },
+
   getIdPrealert:            AgentesBackendService.getIdPrealert.bind(AgentesBackendService),
   getSedes:                 AgentesBackendService.getSedes.bind(AgentesBackendService),
   insertPrealert:           AgentesBackendService.insertPrealert.bind(AgentesBackendService),

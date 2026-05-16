@@ -62,6 +62,7 @@ export default function AgentePage() {
         seleccionada={preAlertaSeleccionada}
         onSeleccionar={setPreAlertaSeleccionada}
         onEliminar={pedirConfirmacion}
+        onDeseleccionar={() => setPreAlertaSeleccionada(null)}
       />
 
       <PrealertaSeriales

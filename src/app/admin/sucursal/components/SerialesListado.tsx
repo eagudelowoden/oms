@@ -211,7 +211,7 @@ export function PrealertaSeriales({
                     </td>
 
                     {/* Técnico */}
-                    <td className={styles.tdMuted}>—</td>
+                    <td className={styles.tdMuted}>{item.tecnico ?? "—"}</td>
 
                     {/* Trámite */}
                     <td className={styles.tdMuted}>{item.tramite ?? "—"}</td>

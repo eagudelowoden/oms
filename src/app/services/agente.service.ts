@@ -107,7 +107,7 @@ export const AgentesBackendService = {
   },
 
   async getSerialsByPrealerta(prealertaId: number) {
-    const rows = await execQuery<PrealertaSerialTable>(
+    const rows = await execQuery<PrealertaSerialTable & { TecnicoCliente?: string | null }>(
       `SELECT
       Serial AS Id,
       Serial AS codigo,
@@ -116,7 +116,8 @@ export const AgentesBackendService = {
       Tipo AS Tipo,
       Tramite AS Tramite,
       CodigoSap AS CodigoSap,
-      Descripcion AS Descripcion
+      Descripcion AS Descripcion,
+      TecnicoCliente
     FROM PrealertaSerial
     WHERE PrealertaId = @id`,
       { id: prealertaId },
@@ -133,6 +134,7 @@ export const AgentesBackendService = {
       tramite: r.Tramite ?? "",
       codigo_sap: r.CodigoSap ?? undefined,
       descripcion: r.Descripcion ?? undefined,
+      tecnico: (r as { TecnicoCliente?: string | null }).TecnicoCliente ?? undefined,
     }));
   },
 
@@ -336,11 +338,95 @@ export const AgentesBackendService = {
 
     return { success: true };
   },
+  async getSerialsSinSap(prealertaId: number) {
+    return execQuery<{ Id: number; Serial: string }>(
+      `SELECT Id, Serial FROM PrealertaSerial
+       WHERE PrealertaId = @prealertaId
+         AND Tipo <> 'No-serializable'
+         AND (Serial IS NOT NULL AND Serial <> '')
+         AND (CodigoSap IS NULL OR CodigoSap = '' OR Descripcion IS NULL OR Descripcion = '')`,
+      { prealertaId },
+    );
+  },
+
+  async actualizarCodigoSapSerial(
+    id: number,
+    codigoSap: string,
+    descripcion: string,
+  ) {
+    await execQuery(
+      `UPDATE PrealertaSerial
+          SET CodigoSap = @codigoSap, Descripcion = @descripcion
+        WHERE Id = @id`,
+      { id, codigoSap, descripcion },
+    );
+  },
+
   async getCodigosSap(): Promise<Map<string, string>> {
     const rows = await execQuery<{ codigo: string; Descripcion: string }>(
       "SELECT codigo, Descripcion FROM CodigoSap",
     );
     return new Map(rows.map((r) => [r.codigo, r.Descripcion ?? ""]));
+  },
+
+  /**
+   * Para cada serial de la prealerta:
+   *   1. Si ya tiene CodigoSap pero Descripcion vacía → busca la descripción por ese código SAP.
+   *   2. Si no tiene CodigoSap → intenta si el valor del Serial coincide con algún código SAP.
+   * En ambos casos actualiza Descripcion (y CodigoSap si aplica) en PrealertaSerial.
+   */
+  async sincronizarConCodigoSap(prealertaId: number): Promise<{ actualizados: number }> {
+    const seriales = await execQuery<{
+      Id: number;
+      Serial: string;
+      CodigoSap: string | null;
+    }>(
+      `SELECT Id, Serial, CodigoSap FROM PrealertaSerial
+       WHERE PrealertaId = @prealertaId
+         AND (Serial IS NOT NULL AND Serial <> '')
+         AND (
+               -- Tiene CodigoSap pero falta descripción
+               (CodigoSap IS NOT NULL AND CodigoSap <> ''
+                AND (Descripcion IS NULL OR Descripcion = ''))
+               -- O no tiene CodigoSap para nada
+               OR (CodigoSap IS NULL OR CodigoSap = '')
+             )`,
+      { prealertaId },
+    );
+
+    if (seriales.length === 0) return { actualizados: 0 };
+
+    const sapMap = await AgentesBackendService.getCodigosSap();
+
+    let actualizados = 0;
+    for (const row of seriales) {
+      // Caso 1: ya tiene código SAP → busca solo la descripción
+      if (row.CodigoSap && row.CodigoSap.trim() !== "") {
+        const desc = sapMap.get(row.CodigoSap.trim());
+        if (desc !== undefined) {
+          await execQuery(
+            `UPDATE PrealertaSerial SET Descripcion = @descripcion WHERE Id = @id`,
+            { id: row.Id, descripcion: desc },
+          );
+          actualizados++;
+        }
+        continue; // pasa al siguiente serial independientemente
+      }
+
+      // Caso 2: sin CodigoSap → intenta si el serial mismo es un código SAP
+      const descPorSerial = sapMap.get(row.Serial.trim());
+      if (descPorSerial !== undefined) {
+        await execQuery(
+          `UPDATE PrealertaSerial
+              SET CodigoSap = @codigo, Descripcion = @descripcion
+            WHERE Id = @id`,
+          { id: row.Id, codigo: row.Serial.trim(), descripcion: descPorSerial },
+        );
+        actualizados++;
+      }
+    }
+
+    return { actualizados };
   },
 
   async getCodigosSapList(): Promise<{ codigo: string; descripcion: string }[]> {

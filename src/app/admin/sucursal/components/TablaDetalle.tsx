@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../css/prealerta.module.css";
 import { PrealertaItem } from "@/app/models/Prealerta.models";
 
@@ -13,6 +13,7 @@ interface Props {
   seleccionada: PrealertaItem | null;
   onSeleccionar: (item: PrealertaItem) => void;
   onEliminar: (item: PrealertaItem) => void;
+  onDeseleccionar?: () => void;
 }
 
 function SortIcon({
@@ -43,6 +44,7 @@ export default function PrealertaTabla({
   seleccionada,
   onSeleccionar,
   onEliminar,
+  onDeseleccionar,
 }: Props) {
   const [ciudadFiltro, setCiudadFiltro] = useState("");
 
@@ -53,6 +55,13 @@ export default function PrealertaTabla({
   const visibles = ciudadFiltro
     ? items.filter((i) => i.ciudad === ciudadFiltro)
     : items;
+
+  useEffect(() => {
+    if (seleccionada && !visibles.find((i) => i.id === seleccionada.id)) {
+      onDeseleccionar?.();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ciudadFiltro]);
 
   return (
     <div className={styles.card}>

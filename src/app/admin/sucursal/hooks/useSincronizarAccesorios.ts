@@ -73,6 +73,7 @@ export function useSincronizarAccesorios(isOpen: boolean) {
                 const codigo = String(r.codigo_accesorio ?? "").trim();
                 const nombre = String(r.accesorio ?? "").trim();
                 if (!codigo) continue;
+                if (nombre.toLowerCase().includes("multimodelo")) continue;
                 const key = `${codigo}||${nombre}`;
                 if (mapa.has(key)) {
                     mapa.get(key)!.cantidad += 1;

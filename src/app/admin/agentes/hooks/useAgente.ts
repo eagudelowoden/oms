@@ -110,12 +110,52 @@ export function usePrealerta() {
     ),
   ];
 
-  /* ── SINCRONIZAR API ── */
+  /* ── SINCRONIZAR API (CRM) ── */
   const { sincronizando, sincronizarDesdeAPI } = useSincronizarAPI({
     serialesEscaneados,
     onPrevista: (seriales) => setSerialePrevista(seriales),
     showToast,
   });
+
+  /* ── ENRIQUECER SERIALES CON SAP (desde API CRM) ── */
+  const [sincronizandoSap, setSincronizandoSap] = useState(false);
+  const [modalEnriquecerSap, setModalEnriquecerSap] = useState(false);
+
+  /** Abre el modal de fecha/documento para enriquecer los seriales vía CRM */
+  const handleSincronizarCodigoSap = () => {
+    if (!preAlertaSeleccionada?.id) {
+      showToast("Selecciona una prealerta primero", "error");
+      return;
+    }
+    setModalEnriquecerSap(true);
+  };
+
+  /** Llamado desde el modal con fecha + documento → consulta CRM y actualiza BD */
+  const handleEnriquecerSap = async (fecha: string, documento: string) => {
+    if (!preAlertaSeleccionada?.id) return;
+    setSincronizandoSap(true);
+    try {
+      const { actualizados } = await prealertaMutations.enriquecerSeriales(
+        preAlertaSeleccionada.id,
+        fecha,
+        documento || undefined,
+      );
+      setModalEnriquecerSap(false);
+      invalidarCachePrealerta(preAlertaSeleccionada.id);
+      if (actualizados === 0) {
+        showToast("Ningún serial fue encontrado en la API con código SAP");
+      } else {
+        showToast(
+          `✓ ${actualizados} serial${actualizados !== 1 ? "es" : ""} actualizado${actualizados !== 1 ? "s" : ""} con código SAP`,
+        );
+      }
+    } catch (err) {
+      console.error("Error enriqueciendo seriales:", err);
+      showToast("Error al buscar seriales en la API", "error");
+    } finally {
+      setSincronizandoSap(false);
+    }
+  };
 
   /* ── FILTRO + ORDEN ── */
   const filteredAndSorted = (() => {
@@ -617,6 +657,11 @@ export function usePrealerta() {
     handleDesempacar,
     showToast,
     sincronizarDesdeAPI,
+    handleSincronizarCodigoSap,
+    sincronizandoSap,
+    modalEnriquecerSap,
+    setModalEnriquecerSap,
+    handleEnriquecerSap,
     handleGuardarSeriales,
     handleAgregarSerial,
     handleToggleSerial,

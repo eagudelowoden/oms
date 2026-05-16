@@ -10,6 +10,8 @@ interface SerialesProps {
   cargandoSeriales?: boolean;
   onRemove: (idx: number) => Promise<void>;
   onRemoveSeleccionados?: () => void;
+  onSincronizarSap?: () => void;
+  sincronizandoSap?: boolean;
 }
 
 export function PrealertaSeriales({
@@ -20,6 +22,8 @@ export function PrealertaSeriales({
   onRemove,
   onRemoveSeleccionados,
   cargandoSeriales,
+  onSincronizarSap,
+  sincronizandoSap,
 }: SerialesProps) {
   const todosSeleccionados =
     seriales.length > 0 && seleccionados.size === seriales.length;
@@ -74,8 +78,31 @@ export function PrealertaSeriales({
           {seriales.length > 0 && (
             <span className={styles.countPill}>{seriales.length}</span>
           )}
+          {onSincronizarSap && (
+            <button
+              type="button"
+              className={styles.btnUpload}
+              onClick={onSincronizarSap}
+              disabled={sincronizandoSap}
+              title="Buscar código SAP para los seriales sin material asignado"
+              style={sincronizandoSap ? { opacity: 0.7, cursor: "not-allowed" } : undefined}
+            >
+              {sincronizandoSap ? (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ animation: "spin 0.8s linear infinite" }}>
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+              ) : (
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 10V4M5 7l3-3 3 3" />
+                  <path d="M2 12.5h12" />
+                </svg>
+              )}
+              {sincronizandoSap ? "Sincronizando…" : "Sincronizar Seriales"}
+            </button>
+          )}
         </div>
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       {cargandoSeriales ? (
         <div className={styles.emptySeriales}>
@@ -206,7 +233,7 @@ export function PrealertaSeriales({
                     </td>
 
                     {/* Técnico */}
-                    <td className={styles.tdMuted}>—</td>
+                    <td className={styles.tdMuted}>{item.tecnico ?? "—"}</td>
 
                     {/* Trámite */}
                     <td className={styles.tdMuted}>{item.tramite ?? "—"}</td>

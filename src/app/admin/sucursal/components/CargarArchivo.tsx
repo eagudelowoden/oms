@@ -58,7 +58,7 @@ function parsearFilas(rows: Record<string, unknown>[]): SerialItem[] {
     const descripcion = col(row, "descripcion", "Descripcion");
     const cajaVal    = parseInt(col(row, "caja", "Caja") || "1") || 1;
     const cantidad   = parseInt(col(row, "cantidad", "Cantidad") || "1") || 1;
-    const tramite    = col(row, "tramite", "Tramite") || "Archivo";
+    const tramite    = "Carga Plantilla";
     const tipoRaw    = col(row, "tipo", "Tipo");
 
     const tipo: "Serializable" | "No-serializable" =

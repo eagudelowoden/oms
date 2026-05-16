@@ -14,6 +14,11 @@ export async function GET(
       return NextResponse.json(data);
     }
 
+    if (action === "list-programadas") {
+      const data = await ProgramarRecoleccionService.getListPrealertasProgramadas();
+      return NextResponse.json(data);
+    }
+
     if (action === "materiales") {
       const prealertaId = parseInt(searchParams.get("prealertaId") ?? "0");
       if (!prealertaId)

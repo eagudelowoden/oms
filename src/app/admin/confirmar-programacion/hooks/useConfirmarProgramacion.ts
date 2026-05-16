@@ -26,7 +26,7 @@ export function useConfirmarProgramacion() {
   /* ── QUERIES ── */
   const { data: prealertas = [], isLoading, refetch: refetchPrealertas } = useQuery({
     queryKey: ["confirmar-prealertas"],
-    queryFn: programarRecoleccionQueries.list,
+    queryFn: programarRecoleccionQueries.listProgramadas,
   });
 
   const { data: materiales = [], isFetching: cargandoMateriales } = useQuery({

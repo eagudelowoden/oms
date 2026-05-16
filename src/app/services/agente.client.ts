@@ -113,4 +113,18 @@ export const prealertaMutations = {
     if (!res.ok) throw new Error("Error al eliminar serial");
     return res.json();
   },
+
+  enriquecerSeriales: async (
+    prealertaId: number,
+    fecha: string,
+    documento?: string,
+  ): Promise<{ actualizados: number }> => {
+    const res = await fetch("/api/agente/enriquecerSeriales", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prealertaId, fecha, documento }),
+    });
+    if (!res.ok) throw new Error("Error al enriquecer seriales");
+    return res.json();
+  },
 };

@@ -90,4 +90,14 @@ export const sucursalMutations = {
     if (!res.ok) throw new Error("Error al eliminar serial");
     return res.json();
   },
+
+  sincronizarCodigoSap: async (prealertaId: number): Promise<{ actualizados: number }> => {
+    const res = await fetch(`${BASE}/sincronizarCodigoSap`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prealertaId }),
+    });
+    if (!res.ok) throw new Error("Error al sincronizar con CodigoSap");
+    return res.json();
+  },
 };

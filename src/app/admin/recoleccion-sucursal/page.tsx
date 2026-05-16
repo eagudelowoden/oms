@@ -49,6 +49,7 @@ export default function RecoleccionSucursalPage() {
         seleccionada={seleccionada}
         onSeleccionar={setSeleccionada}
         onRefresh={refetchPrealertas}
+        onDeseleccionar={() => setSeleccionada(null)}
       />
 
       <TablaMateriales

@@ -111,6 +111,15 @@ export async function POST(
       return NextResponse.json({ success: true, eliminados });
     }
 
+    if (action === "sincronizarCodigoSap") {
+      const body = await request.json();
+      const { prealertaId } = body;
+      if (!prealertaId)
+        return NextResponse.json({ error: "prealertaId requerido" }, { status: 400 });
+      const result = await SucursalBackendService.sincronizarConCodigoSap(Number(prealertaId));
+      return NextResponse.json(result);
+    }
+
     return NextResponse.json({ error: "Acción no válida" }, { status: 404 });
   } catch (error) {
     console.error(`❌ POST /api/sucursal/${action} error:`, error);
