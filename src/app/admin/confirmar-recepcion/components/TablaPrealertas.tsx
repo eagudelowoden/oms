@@ -35,7 +35,9 @@ export default function TablaPrealertas({
   const [ciudadFiltro, setCiudadFiltro] = useState("");
   const [popupInfo, setPopupInfo] = useState<InfoAutorizacion | null>(null);
 
-  const ciudades = [...new Set(prealertas.map((p) => p.ciudad ?? "").filter(Boolean))].sort();
+  const ciudades = [
+    ...new Set(prealertas.map((p) => p.ciudad ?? "").filter(Boolean)),
+  ].sort();
   const filtered = ciudadFiltro
     ? prealertas.filter((p) => p.ciudad === ciudadFiltro)
     : prealertas;
@@ -71,7 +73,9 @@ export default function TablaPrealertas({
             disabled={isLoading}
             title="Refrescar"
           >
-            <span className={`material-symbols-rounded ${isLoading ? styles.spinning : ""}`}>
+            <span
+              className={`material-symbols-rounded ${isLoading ? styles.spinning : ""}`}
+            >
               refresh
             </span>
           </button>
@@ -88,7 +92,11 @@ export default function TablaPrealertas({
           }}
         >
           <div className={styles.cityFilterWrap}>
-            <span className={`material-symbols-rounded ${styles.cityFilterIcon}`}>location_on</span>
+            <span
+              className={`material-symbols-rounded ${styles.cityFilterIcon}`}
+            >
+              location_on
+            </span>
             <select
               className={styles.cityFilterSelect}
               value={ciudadFiltro}
@@ -124,7 +132,7 @@ export default function TablaPrealertas({
             <thead>
               <tr>
                 <th style={{ width: 32 }} />
-                <th>Id</th>
+
                 <th>Nombre</th>
                 <th>Ciudad</th>
                 <th>Fecha</th>
@@ -151,7 +159,9 @@ export default function TablaPrealertas({
                 filtered.map((p) => (
                   <tr
                     key={p.id}
-                    className={seleccionada?.id === p.id ? styles.trSelected : ""}
+                    className={
+                      seleccionada?.id === p.id ? styles.trSelected : ""
+                    }
                     onClick={() => onSeleccionar(p)}
                     style={{ cursor: "pointer" }}
                   >
@@ -163,7 +173,6 @@ export default function TablaPrealertas({
                         onClick={(e) => e.stopPropagation()}
                       />
                     </td>
-                    <td>{p.id}</td>
                     <td>{p.nombre}</td>
                     <td>{p.ciudad}</td>
                     <td className={styles.tdMuted}>{p.fecha ?? "-"}</td>
@@ -184,7 +193,9 @@ export default function TablaPrealertas({
                       )}
                     </td>
                     <td className={styles.tdMuted}>{p.fechaEnvio ?? "-"}</td>
-                    <td className={styles.tdMuted}>{p.fechaRecepcion ?? "-"}</td>
+                    <td className={styles.tdMuted}>
+                      {p.fechaRecepcion ?? "-"}
+                    </td>
                   </tr>
                 ))
               )}
