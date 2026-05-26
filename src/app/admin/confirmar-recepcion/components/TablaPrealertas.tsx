@@ -14,7 +14,11 @@ interface Props {
 }
 
 function EstadoBadge({ estado }: { estado: string }) {
-  return <span className={styles.badgeEnviado}>{estado}</span>;
+  const cls =
+    estado.toLowerCase() === "recibido"
+      ? styles.badgeRecibido
+      : styles.badgeEnviado;
+  return <span className={cls}>{estado}</span>;
 }
 
 export default function TablaPrealertas({
@@ -112,18 +116,19 @@ export default function TablaPrealertas({
               <th>Creado por</th>
               <th>Estado</th>
               <th>Enviado el</th>
+              <th>Recibido el</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={8} className={styles.emptyCell}>
+                <td colSpan={9} className={styles.emptyCell}>
                   Cargando...
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} className={styles.emptyCell}>
+                <td colSpan={9} className={styles.emptyCell}>
                   No hay prealertas enviadas
                 </td>
               </tr>
@@ -151,7 +156,8 @@ export default function TablaPrealertas({
                   <td>
                     <EstadoBadge estado={p.estado} />
                   </td>
-                  <td className={styles.tdMuted}>{p.fechaEnvio || "-"}</td>
+                  <td className={styles.tdMuted}>{p.fechaEnvio ?? "-"}</td>
+                  <td className={styles.tdMuted}>{p.fechaRecepcion ?? "-"}</td>
                 </tr>
               ))
             )}

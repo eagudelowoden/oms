@@ -371,6 +371,27 @@
   opacity: 0.85;
 }
 
+.btnRefresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  width: 34px;
+  padding: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid var(--c-border);
+  background: var(--c-white);
+  color: var(--c-muted);
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.btnRefresh:hover {
+  color: var(--c-blue);
+  background: var(--c-blue-bg);
+  border-color: var(--c-blue-border);
+}
+
 /* ── FECHA CARD ── */
 .fechaCard {
   display: flex;

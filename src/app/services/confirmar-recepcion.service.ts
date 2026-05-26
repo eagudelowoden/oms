@@ -8,7 +8,8 @@ export interface PrealertaRecepcionRow {
   usuarioNombre: string;
   estado: string;
   programado: string | null;
-  fechaEnvio: string;
+  fechaEnvio: string | null;
+  fechaRecepcion: string | null;
 }
 
 export const ConfirmarRecepcionService = {
@@ -23,6 +24,8 @@ export const ConfirmarRecepcionService = {
       UsuarioNombre: string | null;
       Estado: string | null;
       Programado: string | null;
+      FechaEnvio: string | null;
+      FechaRecepcion: string | null;
     }>(`
       SELECT
         p.Id,
@@ -31,7 +34,9 @@ export const ConfirmarRecepcionService = {
         p.Fecha,
         u.nombres       AS UsuarioNombre,
         p.Estado,
-        CONVERT(VARCHAR(10), p.Programado, 120) AS Programado
+        CONVERT(VARCHAR(10), p.Programado, 120)       AS Programado,
+        CONVERT(VARCHAR(19), p.FechaEnvio, 120)       AS FechaEnvio,
+        CONVERT(VARCHAR(19), p.FechaRecepcion, 120)   AS FechaRecepcion
       FROM Prealerta p
       LEFT JOIN UsuarioSys u ON p.UsuarioId = u.Id
       LEFT JOIN WmsWdGeneral.dbo.Sede s ON p.OrigenId = s.Id
@@ -54,21 +59,15 @@ export const ConfirmarRecepcionService = {
       usuarioNombre: r.UsuarioNombre ?? "Desconocido",
       estado: r.Estado ?? "Enviado",
       programado: r.Programado ?? null,
-      fechaEnvio: "",
+      fechaEnvio: r.FechaEnvio ?? null,
+      fechaRecepcion: r.FechaRecepcion ?? null,
     }));
   },
 
   async confirmarRecepcion(id: number): Promise<void> {
-    try {
-      await execQuery(
-        `UPDATE Prealerta SET Estado = 'Recibido', FechaRecepcion = GETDATE() WHERE Id = @Id AND Activo = 1`,
-        { Id: id },
-      );
-    } catch {
-      await execQuery(
-        `UPDATE Prealerta SET Estado = 'Recibido' WHERE Id = @Id AND Activo = 1`,
-        { Id: id },
-      );
-    }
+    await execQuery(
+      `UPDATE Prealerta SET Estado = 'Recibido', FechaRecepcion = GETDATE() WHERE Id = @Id AND Activo = 1`,
+      { Id: id },
+    );
   },
 };

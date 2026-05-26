@@ -175,6 +175,28 @@
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
 }
 
+/* ── INPUT OBSERVACIONES ── */
+.inputObservacion {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 12px;
+  color: var(--c-text);
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  flex: 1;
+  min-width: 200px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  background: var(--c-white);
+}
+.inputObservacion::placeholder {
+  color: var(--c-hint);
+}
+.inputObservacion:focus {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+
 /* ── CARD ── */
 .card {
   background: var(--c-white);

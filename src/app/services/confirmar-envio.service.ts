@@ -12,6 +12,7 @@ export interface PrealertaEnvioRow {
   programado: string | null;
   fechaAutorizado: string | null;
   noAutorizacion: string | null;
+  fechaEnvio: string | null;
 }
 
 export const ConfirmarEnvioService = {
@@ -48,6 +49,7 @@ export const ConfirmarEnvioService = {
       Programado: string | null;
       FechaAutorizado: string | null;
       NoAutorizacion: string | null;
+      FechaEnvio: string | null;
     }>(
       `
       SELECT
@@ -59,7 +61,8 @@ export const ConfirmarEnvioService = {
         p.Estado,
         CONVERT(VARCHAR(10), p.Programado, 120)      AS Programado,
         CONVERT(VARCHAR(19), p.FechaAutorizado, 120) AS FechaAutorizado,
-        p.NoAutorizacion
+        p.NoAutorizacion,
+        CONVERT(VARCHAR(19), p.FechaEnvio, 120)      AS FechaEnvio
       FROM Prealerta p
       LEFT JOIN UsuarioSys u ON p.UsuarioId = u.Id
       LEFT JOIN WmsWdGeneral.dbo.Sede s ON p.OrigenId = s.Id
@@ -95,21 +98,14 @@ export const ConfirmarEnvioService = {
       programado: r.Programado ?? null,
       fechaAutorizado: r.FechaAutorizado ?? null,
       noAutorizacion: r.NoAutorizacion ?? null,
+      fechaEnvio: r.FechaEnvio ?? null,
     }));
   },
 
   async confirmarEnvio(id: number): Promise<void> {
-    // Intentar con FechaEnvio; si la columna no existe, actualizar solo Estado
-    try {
-      await execQuery(
-        `UPDATE Prealerta SET Estado = 'Enviado', FechaEnvio = GETDATE() WHERE Id = @Id AND Activo = 1`,
-        { Id: id },
-      );
-    } catch {
-      await execQuery(
-        `UPDATE Prealerta SET Estado = 'Enviado' WHERE Id = @Id AND Activo = 1`,
-        { Id: id },
-      );
-    }
+    await execQuery(
+      `UPDATE Prealerta SET Estado = 'Enviado', FechaEnvio = GETDATE() WHERE Id = @Id AND Activo = 1`,
+      { Id: id },
+    );
   },
 };

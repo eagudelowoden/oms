@@ -77,13 +77,13 @@ export async function POST(
     }
 
     if (action === "autorizar") {
-      const { prealertaId, noAutorizacion } = body;
+      const { prealertaId, noAutorizacion, observacion } = body;
       if (!prealertaId || !noAutorizacion)
         return NextResponse.json(
           { error: "prealertaId y noAutorizacion requeridos" },
           { status: 400 },
         );
-      const result = await ProgramarRecoleccionService.autorizar(prealertaId, noAutorizacion);
+      const result = await ProgramarRecoleccionService.autorizar(prealertaId, noAutorizacion, observacion ?? "");
       return NextResponse.json(result);
     }
 

@@ -120,18 +120,19 @@ export default function TablaPrealertas({
               <th>Estado</th>
               <th>Autorizado</th>
               <th>Verificado el</th>
+              <th>Enviado el</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={9} className={styles.emptyCell}>
+                <td colSpan={10} className={styles.emptyCell}>
                   Cargando...
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={9} className={styles.emptyCell}>
+                <td colSpan={10} className={styles.emptyCell}>
                   No hay prealertas
                 </td>
               </tr>
@@ -161,6 +162,7 @@ export default function TablaPrealertas({
                   </td>
                   <td className={styles.tdMuted}>{p.noAutorizacion ?? "-"}</td>
                   <td className={styles.tdMuted}>{p.fechaAutorizado ?? "-"}</td>
+                  <td className={styles.tdMuted}>{p.fechaEnvio ?? "-"}</td>
                 </tr>
               ))
             )}

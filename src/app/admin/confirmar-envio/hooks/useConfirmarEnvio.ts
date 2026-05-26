@@ -36,13 +36,18 @@ export function useConfirmarEnvio() {
   const confirmarMutation = useMutation({
     mutationFn: (id: number) => confirmarEnvioMutations.confirmar(id),
     onSuccess: (_data, id) => {
-      // Actualizar estado en cache local sin recargar la lista
+      const fechaEnvio = new Date().toLocaleString("es-CO");
+      // Actualizar estado y fecha de envío en cache local
       queryClient.setQueryData<PrealertaEnvioRow[]>(
         ["confirmar-envio-prealertas"],
         (prev) =>
-          prev?.map((p) => (p.id === id ? { ...p, estado: "Enviado" } : p)) ?? [],
+          prev?.map((p) =>
+            p.id === id ? { ...p, estado: "Enviado", fechaEnvio } : p,
+          ) ?? [],
       );
-      setSeleccionada((prev) => prev ? { ...prev, estado: "Enviado" } : prev);
+      setSeleccionada((prev) =>
+        prev ? { ...prev, estado: "Enviado", fechaEnvio } : prev,
+      );
       showToast("✓ Envío confirmado correctamente");
     },
     onError: (err: Error) => {

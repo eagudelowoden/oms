@@ -49,11 +49,11 @@ export const programarRecoleccionMutations = {
     return res.json();
   },
 
-  autorizar: async (prealertaId: number, noAutorizacion: string): Promise<{ success: boolean }> => {
+  autorizar: async (prealertaId: number, noAutorizacion: string, observacion?: string): Promise<{ success: boolean }> => {
     const res = await fetch(`${BASE}/autorizar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prealertaId, noAutorizacion }),
+      body: JSON.stringify({ prealertaId, noAutorizacion, observacion }),
     });
     if (!res.ok) throw new Error("Error al autorizar recolección");
     return res.json();

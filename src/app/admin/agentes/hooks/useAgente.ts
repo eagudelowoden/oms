@@ -148,6 +148,9 @@ export function usePrealerta() {
         documento || undefined,
       );
       setModalEnriquecerSap(false);
+      // Limpiar los escaneados en memoria para que la vista recargue desde la BD
+      // (que ya tiene los nuevos códigos SAP actualizados)
+      setSerialEscaneados([]);
       invalidarCachePrealerta(preAlertaSeleccionada.id);
       if (actualizados === 0) {
         showToast("Ningún serial fue encontrado en la API con código SAP");
@@ -162,6 +165,13 @@ export function usePrealerta() {
     } finally {
       setSincronizandoSap(false);
     }
+  };
+
+  /** Refresca todos los datos del módulo (prealertas + seriales + cajas) */
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["prealertas"] });
+    invalidarCachePrealerta(preAlertaSeleccionada?.id);
+    setSerialEscaneados([]);
   };
 
   /* ── FILTRO + ORDEN ── */
@@ -675,5 +685,6 @@ export function usePrealerta() {
     handleToggleAll,
     handleActualizarTipo,
     empacarAccesoriosAgrupados,
+    handleRefresh,
   };
 }

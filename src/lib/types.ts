@@ -20,6 +20,8 @@ export interface PrealertaTable {
   IdResponsable: number;
   Estado: string;
   Activo: boolean;
+  FechaEnvio?: Date | string | null;
+  Observacion?: string | null;
 }
 
 export interface PrealertaSerialTable {

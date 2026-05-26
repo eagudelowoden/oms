@@ -22,6 +22,8 @@ export default function ConfirmarProgramacionPage() {
     isPending,
     noAutorizacion,
     setNoAutorizacion,
+    observacion,
+    setObservacion,
     handleReprogramar,
     handleAutorizar,
   } = useConfirmarProgramacion();
@@ -36,6 +38,8 @@ export default function ConfirmarProgramacionPage() {
         onReprogramar={handleReprogramar}
         noAutorizacion={noAutorizacion}
         onNoAutorizacionChange={setNoAutorizacion}
+        observacion={observacion}
+        onObservacionChange={setObservacion}
         onAutorizar={handleAutorizar}
         isPending={isPending}
       />

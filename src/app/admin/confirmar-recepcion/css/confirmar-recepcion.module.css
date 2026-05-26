@@ -297,6 +297,17 @@
   white-space: nowrap;
 }
 
+.badgeRecibido {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
+}
+
 /* ── TOAST ── */
 .toast {
   position: fixed;

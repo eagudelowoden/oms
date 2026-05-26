@@ -184,11 +184,20 @@ export const ProgramarRecoleccionService = {
   async autorizar(
     prealertaId: number,
     noAutorizacion: string,
+    observacion: string = "",
   ): Promise<{ success: boolean }> {
-    await execQuery(
-      `UPDATE Prealerta SET FechaAutorizado = GETDATE(), NoAutorizacion = @noAutorizacion, Estado = 'Autorizado' WHERE Id = @id`,
-      { id: prealertaId, noAutorizacion },
-    );
+    try {
+      await execQuery(
+        `UPDATE Prealerta SET FechaAutorizado = GETDATE(), NoAutorizacion = @noAutorizacion, Observacion = @observacion, Estado = 'Autorizado' WHERE Id = @id`,
+        { id: prealertaId, noAutorizacion, observacion },
+      );
+    } catch {
+      // Si la columna Observacion no existe aún, actualizar sin ella
+      await execQuery(
+        `UPDATE Prealerta SET FechaAutorizado = GETDATE(), NoAutorizacion = @noAutorizacion, Estado = 'Autorizado' WHERE Id = @id`,
+        { id: prealertaId, noAutorizacion },
+      );
+    }
     return { success: true };
   },
 };

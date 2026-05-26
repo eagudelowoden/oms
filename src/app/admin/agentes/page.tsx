@@ -66,6 +66,7 @@ export default function AgentePage() {
     cargandoSeriales,
     cajas,
     serialesDeCaja,
+    handleRefresh,
   } = usePrealerta();
 
   const fechaHoy = new Date().toLocaleDateString("en-CA", {
@@ -112,6 +113,7 @@ export default function AgentePage() {
         sincronizandoAccesorios={sincronizandoAccesorios}
         cajas={cajas}
         serialesDeCaja={serialesDeCaja}
+        onRefresh={handleRefresh}
       />
 
       <PrealertaSeriales

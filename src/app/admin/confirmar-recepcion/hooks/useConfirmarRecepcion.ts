@@ -36,13 +36,18 @@ export function useConfirmarRecepcion() {
   const confirmarMutation = useMutation({
     mutationFn: (id: number) => confirmarRecepcionMutations.confirmar(id),
     onSuccess: (_data, id) => {
-      // Actualizar estado en cache local sin recargar la lista
+      const fechaRecepcion = new Date().toLocaleString("es-CO");
+      // Actualizar estado y fecha de recepción en cache local
       queryClient.setQueryData<PrealertaRecepcionRow[]>(
         ["confirmar-recepcion-prealertas"],
         (prev) =>
-          prev?.map((p) => (p.id === id ? { ...p, estado: "Recibido" } : p)) ?? [],
+          prev?.map((p) =>
+            p.id === id ? { ...p, estado: "Recibido", fechaRecepcion } : p,
+          ) ?? [],
       );
-      setSeleccionada((prev) => prev ? { ...prev, estado: "Recibido" } : prev);
+      setSeleccionada((prev) =>
+        prev ? { ...prev, estado: "Recibido", fechaRecepcion } : prev,
+      );
       showToast("✓ Recepción confirmada correctamente");
     },
     onError: (err: Error) => {

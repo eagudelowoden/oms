@@ -16,6 +16,7 @@ export function useConfirmarProgramacion() {
   const [fecha, setFecha] = useState<string>(hoy);
   const [seleccionada, setSeleccionada] = useState<PrealertaRecoleccionRow | null>(null);
   const [noAutorizacion, setNoAutorizacion] = useState<string>("");
+  const [observacion, setObservacion] = useState<string>("");
   const [toast, setToast] = useState<{ msg: string; type: "ok" | "error" } | null>(null);
 
   const showToast = (msg: string, type: "ok" | "error" = "ok") => {
@@ -50,11 +51,12 @@ export function useConfirmarProgramacion() {
   });
 
   const autorizarMutation = useMutation({
-    mutationFn: ({ id, no }: { id: number; no: string }) =>
-      programarRecoleccionMutations.autorizar(id, no),
+    mutationFn: ({ id, no, obs }: { id: number; no: string; obs: string }) =>
+      programarRecoleccionMutations.autorizar(id, no, obs),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["confirmar-prealertas"] });
       setNoAutorizacion("");
+      setObservacion("");
       showToast("✓ Recolección autorizada correctamente");
     },
     onError: (err: Error) => {
@@ -84,7 +86,11 @@ export function useConfirmarProgramacion() {
       showToast("Ingresa el número de autorización", "error");
       return;
     }
-    autorizarMutation.mutate({ id: seleccionada.id, no: noAutorizacion.trim() });
+    autorizarMutation.mutate({
+      id: seleccionada.id,
+      no: noAutorizacion.trim(),
+      obs: observacion.trim(),
+    });
   };
 
   const isPending = reprogramarMutation.isPending || autorizarMutation.isPending;
@@ -108,6 +114,8 @@ export function useConfirmarProgramacion() {
     isPending,
     noAutorizacion,
     setNoAutorizacion,
+    observacion,
+    setObservacion,
     handleReprogramar,
     handleAutorizar,
   };

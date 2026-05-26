@@ -9,6 +9,8 @@ interface Props {
   onReprogramar: () => void;
   noAutorizacion: string;
   onNoAutorizacionChange: (v: string) => void;
+  observacion: string;
+  onObservacionChange: (v: string) => void;
   onAutorizar: () => void;
   isPending: boolean;
 }
@@ -19,6 +21,8 @@ export default function FechaAcciones({
   onReprogramar,
   noAutorizacion,
   onNoAutorizacionChange,
+  observacion,
+  onObservacionChange,
   onAutorizar,
   isPending,
 }: Props) {
@@ -51,6 +55,13 @@ export default function FechaAcciones({
           placeholder="Ingrese no. autorización"
           value={noAutorizacion}
           onChange={(e) => onNoAutorizacionChange(e.target.value)}
+        />
+        <input
+          type="text"
+          className={styles.inputObservacion}
+          placeholder="Observaciones (opcional)"
+          value={observacion}
+          onChange={(e) => onObservacionChange(e.target.value)}
         />
         <button
           className={styles.btnAutorizar}
