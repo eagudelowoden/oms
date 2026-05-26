@@ -8,6 +8,8 @@ export interface PrealertaRecepcionRow {
   usuarioNombre: string;
   estado: string;
   programado: string | null;
+  noAutorizacion: string | null;
+  observacion: string | null;
   fechaEnvio: string | null;
   fechaRecepcion: string | null;
 }
@@ -24,6 +26,8 @@ export const ConfirmarRecepcionService = {
       UsuarioNombre: string | null;
       Estado: string | null;
       Programado: string | null;
+      NoAutorizacion: string | null;
+      Observacion: string | null;
       FechaEnvio: string | null;
       FechaRecepcion: string | null;
     }>(`
@@ -35,6 +39,8 @@ export const ConfirmarRecepcionService = {
         u.nombres       AS UsuarioNombre,
         p.Estado,
         CONVERT(VARCHAR(10), p.Programado, 120)       AS Programado,
+        p.NoAutorizacion,
+        p.Observacion,
         CONVERT(VARCHAR(19), p.FechaEnvio, 120)       AS FechaEnvio,
         CONVERT(VARCHAR(19), p.FechaRecepcion, 120)   AS FechaRecepcion
       FROM Prealerta p
@@ -59,6 +65,8 @@ export const ConfirmarRecepcionService = {
       usuarioNombre: r.UsuarioNombre ?? "Desconocido",
       estado: r.Estado ?? "Enviado",
       programado: r.Programado ?? null,
+      noAutorizacion: r.NoAutorizacion ?? null,
+      observacion: r.Observacion ?? null,
       fechaEnvio: r.FechaEnvio ?? null,
       fechaRecepcion: r.FechaRecepcion ?? null,
     }));

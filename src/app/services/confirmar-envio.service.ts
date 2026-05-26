@@ -12,6 +12,7 @@ export interface PrealertaEnvioRow {
   programado: string | null;
   fechaAutorizado: string | null;
   noAutorizacion: string | null;
+  observacion: string | null;
   fechaEnvio: string | null;
 }
 
@@ -49,6 +50,7 @@ export const ConfirmarEnvioService = {
       Programado: string | null;
       FechaAutorizado: string | null;
       NoAutorizacion: string | null;
+      Observacion: string | null;
       FechaEnvio: string | null;
     }>(
       `
@@ -62,6 +64,7 @@ export const ConfirmarEnvioService = {
         CONVERT(VARCHAR(10), p.Programado, 120)      AS Programado,
         CONVERT(VARCHAR(19), p.FechaAutorizado, 120) AS FechaAutorizado,
         p.NoAutorizacion,
+        p.Observacion,
         CONVERT(VARCHAR(19), p.FechaEnvio, 120)      AS FechaEnvio
       FROM Prealerta p
       LEFT JOIN UsuarioSys u ON p.UsuarioId = u.Id
@@ -98,6 +101,7 @@ export const ConfirmarEnvioService = {
       programado: r.Programado ?? null,
       fechaAutorizado: r.FechaAutorizado ?? null,
       noAutorizacion: r.NoAutorizacion ?? null,
+      observacion: r.Observacion ?? null,
       fechaEnvio: r.FechaEnvio ?? null,
     }));
   },
