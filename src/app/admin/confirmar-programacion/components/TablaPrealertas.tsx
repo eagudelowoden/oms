@@ -16,7 +16,9 @@ interface Props {
 function EstadoBadge({ estado }: { estado: string }) {
   const esAutorizado = estado.toLowerCase() === "autorizado";
   return (
-    <span className={esAutorizado ? styles.badgeAutorizado : styles.badgePendiente}>
+    <span
+      className={esAutorizado ? styles.badgeAutorizado : styles.badgePendiente}
+    >
       {estado}
     </span>
   );
@@ -32,7 +34,9 @@ export default function TablaPrealertas({
 }: Props) {
   const [ciudadFiltro, setCiudadFiltro] = useState("");
 
-  const ciudades = [...new Set(prealertas.map((p) => p.ciudad ?? "").filter(Boolean))].sort();
+  const ciudades = [
+    ...new Set(prealertas.map((p) => p.ciudad ?? "").filter(Boolean)),
+  ].sort();
   const filtered = ciudadFiltro
     ? prealertas.filter((p) => p.ciudad === ciudadFiltro)
     : prealertas;
@@ -41,7 +45,7 @@ export default function TablaPrealertas({
     if (seleccionada && !filtered.find((p) => p.id === seleccionada.id)) {
       onDeseleccionar?.();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ciudadFiltro]);
 
   return (
@@ -57,16 +61,28 @@ export default function TablaPrealertas({
           disabled={isLoading}
           title="Refrescar"
         >
-          <span className={`material-symbols-rounded ${isLoading ? styles.spinning : ""}`}>
+          <span
+            className={`material-symbols-rounded ${isLoading ? styles.spinning : ""}`}
+          >
             refresh
           </span>
         </button>
       </div>
 
       {/* ── City filter ── */}
-      <div style={{ padding: "6px 12px", borderBottom: "0.5px solid var(--c-border)", background: "var(--c-bg)", display: "flex", alignItems: "center" }}>
+      <div
+        style={{
+          padding: "6px 12px",
+          borderBottom: "0.5px solid var(--c-border)",
+          background: "var(--c-bg)",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
         <div className={styles.cityFilterWrap}>
-          <span className={`material-symbols-rounded ${styles.cityFilterIcon}`}>location_on</span>
+          <span className={`material-symbols-rounded ${styles.cityFilterIcon}`}>
+            location_on
+          </span>
           <select
             className={styles.cityFilterSelect}
             value={ciudadFiltro}
@@ -74,11 +90,25 @@ export default function TablaPrealertas({
           >
             <option value="">Todas las ciudades</option>
             {ciudades.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
           </select>
-          <svg className={styles.cityFilterChevron} width="10" height="10" viewBox="0 0 10 10" fill="none">
-            <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg
+            className={styles.cityFilterChevron}
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+            fill="none"
+          >
+            <path
+              d="M2 3.5l3 3 3-3"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
       </div>
@@ -88,7 +118,7 @@ export default function TablaPrealertas({
           <thead>
             <tr>
               <th style={{ width: 32 }} />
-              <th>Id</th>
+
               <th>Nombre</th>
               <th>Ciudad</th>
               <th>Fecha</th>
@@ -128,7 +158,7 @@ export default function TablaPrealertas({
                       onClick={(e) => e.stopPropagation()}
                     />
                   </td>
-                  <td>{p.id}</td>
+
                   <td>{p.nombre}</td>
                   <td>{p.ciudad}</td>
                   <td className={styles.tdMuted}>{p.fecha ?? "-"}</td>
