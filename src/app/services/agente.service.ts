@@ -111,6 +111,7 @@ export const AgentesBackendService = {
       `SELECT
       Serial AS Id,
       Serial AS codigo,
+      Mac AS Mac,
       Cantidad AS Cantidad,
       Caja AS Caja,
       Tipo AS Tipo,
@@ -129,6 +130,7 @@ export const AgentesBackendService = {
       estado:
         r.Caja && r.Caja > 0 ? ("Empacado" as const) : ("Disponible" as const),
       tipo: r.Tipo ?? "Serializable",
+      mac: r.Mac ?? undefined,
       cantidad: r.Cantidad,
       caja: r.Caja,
       tramite: r.Tramite ?? "",

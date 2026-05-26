@@ -89,6 +89,7 @@ export function usePrealerta() {
         origen: "api" as const,
         estado: "Empacado" as const,
         tipo: s.tipo as "Serializable" | "No-serializable",
+        mac: s.mac || undefined,
         cantidad: s.cantidad,
         caja: cajaActual,
         tramite: s.tramite,
