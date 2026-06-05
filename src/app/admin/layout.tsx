@@ -289,6 +289,14 @@ export default function AdminLayout({
               <span>Confirmar Recepción</span>
             </Link>
 
+            <Link
+              href="/admin/consolidar-prealertas"
+              className={linkClass("/admin/consolidar-prealertas")}
+            >
+              <span className="material-symbols-rounded">merge</span>
+              <span>Consolidar Prealertas</span>
+            </Link>
+
             {usuario.perfilId === 1 && (
               <Link
                 href="/admin/usuarios"
