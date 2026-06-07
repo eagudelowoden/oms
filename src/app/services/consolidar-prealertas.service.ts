@@ -246,18 +246,22 @@ export const ConsolidarPrealertasService = {
     const idList = ids.join(",");
     await execQuery(`
       INSERT INTO PrealertaSerial
-        (PrealertaId, Serial, Mac, CodigoSap, Descripcion, Cantidad, Caja, Falla, TecnicoCliente, Pedido, Tramite, Novedad, Garantia, Tipo, codigo)
+        (PrealertaId, Serial, Mac, CodigoSap, Descripcion, Cantidad, Caja, Falla, TecnicoCliente, Pedido, Tramite, Novedad, Garantia, Tipo)
       SELECT
-        ${newId}, Serial, Mac, CodigoSap, Descripcion, Cantidad, Caja, Falla, TecnicoCliente, Pedido, Tramite, Novedad, Garantia, Tipo, codigo
+        ${newId}, Serial, Mac, CodigoSap, Descripcion, Cantidad, Caja, Falla, TecnicoCliente, Pedido, Tramite, Novedad, Garantia, Tipo
       FROM PrealertaSerial
       WHERE PrealertaId IN (${idList})
     `);
 
-    // Track origin prealertas
+    // Track origin prealertas and mark them as consolidated
     for (const origenId of ids) {
       await execQuery(
         `INSERT INTO PrealertaConsolidada (PrealertaConsolidadaId, PrealertaOrigenId) VALUES (@consolidadaId, @origenId)`,
         { consolidadaId: newId, origenId },
+      );
+      await execQuery(
+        `UPDATE Prealerta SET Estado = 'Consolidada' WHERE Id = @id`,
+        { id: origenId },
       );
     }
 
