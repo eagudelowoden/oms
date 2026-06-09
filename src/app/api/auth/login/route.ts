@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     cookieStore.set("token", token, {
       httpOnly: true, // Protege contra ataques XSS
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       maxAge: 60 * 60 * 8, // 8 horas (igual que el JWT)
       path: "/", // Disponible en toda la app
       sameSite: "lax",
