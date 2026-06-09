@@ -1,0 +1,186 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modalCard {
+  background: var(--bg-card, #ffffff);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #2563eb;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted, #64748b);
+}
+
+/* --- Buscador --- */
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid var(--border-color, #cbd5e1);
+  border-radius: 0.75rem;
+  padding: 8px 12px;
+  background: var(--bg-input, #f8fafc);
+  transition: border-color 0.2s;
+}
+
+.searchWrapper:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.searchWrapper .material-symbols-rounded {
+  color: #94a3b8;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.9rem;
+  color: var(--text-main, #0f172a);
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+
+.clearBtn:hover {
+  color: #475569;
+}
+
+/* --- Lista de clientes --- */
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 2px solid var(--border-color, #cbd5e1);
+  border-radius: 0.75rem;
+  background: var(--bg-card, #fff);
+}
+
+.listaItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main, #1e293b);
+  border-bottom: 1px solid var(--border-color, #f1f5f9);
+  transition: background 0.15s;
+}
+
+.listaItem:last-child {
+  border-bottom: none;
+}
+
+.listaItem:hover {
+  background: #eff6ff;
+}
+
+.listaItemActivo {
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.listaItemActivo .material-symbols-rounded {
+  color: #2563eb;
+}
+
+.sinResultados {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 14px;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* --- Botones --- */
+.footerButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.btnCancel {
+  flex: 1;
+  padding: 12px;
+  border-radius: 0.75rem;
+  border: none;
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnCancel:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.btnConfirm {
+  flex: 2;
+  padding: 12px;
+  border-radius: 0.75rem;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnConfirm:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btnConfirm:disabled,
+.btnCancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

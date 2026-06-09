@@ -3,16 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import styles from "./admin.module.css";
-import ModalElegirCliente from "../../../src/app/_modulos/auth/components/ModalElegirCliente/ModalElegirCliente";
+import styles from "../admin/agentes/css/admin.module.css";
+import ModalElegirCliente from "@/modules/auth/components/ModalElegirCliente/ModalElegirCliente";
+import { useMenu } from "@/modules/auth/hooks/useMenu";
+import { Providers } from "@/app/providers";
 
-// --- INTERFACES ACTUALIZADAS ---
 interface Usuario {
   id: number;
   nombres: string;
   apellidos: string;
   perfilId: number;
-  perfilNombre?: string; // Aquí guardaremos lo que traiga el SP
+  perfilNombre?: string;
   nombreUsuario: string;
   clienteNombre?: string;
 }
@@ -31,13 +32,14 @@ export default function AdminLayout({
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [cargando, setCargando] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showChangeClient, setShowChangeClient] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
+  const { menu, loadingMenu } = useMenu(usuario?.perfilId);
   const router = useRouter();
   const pathname = usePathname();
 
-  // EFECTO 1: Solo carga el usuario base del localStorage al arrancar
   useEffect(() => {
     const userStr = localStorage.getItem("usuario");
     if (!userStr) {
@@ -45,49 +47,46 @@ export default function AdminLayout({
       return;
     }
     const localData = JSON.parse(userStr) as Usuario;
-    console.log("👤 Usuario desde localStorage:", localData);
-    console.log("🏢 clienteNombre:", localData.clienteNombre);
-    console.log("🆔 id:", localData.id);
     setUsuario(localData);
     setCargando(false);
   }, [router]);
 
-  // EFECTO 2: Reacciona al cambio de cliente y pide el perfil (El "SwitchMap" de Angular)
   useEffect(() => {
     const fetchPerfilData = async () => {
-      // Solo disparamos si tenemos el ID y el Nombre del Cliente
-      // pero NO tenemos todavía el perfilNombre cargado
       if (usuario?.id && usuario?.clienteNombre && !usuario.perfilNombre) {
         try {
           const url = `/api/perfil/${usuario.id}?clienteNombre=${encodeURIComponent(usuario.clienteNombre)}`;
-
-          console.log(
-            "📡 Disparando petición de perfil para:",
-            usuario.clienteNombre,
-          );
-
           const response = await fetch(url);
           if (response.ok) {
             const data = await response.json();
-
-            // Actualizamos el estado con el perfil que trajo el SP
             setUsuario((prev) =>
               prev
                 ? {
                     ...prev,
                     perfilNombre: data.perfilNombre,
+                    perfilId: data.perfilId,
                   }
                 : null,
             );
+            const userStr = localStorage.getItem("usuario");
+            if (userStr) {
+              const user = JSON.parse(userStr);
+              localStorage.setItem(
+                "usuario",
+                JSON.stringify({
+                  ...user,
+                  perfilNombre: data.perfilNombre,
+                  perfilId: data.perfilId,
+                }),
+              );
+            }
           }
         } catch (error) {
           console.error("❌ Error en fetch perfil:", error);
         }
       }
     };
-
     fetchPerfilData();
-    // Esta es la clave: el efecto "vigila" estas variables
   }, [usuario?.id, usuario?.clienteNombre, usuario?.perfilNombre]);
 
   useEffect(() => {
@@ -106,20 +105,17 @@ export default function AdminLayout({
   };
 
   const handleClientSwitchSuccess = (result: ClientSwitchResult) => {
-    console.log("🔄 result completo:", result); // 👈 agrega esto
     if (usuario) {
       const updatedUser = {
         ...usuario,
-        clienteNombre: result.clientDb, // El nombre que viene del modal
-        perfilNombre: undefined, // 👈 IMPORTANTE: Limpiar para que el useEffect se dispare
+        clienteNombre: result.clientDbName,
+        perfilNombre: undefined,
       };
-
       localStorage.setItem("usuario", JSON.stringify(updatedUser));
       setUsuario(updatedUser);
     }
     setShowChangeClient(false);
     setIsUserMenuOpen(false);
-    // router.refresh(); // Opcional, con setUsuario(updatedUser) debería bastar
   };
 
   if (cargando || !usuario)
@@ -132,7 +128,6 @@ export default function AdminLayout({
   const linkClass = (path: string) =>
     `${styles.navItem} ${pathname === path ? styles.active : ""}`;
 
-  // --- COMPONENTE DE MENÚ ---
   const UserMenuComponent = () => (
     <div className={styles.userMenuWrapper}>
       {isUserMenuOpen && (
@@ -178,111 +173,174 @@ export default function AdminLayout({
   );
 
   return (
-    <div className={styles.adminWrapper}>
-      <div
-        className={`${styles.mobileOverlay} ${isSidebarOpen ? styles.showOverlay : ""}`}
-        onClick={() => setIsSidebarOpen(false)}
-      />
+    <Providers key={usuario.clienteNombre ?? "default"}>
+      {" "}
+      {/* ← key fuerza recrear QueryClient al cambiar cliente */}
+      <div className={styles.adminWrapper}>
+        <div
+          className={`${styles.mobileOverlay} ${isSidebarOpen ? styles.showOverlay : ""}`}
+          onClick={() => setIsSidebarOpen(false)}
+        />
 
-      <aside
-        className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ""}`}
-      >
-        <div className={styles.sidebarHeader}>
-          <div className={styles.logoGroup}>
-            <div className={styles.logoBadge}>
-              <span className="material-symbols-rounded">warehouse</span>
-            </div>
-            <span className={styles.logoText}>OMS</span>
-          </div>
-          <button
-            className={styles.closeMenuMobile}
-            onClick={() => setIsSidebarOpen(false)}
-          >
-            <span className="material-symbols-rounded">close</span>
-          </button>
-        </div>
-
-        {/* INFO SESIÓN MINIMALISTA */}
-        <div className={styles.currentClientBadge}>
-          <div className={styles.sessionInfoGroup}>
-            <div className={styles.infoRow}>
-              <span className="material-symbols-rounded">domain</span>
-              <div className={styles.infoText}>
-                <p className={styles.clientName}>
-                  {usuario.clienteNombre || "Sin seleccionar"}
-                </p>
+        <aside
+          className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ""} ${sidebarCollapsed ? styles.sidebarCollapsed : ""}`}
+        >
+          <div className={styles.sidebarHeader}>
+            <div className={styles.logoGroup}>
+              <div className={styles.logoBadge}>
+                <span className="material-symbols-rounded">warehouse</span>
               </div>
+              <span className={styles.logoText}>OMS</span>
             </div>
-            <div className={styles.infoRow}>
-              <span className="material-symbols-rounded">person</span>
-              <div className={styles.infoText}>
-                <p className={styles.userName}>
-                  {`${usuario.nombres} ${usuario.apellidos}` || "Usuario"}
-                  <span className={styles.roleTag}>
-                    {usuario.perfilNombre || "Cargando..."}
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <nav className={styles.navMenu}>
-          <p className={styles.navSectionTitle}>Módulos</p>
-          <Link href="/admin" className={linkClass("/admin")}>
-            <span className="material-symbols-rounded">dashboard</span>
-            <span>Dashboard</span>
-          </Link>
-          <Link
-            href="/admin/preAlertaAgente"
-            className={linkClass("/admin/preAlertaAgente")}
-          >
-            <span className="material-symbols-rounded">pending_actions</span>
-            <span>Pre-Alerta</span>
-          </Link>
-          {usuario.perfilId === 1 && (
-            <Link
-              href="/admin/usuarios"
-              className={linkClass("/admin/usuarios")}
-            >
-              <span className="material-symbols-rounded">group</span>
-              <span>Usuarios</span>
-            </Link>
-          )}
-        </nav>
-
-        <div className={styles.sidebarFooterDesktop}>
-          <UserMenuComponent />
-        </div>
-      </aside>
-
-      <main className={styles.mainContent}>
-        <header className={styles.topHeader}>
-          <div className={styles.headerLeft}>
             <button
-              className={styles.hamburger}
-              onClick={() => setIsSidebarOpen(true)}
+              className={styles.sidebarToggleDesktop}
+              onClick={() => setSidebarCollapsed((c) => !c)}
+              title={sidebarCollapsed ? "Expandir menú" : "Colapsar menú"}
             >
-              <span className="material-symbols-rounded">menu</span>
+              <span className="material-symbols-rounded">
+                {sidebarCollapsed ? "menu_open" : "menu"}
+              </span>
             </button>
-            <div className={styles.headerBreadcrumb}>
-              OMS System / {pathname.split("/").pop()}
+            <button
+              className={styles.closeMenuMobile}
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <span className="material-symbols-rounded">close</span>
+            </button>
+          </div>
+
+          <div className={styles.currentClientBadge}>
+            <div className={styles.sessionInfoGroup}>
+              <div className={styles.infoRow}>
+                <span className="material-symbols-rounded">domain</span>
+                <div className={styles.infoText}>
+                  <p className={styles.clientName}>
+                    {usuario.clienteNombre || "Sin seleccionar"}
+                  </p>
+                </div>
+              </div>
+              <div className={styles.infoRow}>
+                <span className="material-symbols-rounded">person</span>
+                <div className={styles.infoText}>
+                  <p className={styles.userName}>
+                    {`${usuario.nombres} ${usuario.apellidos}` || "Usuario"}
+                    <span className={styles.roleTag}>
+                      {usuario.perfilNombre || "Cargando..."}
+                    </span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className={styles.headerUserMobile}>
+
+          <nav className={styles.navMenu}>
+            <p className={styles.navSectionTitle}>Módulos</p>
+            <Link href="/admin/agentes" className={linkClass("/admin/agentes")}>
+              <span className="material-symbols-rounded">pending_actions</span>
+              <span>Agentes</span>
+            </Link>
+
+            <Link
+              href="/admin/sucursal"
+              className={linkClass("/admin/sucursal")}
+            >
+              {/* CAMBIA ESTA LÍNEA DE ABAJO: de outlined a rounded */}
+              <span className="material-symbols-rounded">gite</span>
+              <span>Sucursal</span>
+            </Link>
+
+            <Link
+              href="/admin/programar-recoleccion"
+              className={linkClass("/admin/programar-recoleccion")}
+            >
+              <span className="material-symbols-rounded">local_shipping</span>
+              <span>Programar Recolección</span>
+            </Link>
+
+            <Link
+              href="/admin/confirmar-programacion"
+              className={linkClass("/admin/confirmar-programacion")}
+            >
+              <span className="material-symbols-rounded">task_alt</span>
+              <span>Confirmar Programación</span>
+            </Link>
+
+            <Link
+              href="/admin/recoleccion-sucursal"
+              className={linkClass("/admin/recoleccion-sucursal")}
+            >
+              <span className="material-symbols-rounded">store</span>
+              <span>Recolección Sucursal</span>
+            </Link>
+
+            <Link
+              href="/admin/confirmar-envio"
+              className={linkClass("/admin/confirmar-envio")}
+            >
+              <span className="material-symbols-rounded">local_shipping</span>
+              <span>Confirmar Envío</span>
+            </Link>
+
+            <Link
+              href="/admin/confirmar-recepcion"
+              className={linkClass("/admin/confirmar-recepcion")}
+            >
+              <span className="material-symbols-rounded">move_to_inbox</span>
+              <span>Confirmar Recepción</span>
+            </Link>
+
+            <Link
+              href="/admin/consolidar-prealertas"
+              className={linkClass("/admin/consolidar-prealertas")}
+            >
+              <span className="material-symbols-rounded">merge</span>
+              <span>Consolidar Prealertas</span>
+            </Link>
+
+            {usuario.perfilId === 1 && (
+              <Link
+                href="/admin/usuarios"
+                className={linkClass("/admin/usuarios")}
+              >
+                <span className="material-symbols-rounded">group</span>
+                <span>Usuarios</span>
+              </Link>
+            )}
+          </nav>
+
+          <div className={styles.sidebarFooterDesktop}>
             <UserMenuComponent />
           </div>
-        </header>
-        <div className={styles.pageContainer}>{children}</div>
-      </main>
+        </aside>
 
-      {showChangeClient && (
-        <ModalElegirCliente
-          usuarioId={usuario.id}
-          onSuccess={handleClientSwitchSuccess}
-          onCancel={() => setShowChangeClient(false)}
-        />
-      )}
-    </div>
+        <main className={styles.mainContent}>
+          <header className={styles.topHeader}>
+            <div className={styles.headerLeft}>
+              <button
+                className={styles.hamburger}
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <span className="material-symbols-rounded">menu</span>
+              </button>
+              <div className={styles.headerBreadcrumb}>
+                OMS System / {pathname.split("/").pop()}
+              </div>
+            </div>
+            <div className={styles.headerUserMobile}>
+              <UserMenuComponent />
+            </div>
+          </header>
+          <div className={styles.pageContainer}>{children}</div>
+        </main>
+
+        {showChangeClient && (
+          <ModalElegirCliente
+            usuarioId={usuario.id}
+            onSuccess={handleClientSwitchSuccess}
+            onCancel={() => setShowChangeClient(false)}
+          />
+        )}
+      </div>
+    </Providers>
   );
 }
