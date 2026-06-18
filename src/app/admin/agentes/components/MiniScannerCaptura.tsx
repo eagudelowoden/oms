@@ -268,9 +268,10 @@ export default function MiniScannerCaptura({ isOpen, onCapturar, onClose }: Prop
       setUsaNativo(!!det);
       startScan(det);
     } catch (err: unknown) {
-      const e = err as { name?: string };
+      const e = err as { name?: string; message?: string };
+      console.error("[MiniScannerCaptura] Error:", e?.name, e?.message, err);
       setCamError(e?.name === "NotAllowedError" ? "Permiso de cámara denegado"
-        : e?.name === "NotFoundError" ? "No se encontró cámara" : "Error al iniciar la cámara");
+        : e?.name === "NotFoundError" ? "No se encontró cámara" : `Error: ${e?.message || "desconocido"}`);
     }
   }, [detener, startScan, setEstado, syncHandles]);
 

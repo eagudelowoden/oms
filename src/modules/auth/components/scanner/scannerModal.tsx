@@ -260,6 +260,7 @@ export default function ScannerModal({
       } catch (err: unknown) {
         const e = err as { name?: string; message?: string; constraint?: string };
         const debugMsg = `${e?.name}: ${e?.message}${e?.constraint ? ` | constraint: ${e?.constraint}` : ""}`;
+        console.error("[ScannerModal] Error:", debugMsg, err);
 
         const msg =
           e?.name === "NotAllowedError"
