@@ -232,6 +232,10 @@ export default function MiniScannerCaptura({ isOpen, onCapturar, onClose }: Prop
     syncHandles(RECT_INIT);
 
     try {
+      if (!navigator.mediaDevices) {
+        const isHttps = window.location.protocol === "https:";
+        throw new Error(isHttps ? "Cámara no soportada en este navegador" : "Se requiere HTTPS para usar la cámara");
+      }
       const devices = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = devices.filter((d) => d.kind === "videoinput");
       setCamaras(videoDevices.map((d, i) => ({ deviceId: d.deviceId, label: d.label || `Cámara ${i + 1}` })));

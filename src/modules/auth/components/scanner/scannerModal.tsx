@@ -99,6 +99,10 @@ export default function ScannerModal({
   /* ── DETECTAR CÁMARAS TRASERAS ── */
   const detectarCamaras = useCallback(async () => {
     try {
+      if (!navigator.mediaDevices) {
+        const isHttps = window.location.protocol === "https:";
+        throw new Error(isHttps ? "Cámara no soportada en este navegador" : "Se requiere HTTPS para usar la cámara");
+      }
       // Pedir permiso primero para obtener labels — cerrar inmediatamente
       const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
       tempStream.getTracks().forEach((t) => t.stop());
@@ -160,6 +164,11 @@ export default function ScannerModal({
       }
 
       try {
+        if (!navigator.mediaDevices) {
+          const isHttps = window.location.protocol === "https:";
+          throw new Error(isHttps ? "Cámara no soportada en este navegador" : "Se requiere HTTPS para usar la cámara");
+        }
+
         let listaActual = camaras;
         if (camaras.length === 0) {
           listaActual = await detectarCamaras();
