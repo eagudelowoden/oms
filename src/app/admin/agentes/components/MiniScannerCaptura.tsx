@@ -218,35 +218,6 @@ export default function MiniScannerCaptura({ isOpen, onCapturar, onClose }: Prop
               setEstado("ok");
             }
           }
-        } else {
-          // ZXing fallback — crop canvas → worker
-          const container = containerRef.current;
-          if (!container) return;
-          const r  = rectRef.current;
-          const vw = video.videoWidth, vh = video.videoHeight;
-          const dw = container.clientWidth,  dh = container.clientHeight;
-          const scale = Math.max(dw / vw, dh / vh);
-          const offX  = (dw - vw * scale) / 2, offY = (dh - vh * scale) / 2;
-          const cx = Math.max(0, ((r.left / 100) * dw - offX) / scale);
-          const cy = Math.max(0, ((r.top  / 100) * dh - offY) / scale);
-          const cw = Math.min(((r.right - r.left) / 100) * dw / scale, vw - cx);
-          const ch = Math.min(((r.bottom - r.top)  / 100) * dh / scale, vh - cy);
-          if (cw < 20 || ch < 20) return;
-          const ds = Math.min(1, 900 / Math.max(cw, ch));
-          const c = document.createElement("canvas");
-          c.width = Math.round(cw * ds); c.height = Math.round(ch * ds);
-          c.getContext("2d")!.drawImage(video, cx, cy, cw, ch, 0, 0, c.width, c.height);
-          const img = c.getContext("2d")!.getImageData(0, 0, c.width, c.height);
-          await new Promise<void>((resolve) => {
-            const w = new Worker("/workers/barcodeWorker.js");
-            w.onmessage = (e: MessageEvent<{ text: string | null }>) => {
-              w.terminate();
-              const t = e.data.text?.trim();
-              if (t) { setResultado(t); setEstado("ok"); }
-              resolve();
-            };
-            w.postMessage({ pixels: img.data, width: img.width, height: img.height }, [img.data.buffer]);
-          });
         }
       } catch { /* sin código en frame */ }
       scanningRef.current = false;

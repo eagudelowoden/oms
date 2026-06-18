@@ -218,7 +218,7 @@ export default function ScannerModal({
           return;
         }
 
-        // Intentar usar BarcodeDetector nativo; si no, usar Worker
+        // Usar BarcodeDetector nativo
         let barcodeDetector: any = null;
         let scanInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -235,57 +235,27 @@ export default function ScannerModal({
           barcodeDetector = null;
         }
 
-        const canvas = document.createElement("canvas");
-        let canvasCtx = canvas.getContext("2d");
-        let scanning = false;
-
         const procesarFrame = async () => {
-          if (scanning || barcodeLocked) return;
+          if (barcodeLocked) return;
           const videoEl = videoRef.current;
-          if (!videoEl || videoEl.readyState < 2) return;
+          if (!videoEl || videoEl.readyState < 2 || !barcodeDetector) return;
 
-          scanning = true;
           try {
-            if (barcodeDetector) {
-              // Usar BarcodeDetector nativo
-              const barcodes = await barcodeDetector.detect(videoEl);
-              if (barcodes.length > 0) {
-                const texto = (barcodes[0] as any).rawValue?.trim().toUpperCase() || "";
-                if (texto && !codigoPendienteRef.current) {
-                  setBarcodeLocked(true);
-                  if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
-                  lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 300);
-                  codigoPendienteRef.current = texto;
-                  setCodigoPendiente(texto);
-                }
+            const barcodes = await barcodeDetector.detect(videoEl);
+            if (barcodes.length > 0) {
+              const texto = (barcodes[0] as any).rawValue?.trim().toUpperCase() || "";
+              if (texto && !codigoPendienteRef.current) {
+                setBarcodeLocked(true);
+                if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
+                lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 300);
+                codigoPendienteRef.current = texto;
+                setCodigoPendiente(texto);
               }
-            } else {
-              // Fallback: procesar con Worker
-              if (!canvasCtx) return;
-              canvas.width = videoEl.videoWidth;
-              canvas.height = videoEl.videoHeight;
-              canvasCtx.drawImage(videoEl, 0, 0);
-              const imageData = canvasCtx.getImageData(0, 0, canvas.width, canvas.height);
-
-              const w = new Worker("/workers/barcodeWorker.js");
-              w.onmessage = (e: MessageEvent<{ text: string | null }>) => {
-                w.terminate();
-                const texto = e.data.text?.trim().toUpperCase();
-                if (texto && !codigoPendienteRef.current) {
-                  setBarcodeLocked(true);
-                  if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
-                  lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 300);
-                  codigoPendienteRef.current = texto;
-                  setCodigoPendiente(texto);
-                }
-              };
-              w.postMessage({ pixels: imageData.data, width: imageData.width, height: imageData.height }, [imageData.data.buffer]);
             }
           } catch (_) {}
-          scanning = false;
         };
 
-        scanInterval = setInterval(procesarFrame, barcodeDetector ? 150 : 500);
+        scanInterval = setInterval(procesarFrame, 150);
         scannerRef.current = { reset: () => { if (scanInterval) clearInterval(scanInterval); } };
       } catch (err: unknown) {
         const e = err as { name?: string; message?: string; constraint?: string };
