@@ -238,7 +238,7 @@ export default function MiniScannerCaptura({ isOpen, onCapturar, onClose }: Prop
           c.getContext("2d")!.drawImage(video, cx, cy, cw, ch, 0, 0, c.width, c.height);
           const img = c.getContext("2d")!.getImageData(0, 0, c.width, c.height);
           await new Promise<void>((resolve) => {
-            const w = new Worker(new URL("../workers/barcodeWorker.ts", import.meta.url));
+            const w = new Worker("/workers/barcodeWorker.js");
             w.onmessage = (e: MessageEvent<{ text: string | null }>) => {
               w.terminate();
               const t = e.data.text?.trim();

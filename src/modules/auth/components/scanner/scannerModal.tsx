@@ -218,40 +218,75 @@ export default function ScannerModal({
           return;
         }
 
-        const { BrowserMultiFormatReader } = await import("@zxing/browser");
-        const { DecodeHintType, BarcodeFormat } =
-          await import("@zxing/library");
+        // Intentar usar BarcodeDetector nativo; si no, usar Worker
+        let barcodeDetector: any = null;
+        let scanInterval: ReturnType<typeof setInterval> | null = null;
 
-        const hints = new Map();
-        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-          BarcodeFormat.CODE_128,
-          BarcodeFormat.CODE_39,
-        ]);
-        hints.set(DecodeHintType.TRY_HARDER, true);
-
-        const codeReader = new BrowserMultiFormatReader(hints);
-        scannerRef.current = codeReader;
-
-        const videoEl = videoRef.current;
-        codeReader.decodeFromVideoElement(videoEl, (result) => {
-          if (result) {
-            const texto = result.getText().trim().toUpperCase();
-            if (!texto) return;
-            // Si ya hay un código pendiente de confirmar, ignorar nuevas lecturas
-            if (codigoPendienteRef.current) return;
-
-            setBarcodeLocked(true);
-            if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
-            lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 300);
-
-            // Mostrar para confirmación en lugar de agregar directamente
-            codigoPendienteRef.current = texto;
-            setCodigoPendiente(texto);
-          } else {
-            if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
-            lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 200);
+        try {
+          if ("BarcodeDetector" in window) {
+            const supported = await (window.BarcodeDetector as any).getSupportedFormats();
+            const want = ["code_128", "code_39"];
+            const formats = want.filter((f) => supported.includes(f));
+            if (formats.length > 0) {
+              barcodeDetector = new (window.BarcodeDetector as any)({ formats });
+            }
           }
-        });
+        } catch (_) {
+          barcodeDetector = null;
+        }
+
+        const canvas = document.createElement("canvas");
+        let canvasCtx = canvas.getContext("2d");
+        let scanning = false;
+
+        const procesarFrame = async () => {
+          if (scanning || barcodeLocked) return;
+          const videoEl = videoRef.current;
+          if (!videoEl || videoEl.readyState < 2) return;
+
+          scanning = true;
+          try {
+            if (barcodeDetector) {
+              // Usar BarcodeDetector nativo
+              const barcodes = await barcodeDetector.detect(videoEl);
+              if (barcodes.length > 0) {
+                const texto = (barcodes[0] as any).rawValue?.trim().toUpperCase() || "";
+                if (texto && !codigoPendienteRef.current) {
+                  setBarcodeLocked(true);
+                  if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
+                  lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 300);
+                  codigoPendienteRef.current = texto;
+                  setCodigoPendiente(texto);
+                }
+              }
+            } else {
+              // Fallback: procesar con Worker
+              if (!canvasCtx) return;
+              canvas.width = videoEl.videoWidth;
+              canvas.height = videoEl.videoHeight;
+              canvasCtx.drawImage(videoEl, 0, 0);
+              const imageData = canvasCtx.getImageData(0, 0, canvas.width, canvas.height);
+
+              const w = new Worker("/workers/barcodeWorker.js");
+              w.onmessage = (e: MessageEvent<{ text: string | null }>) => {
+                w.terminate();
+                const texto = e.data.text?.trim().toUpperCase();
+                if (texto && !codigoPendienteRef.current) {
+                  setBarcodeLocked(true);
+                  if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
+                  lockTimeoutRef.current = setTimeout(() => setBarcodeLocked(false), 300);
+                  codigoPendienteRef.current = texto;
+                  setCodigoPendiente(texto);
+                }
+              };
+              w.postMessage({ pixels: imageData.data, width: imageData.width, height: imageData.height }, [imageData.data.buffer]);
+            }
+          } catch (_) {}
+          scanning = false;
+        };
+
+        scanInterval = setInterval(procesarFrame, barcodeDetector ? 150 : 500);
+        scannerRef.current = { reset: () => { if (scanInterval) clearInterval(scanInterval); } };
       } catch (err: unknown) {
         const e = err as { name?: string; message?: string; constraint?: string };
         const debugMsg = `${e?.name}: ${e?.message}${e?.constraint ? ` | constraint: ${e?.constraint}` : ""}`;
