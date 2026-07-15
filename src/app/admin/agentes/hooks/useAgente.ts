@@ -178,6 +178,7 @@ export function usePrealerta() {
   const filteredAndSorted = (() => {
     let list = prealertas.filter(
       (r) =>
+        (r.estado ?? "").trim().toLowerCase() !== "consolidada" &&
         r.nombre.toLowerCase().includes(query.toLowerCase()) &&
         (sedeId === null || r.origenId === sedeId),
     );

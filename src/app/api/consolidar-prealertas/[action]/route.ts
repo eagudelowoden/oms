@@ -39,6 +39,14 @@ export async function GET(
       return NextResponse.json(data);
     }
 
+    if (action === "seriales-descarga") {
+      const id = Number(searchParams.get("id"));
+      if (!id || isNaN(id))
+        return NextResponse.json({ error: "id requerido" }, { status: 400 });
+      const data = await ConsolidarPrealertasService.getSerialesDescarga(id);
+      return NextResponse.json(data);
+    }
+
     return NextResponse.json({ error: "Acción no válida" }, { status: 404 });
   } catch (error) {
     console.error(`❌ GET /api/consolidar-prealertas/${action} error:`, error);

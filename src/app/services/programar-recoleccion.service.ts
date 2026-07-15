@@ -52,6 +52,7 @@ export const ProgramarRecoleccionService = {
       LEFT JOIN UsuarioSys u ON p.UsuarioId = u.Id
       LEFT JOIN WmsWdGeneral.dbo.Sede s ON p.OrigenId = s.Id
       WHERE p.Activo = 1
+        AND p.Estado <> 'Consolidada'
       ORDER BY p.Fecha DESC
     `);
 

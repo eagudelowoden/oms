@@ -179,6 +179,31 @@
   font-size: 16px;
 }
 
+.btnDescargar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-blue-bg);
+  color: var(--c-blue);
+  border: 1px solid var(--c-blue);
+  cursor: pointer;
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  transition: opacity 0.15s, background 0.15s;
+  line-height: 1;
+}
+.btnDescargar:hover:not(:disabled) {
+  background: var(--c-blue);
+  color: #fff;
+}
+.btnDescargar:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.btnDescargar .material-symbols-rounded {
+  font-size: 14px;
+}
+
 .spinning {
   animation: spin 0.8s linear infinite;
 }

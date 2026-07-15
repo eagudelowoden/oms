@@ -89,8 +89,10 @@ export function usePrealerta() {
 
   /* ── FILTRO + ORDEN ── */
   const filteredAndSorted = (() => {
-    let list = prealertas.filter((r) =>
-      r.nombre.toLowerCase().includes(query.toLowerCase()),
+    let list = prealertas.filter(
+      (r) =>
+        (r.estado ?? "").trim().toLowerCase() !== "consolidada" &&
+        r.nombre.toLowerCase().includes(query.toLowerCase()),
     );
     if (sortCol) {
       list = [...list].sort((a, b) => {

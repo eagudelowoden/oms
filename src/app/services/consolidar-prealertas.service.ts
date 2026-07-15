@@ -47,6 +47,16 @@ export interface PrealertaConsolidadaRow {
   estado: string;
 }
 
+export interface SerialDescargaRow {
+  Serial: string;
+  Mac: string;
+  CodigoSap: string;
+  Descripcion: string;
+  Caja: number;
+  Cantidad: number;
+  Tipo: string;
+}
+
 async function ensureConsolidadaTable() {
   await execQuery(`
     IF NOT EXISTS (
@@ -266,6 +276,45 @@ export const ConsolidarPrealertasService = {
     }
 
     return { id: newId, nombre };
+  },
+
+  /**
+   * Devuelve todos los seriales de una prealerta (consolidada) con las mismas
+   * columnas del formato que se carga, para poder re-descargar el archivo.
+   */
+  async getSerialesDescarga(prealertaId: number): Promise<SerialDescargaRow[]> {
+    const rows = await execQuery<{
+      Serial: string | null;
+      Mac: string | null;
+      CodigoSap: string | null;
+      Descripcion: string | null;
+      Caja: number | null;
+      Cantidad: number | null;
+      Tipo: string | null;
+    }>(
+      `SELECT
+         Serial,
+         Mac,
+         CodigoSap,
+         Descripcion,
+         Caja,
+         Cantidad,
+         Tipo
+       FROM PrealertaSerial
+       WHERE PrealertaId = @id
+       ORDER BY Caja ASC, Serial ASC`,
+      { id: prealertaId },
+    );
+
+    return rows.map((r) => ({
+      Serial: r.Serial ?? "",
+      Mac: r.Mac ?? "",
+      CodigoSap: r.CodigoSap ?? "",
+      Descripcion: r.Descripcion ?? "",
+      Caja: r.Caja ?? 0,
+      Cantidad: r.Cantidad ?? 1,
+      Tipo: r.Tipo ?? "Serializable",
+    }));
   },
 
   async getConsolidadas(): Promise<PrealertaConsolidadaRow[]> {

@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import * as XLSX from "xlsx";
 import styles from "../css/consolidar-prealertas.module.css";
 import { PrealertaConsolidadaRow } from "@/app/services/consolidar-prealertas.service";
+import { consolidarQueries } from "@/app/services/consolidar-prealertas.client";
 
 interface Props {
   consolidadas: PrealertaConsolidadaRow[];
@@ -11,6 +13,29 @@ interface Props {
 }
 
 export default function TablaConsolidadas({ consolidadas, isLoading, onRefresh }: Props) {
+  const [descargandoId, setDescargandoId] = useState<number | null>(null);
+
+  const handleDescargar = async (c: PrealertaConsolidadaRow) => {
+    setDescargandoId(c.id);
+    try {
+      const seriales = await consolidarQueries.serialesDescarga(c.id);
+      if (seriales.length === 0) {
+        alert("Esta prealerta no tiene seriales para descargar");
+        return;
+      }
+      const ws = XLSX.utils.json_to_sheet(seriales, {
+        header: ["Serial", "Mac", "CodigoSap", "Descripcion", "Caja", "Cantidad", "Tipo"],
+      });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Prealerta");
+      XLSX.writeFile(wb, `${c.nombre || `Prealerta-${c.id}`}.xlsx`);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al descargar el archivo");
+    } finally {
+      setDescargandoId(null);
+    }
+  };
+
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
@@ -42,16 +67,17 @@ export default function TablaConsolidadas({ consolidadas, isLoading, onRefresh }
               <th>Creada</th>
               <th>Creado por</th>
               <th>Estado</th>
+              <th>Formato</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={6} className={styles.emptyCell}>Cargando...</td>
+                <td colSpan={7} className={styles.emptyCell}>Cargando...</td>
               </tr>
             ) : consolidadas.length === 0 ? (
               <tr>
-                <td colSpan={6} className={styles.emptyCell}>
+                <td colSpan={7} className={styles.emptyCell}>
                   No hay prealertas consolidadas aún
                 </td>
               </tr>
@@ -65,6 +91,20 @@ export default function TablaConsolidadas({ consolidadas, isLoading, onRefresh }
                   <td>{c.creadoPor}</td>
                   <td>
                     <span className={styles.badgeConsolidada}>{c.estado}</span>
+                  </td>
+                  <td>
+                    <button
+                      className={styles.btnDescargar}
+                      onClick={() => handleDescargar(c)}
+                      disabled={descargandoId === c.id}
+                      title="Descargar formato de la prealerta con todos los seriales"
+                    >
+                      <span
+                        className={`material-symbols-rounded ${descargandoId === c.id ? styles.spinning : ""}`}
+                      >
+                        {descargandoId === c.id ? "progress_activity" : "download"}
+                      </span>
+                    </button>
                   </td>
                 </tr>
               ))

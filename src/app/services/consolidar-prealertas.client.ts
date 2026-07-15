@@ -3,6 +3,7 @@ import {
   MaterialConsolidarRow,
   AccesorioConsolidarRow,
   PrealertaConsolidadaRow,
+  SerialDescargaRow,
 } from "./consolidar-prealertas.service";
 
 const BASE = "/api/consolidar-prealertas";
@@ -42,6 +43,12 @@ export const consolidarQueries = {
   consolidadas: async (): Promise<PrealertaConsolidadaRow[]> => {
     const res = await fetch(`${BASE}/consolidadas`);
     if (!res.ok) throw new Error("Error al cargar consolidadas");
+    return res.json();
+  },
+
+  serialesDescarga: async (id: number): Promise<SerialDescargaRow[]> => {
+    const res = await fetch(`${BASE}/seriales-descarga?id=${id}`);
+    if (!res.ok) throw new Error("Error al cargar los seriales de la prealerta");
     return res.json();
   },
 };
